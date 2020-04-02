@@ -1,6 +1,6 @@
 {
   "name": "@shelex/cypress-allure-plugin",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "allure reporting plugin for cypress",
   "main": "reporter/index.js",
   "types": "reporter/index.d.ts",
