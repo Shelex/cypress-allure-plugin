@@ -1,6 +1,6 @@
 # cypress-allure-plugin
 
-Plugin for integrating mocha-allure2 reporter in Cypress with support of Allure API
+Plugin for integrating mocha-allure2 reporter in Cypress with support of Allure API.  
 I would call current stage "early beta" or "POC", as still some features missing and polishing required.
 
 
@@ -79,7 +79,7 @@ Screenshots are attached automatically, for other type of content use `testAttac
 
 ## Credits
 
-A lot of respect to [Sergey Korol](serhii.s.korol@gmail.com) who made `Allure-mocha`(https://github.com/allure-framework/allure-js/tree/master/packages/allure-mocha) reporter. Major part of interaction from mocha to allure is based on that solution technically and ideologically.
+A lot of respect to [Sergey Korol](serhii.s.korol@gmail.com) who made [Allure-mocha](https://github.com/allure-framework/allure-js/tree/master/packages/allure-mocha) reporter. Major part of interaction from mocha to allure is based on that solution technically and ideologically.
 
 ## License
 
