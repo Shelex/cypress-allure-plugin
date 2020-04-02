@@ -1,0 +1,42 @@
+{
+  "name": "cypress-allure-plugin",
+  "version": "0.0.1",
+  "description": "allure reporting plugin for cypress",
+  "main": "reporter/index.js",
+  "types": "reporter/index.d.ts",
+  "author": {
+    "name": "Oleksandr Shevtsov",
+    "email": "ovr.shevtsov@gmail.com"
+  },
+  "keywords": [
+    "cypress",
+    "cypress-io",
+    "cypress-plugin",
+    "allure",
+    "allure2",
+    "cypress-allure",
+    "reports"
+  ],
+  "files": [
+    "writer.js",
+    "reporter/index.d.ts",
+    "reporter/index.js",
+    "reporter/commands.js",
+    "reporter/afterHook.js",
+    "reporter/mocha-allure/AllureInterface.js",
+    "reporter/mocha-allure/AllureReporter.js",
+    "reporter/mocha-allure/StepWrapper.js"
+  ],
+  "dependencies": {
+    "allure-js-commons": "^2.0.0-beta.6",
+    "fs-extra": "^9.0.0",
+    "mocha": "^7.1.1"
+  },
+  "devDependencies": {
+    "@types/fs-extra": "^8.1.0",
+    "cypress": "^4.1.0",
+    "eslint-config-prettier": "^6.10.0",
+    "eslint-plugin-prettier": "^3.1.2",
+    "prettier": "1.19.1"
+  }
+}

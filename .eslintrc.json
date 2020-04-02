@@ -1,0 +1,22 @@
+{
+    "root": true,
+    "extends": [
+        "plugin:prettier/recommended"
+    ],
+    "rules": {
+        "prettier/prettier": [
+            "error",
+            {
+                "singleQuote": true,
+                "trailingComma": "none"
+            }
+        ]
+    },
+    "plugins": [
+        "prettier"
+    ],
+    "globals": {
+        "cy": true,
+        "Cypress": true
+    }
+}
