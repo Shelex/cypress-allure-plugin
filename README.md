@@ -5,7 +5,7 @@ I would call current stage "early beta" or "POC", as still some features missing
 
 ## Installation
 
-*  `yarn add cypress-allure-plugin`  OR  `npm install cypress-allure-plugin`
+*  `yarn add @shelex/cypress-allure-plugin`  OR  `npm install @shelex/cypress-allure-plugin`
 *  in your cypress/plugins/index.js file add Allure writer task:
 ```
 const allureWriter = require('cypress-allure-plugin/writer')

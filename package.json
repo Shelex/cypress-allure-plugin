@@ -1,12 +1,15 @@
 {
-  "name": "cypress-allure-plugin",
-  "version": "0.0.1",
+  "name": "@shelex/cypress-allure-plugin",
+  "version": "0.0.2",
   "description": "allure reporting plugin for cypress",
   "main": "reporter/index.js",
   "types": "reporter/index.d.ts",
   "author": {
     "name": "Oleksandr Shevtsov",
     "email": "ovr.shevtsov@gmail.com"
+  },
+  "repository": {
+    "url": "git@github.com:Shelex/cypress-allure-plugin.git"
   },
   "keywords": [
     "cypress",
@@ -16,16 +19,6 @@
     "allure2",
     "cypress-allure",
     "reports"
-  ],
-  "files": [
-    "writer.js",
-    "reporter/index.d.ts",
-    "reporter/index.js",
-    "reporter/commands.js",
-    "reporter/afterHook.js",
-    "reporter/mocha-allure/AllureInterface.js",
-    "reporter/mocha-allure/AllureReporter.js",
-    "reporter/mocha-allure/StepWrapper.js"
   ],
   "dependencies": {
     "allure-js-commons": "^2.0.0-beta.6",
