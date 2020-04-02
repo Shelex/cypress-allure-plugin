@@ -3,7 +3,6 @@
 Plugin for integrating mocha-allure2 reporter in Cypress with support of Allure API.  
 I would call current stage "early beta" or "POC", as still some features missing and polishing required.
 
-
 ## Installation
 
 *  `yarn add cypress-allure-plugin`  OR  `npm install cypress-allure-plugin`
@@ -76,6 +75,10 @@ Screenshots are attached automatically, for other type of content use `testAttac
 ## Roadmap
  * configure types for allure API
  * configure integration with cypress-cucumber-preprocessor to use gherkin tags instead of commands
+
+## Examples
+
+See [cypress-allure-plugin-example](https://github.com/Shelex/cypress-allure-plugin-example) project, which is already configured to use this plugin.
 
 ## Credits
 
