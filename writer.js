@@ -7,12 +7,12 @@ module.exports = function (on) {
         writeAllureResults: ({ resultsDir, writer }) => {
             const { groups, tests, attachments } = writer;
             try {
+                !fse.existsSync(resultsDir) && fse.mkdirSync(resultsDir)
                 groups &&
                     groups.forEach(group => {
                         const fileName = `${group.uuid}-container.json`;
                         fse.outputFileSync(
-                            //path.resolve('./', resultsDir, fileName),
-                            `./${resultsDir}/${fileName}`,
+                            path.join(resultsDir, fileName),
                             JSON.stringify(group)
                         );
                     });
@@ -20,13 +20,13 @@ module.exports = function (on) {
                     tests.forEach(test => {
                         const fileName = `${test.uuid}-result.json`;
                         fse.outputFileSync(
-                            `./${resultsDir}/${fileName}`,
+                            path.join(resultsDir, fileName),
                             JSON.stringify(test)
                         );
                     });
                 if (attachments) {
                     for (let [name, content] of Object.entries(attachments)) {
-                        fse.outputFileSync(`./${resultsDir}/${name}`, content, {
+                        fse.outputFileSync(path.join(resultsDir, name), content, {
                             encoding: 'binary'
                         });
                     }
