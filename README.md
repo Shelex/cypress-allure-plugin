@@ -6,7 +6,7 @@ I would call current stage "early beta" or "POC", as still some features missing
 ## Installation
 
 *  `yarn add @shelex/cypress-allure-plugin`  OR  `npm install @shelex/cypress-allure-plugin`
-*  in your cypress/plugins/index.js file add Allure writer task:
+*  in your `cypress/plugins/index.js` file add Allure writer task:
 ```
 const allureWriter = require('cypress-allure-plugin/writer')
 
@@ -15,12 +15,18 @@ module.exports = (on, config) => {
     return config
 }
 ```
-* in your cypress/support/index.js file connect plugin itself:
+* in your `cypress/support/index.js` file connect plugin itself:
 ```
 import 'cypress-allure-plugin';
 // you can use require also:
 require('cypress-allure-plugin');
 ```
+
+* for IntelliSense (autocompletion) support in your IDE add:
+```
+/// <reference types="cypress-allure-plugin" />
+```
+on top of your `cypress/plugins/index.js` file
 
 ## Execution
 
@@ -73,7 +79,6 @@ Allure API available:
 Screenshots are attached automatically, for other type of content use `testAttachment` (inside test with cy chainer) or `attachment` (outside test with synchronous api)
 
 ## Roadmap
- * configure types for allure API
  * configure integration with cypress-cucumber-preprocessor to use gherkin tags instead of commands
 
 ## Examples

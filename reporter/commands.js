@@ -1,6 +1,3 @@
-/**
- * Get Allure interface
- */
 Cypress.Commands.add('allure', () => {
     cy.wrap(Cypress.Allure.reporter.getInterface(), { log: false });
 });
