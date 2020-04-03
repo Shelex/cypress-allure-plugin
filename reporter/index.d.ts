@@ -1,11 +1,10 @@
-/// <reference types="cypress" />
-import { Category, ContentType, Status, Severity, LinkType, LabelName } from 'allure-js-commons'
+import { Category } from 'allure-js-commons'
 
-type LabelNames = keyof typeof LabelName
-type LinkTypes = keyof typeof LinkType
-type ContentTypes = keyof typeof ContentType
-type Statuses = keyof typeof Status
-type Severities = keyof typeof Severity
+type LabelName = "AS_ID" | "suite" | "parentSuite" | "subSuite" | "epic" | "feature" | "story" | "severity" | "tag" | "owner" | "lead" | "host" | "thread" | "testMethod" | "testClass" | "package" | "framework" | "language"
+type LinkType = "issue" | "tms"
+type ContentType = "text/plain" | "application/xml" | "text/csv" | "text/tab-separated-values" | "text/css" | "text/uri-list" | "image/svg+xml" | "image/png" | "application/json" | "video/webm" | "image/jpeg"
+type Status = "failed" | "broken" | "passed" | "skipped"
+type Severity = "blocker" | "critical" | "normal" | "minor" | "trivial"
 
 declare global {
     namespace Cypress {
@@ -54,7 +53,7 @@ declare global {
              * @param name 
              * @param value 
              */
-            label(name: LabelNames, value: string): Allure;
+            label(name: LabelName, value: string): Allure;
             /**
              * Add Parameter
              * @param name 
@@ -67,7 +66,7 @@ declare global {
              * @param {string} name 
              * @param type 
              */
-            link(url: string, name?: string, type?: LinkTypes): Allure;
+            link(url: string, name?: string, type?: LinkType): Allure;
             /**
              * Add issue link
              * @param name 
@@ -99,7 +98,7 @@ declare global {
              * Add severity level
              * @param severity 
              */
-            severity(severity: Severities): Allure;
+            severity(severity: Severity): Allure;
             /**
              * Add tag
              * @param tag 
@@ -121,7 +120,7 @@ declare global {
              * @param content 
              * @param type 
              */
-            attachment(name: string, content: Buffer | string, type: ContentTypes): Allure;
+            attachment(name: string, content: Buffer | string, type: ContentType): Allure;
             /**
              * Attach info to test
              * Screenshots will be attached automatically
@@ -129,13 +128,13 @@ declare global {
              * @param content 
              * @param type 
              */
-            testAttachment(name: string, content: Buffer | string, type: ContentTypes): Allure;
+            testAttachment(name: string, content: Buffer | string, type: ContentType): Allure;
             /**
              * Log step into Test Execution Body
              * @param name - step name
              * @param body - may be some status or function which wraps step code
              */
-            logStep(name: string, body?: Statuses | Function): Allure;
+            logStep(name: string, body?: Status | Function): Allure;
         }
     }
 }

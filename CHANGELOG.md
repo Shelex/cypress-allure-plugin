@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.6] - 2020-04-03
+### Changed
+ - Improved type definitions
+
 ## [0.0.5] - 2020-04-02
 ### Added
  - Type definitions for IntelliSense support
