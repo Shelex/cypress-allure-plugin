@@ -1,5 +1,5 @@
-require('./afterHook')
-require('./commands')
+require('./afterHook');
+require('./commands');
 
 const {
     EVENT_TEST_BEGIN,
@@ -10,10 +10,7 @@ const {
     EVENT_SUITE_END
 } = Mocha.Runner.constants;
 
-const {
-    AllureRuntime,
-    InMemoryAllureWriter,
-} = require('allure-js-commons');
+const { AllureRuntime, InMemoryAllureWriter } = require('allure-js-commons');
 const AllureReporter = require('./mocha-allure/AllureReporter');
 
 class CypressAllureReporter {
@@ -27,26 +24,26 @@ class CypressAllureReporter {
 
         Cypress.mocha
             .getRunner()
-            .on(EVENT_SUITE_BEGIN, suite => {
+            .on(EVENT_SUITE_BEGIN, (suite) => {
                 this.reporter.startSuite(suite.fullTitle());
             })
             .on(EVENT_SUITE_END, () => {
                 this.reporter.endSuite();
             })
-            .on(EVENT_TEST_BEGIN, test => {
+            .on(EVENT_TEST_BEGIN, (test) => {
                 this.reporter.startCase(test);
             })
             .on(EVENT_TEST_FAIL, (test, err) => {
                 this.reporter.failTestCase(test, err);
             })
-            .on(EVENT_TEST_PASS, test => {
+            .on(EVENT_TEST_PASS, (test) => {
                 this.reporter.passTestCase(test);
             })
-            .on(EVENT_TEST_PENDING, test => {
+            .on(EVENT_TEST_PENDING, (test) => {
                 this.reporter.pendingTestCase(test);
-            })
+            });
 
-        Cypress.on('log:added', options => {
+        Cypress.on('log:added', (options) => {
             if (
                 options.instrument === 'command' &&
                 options.consoleProps &&
@@ -55,26 +52,26 @@ class CypressAllureReporter {
                 const detailMessage =
                     options.name === 'xhr'
                         ? `${(options.consoleProps.Stubbed === 'Yes'
-                            ? 'STUBBED '
-                            : '') + options.consoleProps.Method} ${
-                        options.consoleProps.URL
-                        }`
+                              ? 'STUBBED '
+                              : '') + options.consoleProps.Method} ${
+                              options.consoleProps.URL
+                          }`
                         : '';
                 this.reporter
                     .getInterface()
                     .logStep(
                         `${options.name} ${options.message} ${detailMessage ||
-                        ''}`
+                            ''}`
                     );
             }
         });
     }
 }
 
-Cypress.Allure = new CypressAllureReporter()
+Cypress.Allure = new CypressAllureReporter();
 
 Cypress.Screenshot.defaults({
     onAfterScreenshot(el, details) {
-        Cypress.Allure.reporter.screenshots.push(details)
+        Cypress.Allure.reporter.screenshots.push(details);
     }
 });

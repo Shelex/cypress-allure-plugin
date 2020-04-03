@@ -1,107 +1,135 @@
-import { Category } from 'allure-js-commons'
+import { Category } from 'allure-js-commons';
 
-type LabelName = "AS_ID" | "suite" | "parentSuite" | "subSuite" | "epic" | "feature" | "story" | "severity" | "tag" | "owner" | "lead" | "host" | "thread" | "testMethod" | "testClass" | "package" | "framework" | "language"
-type LinkType = "issue" | "tms"
-type ContentType = "text/plain" | "application/xml" | "text/csv" | "text/tab-separated-values" | "text/css" | "text/uri-list" | "image/svg+xml" | "image/png" | "application/json" | "video/webm" | "image/jpeg"
-type Status = "failed" | "broken" | "passed" | "skipped"
-type Severity = "blocker" | "critical" | "normal" | "minor" | "trivial"
+type LabelName =
+    | 'AS_ID'
+    | 'suite'
+    | 'parentSuite'
+    | 'subSuite'
+    | 'epic'
+    | 'feature'
+    | 'story'
+    | 'severity'
+    | 'tag'
+    | 'owner'
+    | 'lead'
+    | 'host'
+    | 'thread'
+    | 'testMethod'
+    | 'testClass'
+    | 'package'
+    | 'framework'
+    | 'language';
+type LinkType = 'issue' | 'tms';
+type ContentType =
+    | 'text/plain'
+    | 'application/xml'
+    | 'text/csv'
+    | 'text/tab-separated-values'
+    | 'text/css'
+    | 'text/uri-list'
+    | 'image/svg+xml'
+    | 'image/png'
+    | 'application/json'
+    | 'video/webm'
+    | 'image/jpeg';
+type Status = 'failed' | 'broken' | 'passed' | 'skipped';
+type Severity = 'blocker' | 'critical' | 'normal' | 'minor' | 'trivial';
 
 declare global {
     namespace Cypress {
         interface Chainable<Subject = null> {
             /**
-            * Parent command to start interaction with Allure API
-            */
-            allure(): Allure
+             * Parent command to start interaction with Allure API
+             */
+            allure(): Allure;
         }
 
         interface Cypress {
             /**
              * Interface via Cypress global object
              */
-            "Allure": {
-                "reporter": {
-                    getInterface(): Allure
-                }
-            }
-
+            Allure: {
+                reporter: {
+                    getInterface(): Allure;
+                };
+            };
         }
 
         interface Allure {
             /**
              * Add Epic name to Allure
-             * @param {string} epic 
+             * @param {string} epic
              */
             epic(epic: string): Allure;
             /**
              * add feature
-             * @param {string} feature 
+             * @param {string} feature
              */
             feature(feature: string): Allure;
             /**
              * add Story name
-             * @param story 
+             * @param story
              */
             story(story: string): Allure;
             /**
              * add Suite
-             * @param name 
+             * @param name
              */
             suite(name: string): Allure;
             /**
              * Add Label
-             * @param name 
-             * @param value 
+             * @param name
+             * @param value
              */
             label(name: LabelName, value: string): Allure;
             /**
              * Add Parameter
-             * @param name 
-             * @param value 
+             * @param name
+             * @param value
              */
             parameter(name: string, value: string): Allure;
             /**
              * Add customized link
-             * @param {string} url 
-             * @param {string} name 
-             * @param type 
+             * @param {string} url
+             * @param {string} name
+             * @param type
              */
             link(url: string, name?: string, type?: LinkType): Allure;
             /**
              * Add issue link
-             * @param name 
-             * @param url 
+             * @param name
+             * @param url
              */
             issue(name: string, url: string): Allure;
             /**
              * Add tms link
-             * @param name 
-             * @param url 
+             * @param name
+             * @param url
              */
             tms(name: string, url: string): Allure;
             /**
              * Add test description in markdown format
-             * @param markdown 
+             * @param markdown
              */
             description(markdown: string): Allure;
             /**
              * Add test description in html format
-             * @param html 
+             * @param html
              */
             descriptionHtml(html: string): Allure;
             /**
              * Add test owner
-             * @param owner 
+             * @param owner
              */
             owner(owner: string): Allure;
             /**
              * Add severity level
-             * @param severity 
+             * @param severity
              */
             severity(severity: Severity): Allure;
             /**
              * Add tag
-             * @param tag 
+             * @param tag
              */
             tag(tag: string): Allure;
             /**
@@ -111,24 +139,32 @@ declare global {
             writeEnvironmentInfo(info: Record<string, string>): Allure;
             /**
              * Attach test categories failures definition
-             * @param categories 
+             * @param categories
              */
             writeCategoriesDefinitions(categories: Category[]): Allure;
             /**
              * Attachment outside test
-             * @param name 
-             * @param content 
-             * @param type 
+             * @param name
+             * @param content
+             * @param type
              */
-            attachment(name: string, content: Buffer | string, type: ContentType): Allure;
+            attachment(
+                name: string,
+                content: Buffer | string,
+                type: ContentType
+            ): Allure;
             /**
              * Attach info to test
              * Screenshots will be attached automatically
-             * @param name 
-             * @param content 
-             * @param type 
+             * @param name
+             * @param content
+             * @param type
              */
-            testAttachment(name: string, content: Buffer | string, type: ContentType): Allure;
+            testAttachment(
+                name: string,
+                content: Buffer | string,
+                type: ContentType
+            ): Allure;
             /**
              * Log step into Test Execution Body
              * @param name - step name

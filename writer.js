@@ -1,34 +1,40 @@
 const path = require('path');
-const fse = require('fs-extra')
-const uuid = require('uuid')
+const fse = require('fs-extra');
+const uuid = require('uuid');
 
-module.exports = function (on) {
+module.exports = function(on) {
     on('task', {
         writeAllureResults: ({ resultsDir, writer }) => {
             const { groups, tests, attachments } = writer;
             try {
-                !fse.existsSync(resultsDir) && fse.mkdirSync(resultsDir)
+                !fse.existsSync(resultsDir) && fse.mkdirSync(resultsDir);
                 groups &&
-                    groups.forEach(group => {
+                    groups.forEach((group) => {
                         const fileName = `${group.uuid}-container.json`;
-                        fse.outputFileSync(
-                            path.join(resultsDir, fileName),
-                            JSON.stringify(group)
-                        );
+                        const groupResultPath = path.join(resultsDir, fileName);
+                        !fse.existsSync(groupResultPath) &&
+                            fse.outputFileSync(
+                                groupResultPath,
+                                JSON.stringify(group)
+                            );
                     });
                 tests &&
-                    tests.forEach(test => {
+                    tests.forEach((test) => {
                         const fileName = `${test.uuid}-result.json`;
-                        fse.outputFileSync(
-                            path.join(resultsDir, fileName),
-                            JSON.stringify(test)
-                        );
+                        const testResultPath = path.join(resultsDir, fileName);
+                        !fse.existsSync(testResultPath) &&
+                            fse.outputFileSync(
+                                testResultPath,
+                                JSON.stringify(test)
+                            );
                     });
                 if (attachments) {
                     for (let [name, content] of Object.entries(attachments)) {
-                        fse.outputFileSync(path.join(resultsDir, name), content, {
-                            encoding: 'binary'
-                        });
+                        const attachmentPath = path.join(resultsDir, name);
+                        !fse.existsSync(attachmentPath) &&
+                            fse.outputFileSync(attachmentPath, content, {
+                                encoding: 'binary'
+                            });
                     }
                 }
             } catch (e) {
@@ -41,12 +47,14 @@ module.exports = function (on) {
         }
     });
     on('after:screenshot', (details) => {
-        const allurePath = `allure-results/${uuid.v4()}-attachment.png`
+        const allurePath = `allure-results/${uuid.v4()}-attachment.png`;
         return new Promise((resolve, reject) => {
-          fse.copy(details.path, allurePath, (err) => {
-            if (err) return reject(err)
-            resolve({ path: allurePath })
-          })
-        })
-      })
-}
+            fse.copy(details.path, allurePath, (err) => {
+                if (err) {
+                    return reject(err);
+                }
+                resolve({ path: allurePath });
+            });
+        });
+    });
+};

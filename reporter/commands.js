@@ -39,14 +39,10 @@ Cypress.Commands.add(
     }
 );
 
-Cypress.Commands.add(
-    'logStep',
-    { prevSubject: true },
-    (allure, name, body) => {
-        allure.logStep(name, body);
-        cy.wrap(allure, { log: false });
-    }
-);
+Cypress.Commands.add('logStep', { prevSubject: true }, (allure, name, body) => {
+    allure.logStep(name, body);
+    cy.wrap(allure, { log: false });
+});
 
 Cypress.Commands.add('epic', { prevSubject: true }, (allure, name) => {
     allure.epic(name);

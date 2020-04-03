@@ -3,11 +3,17 @@
  * Allure-mocha reporter: "https://github.com/allure-framework/allure-js/tree/master/packages/allure-mocha"
  */
 
-const path = require('path')
-const { Allure, isPromise, Status, Stage, ContentType } = require('allure-js-commons');
+const path = require('path');
+const {
+    Allure,
+    isPromise,
+    Status,
+    Stage,
+    ContentType
+} = require('allure-js-commons');
 const StepWrapper = require('./StepWrapper');
 
-Allure.prototype.step = function (name, body = Status.PASSED) {
+Allure.prototype.step = function(name, body = Status.PASSED) {
     const wrappedStep = this.startStep(name);
     let result;
     if (typeof body === 'string') {
@@ -22,11 +28,11 @@ Allure.prototype.step = function (name, body = Status.PASSED) {
         }
         if (isPromise(result)) {
             return result
-                .then(a => {
+                .then((a) => {
                     wrappedStep.endStep();
                     return a;
                 })
-                .catch(e => {
+                .catch((e) => {
                     wrappedStep.endStep();
                     throw e;
                 });
@@ -37,33 +43,38 @@ Allure.prototype.step = function (name, body = Status.PASSED) {
     return result;
 };
 
-Allure.prototype.logStep = function (name, body) {
+Allure.prototype.logStep = function(name, body) {
     this.step(name, body);
 };
 
-Allure.prototype.attachment = function (name, content, type) {
+Allure.prototype.attachment = function(name, content, type) {
     const fileName = this.reporter.writeAttachment(content, type);
     this.currentExecutable.addAttachment(name, type, fileName);
 };
 
-Allure.prototype.testAttachment = function (name, content, type) {
+Allure.prototype.testAttachment = function(name, content, type) {
     const fileName = this.reporter.writeAttachment(content, type);
     this.currentTest.addAttachment(name, type, fileName);
 };
 
-Allure.prototype.startStep = function (name) {
+Allure.prototype.startStep = function(name) {
     const allureStep = this.currentExecutable.startStep(name);
     this.reporter.pushStep(allureStep);
     return new StepWrapper(this.reporter, allureStep);
 };
 
-Allure.prototype.processScreenshots = function () {
-    const { currentTest } = this
-    this.reporter.screenshots.forEach(function (s) {
-        currentTest.addAttachment(`${s.specName}:${s.takenAt}`, ContentType.PNG, path.basename(s.path));
-    })
-    this.reporter.screenshots = []
-}
+// Process Cypress screenshots automatically
+Allure.prototype.processScreenshots = function() {
+    const { currentTest } = this;
+    this.reporter.screenshots.forEach(function(s) {
+        currentTest.addAttachment(
+            `${s.specName}:${s.takenAt}`,
+            ContentType.PNG,
+            path.basename(s.path)
+        );
+    });
+    this.reporter.screenshots = [];
+};
 
 module.exports = class AllureInterface {
     constructor(reporter, runtime) {

@@ -3,11 +3,7 @@
  * Allure-mocha reporter: "https://github.com/allure-framework/allure-js/tree/master/packages/allure-mocha"
  */
 
-const {
-    LabelName,
-    Stage,
-    Status,
-} = require('allure-js-commons');
+const { LabelName, Stage, Status } = require('allure-js-commons');
 const { createHash } = require('crypto');
 const AllureInterface = require('./AllureInterface');
 
