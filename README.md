@@ -5,8 +5,9 @@ I would call current stage "early beta" or "POC", as still some features missing
 
 ## Installation
 
-*  `yarn add @shelex/cypress-allure-plugin`  OR  `npm install @shelex/cypress-allure-plugin`
-*  in your `cypress/plugins/index.js` file add Allure writer task:
+-   `yarn add @shelex/cypress-allure-plugin` OR `npm install @shelex/cypress-allure-plugin`
+-   in your `cypress/plugins/index.js` file add Allure writer task:
+
 ```
 const allureWriter = require('cypress-allure-plugin/writer')
 
@@ -15,22 +16,35 @@ module.exports = (on, config) => {
     return config
 }
 ```
-* in your `cypress/support/index.js` file connect plugin itself:
+
+-   in your `cypress/support/index.js` file connect plugin itself:
+
 ```
 import 'cypress-allure-plugin';
 // you can use require also:
 require('cypress-allure-plugin');
 ```
 
-* for IntelliSense (autocompletion) support in your IDE add:
+-   for IntelliSense (autocompletion) support in your IDE add:
+
 ```
 /// <reference types="cypress-allure-plugin" />
 ```
+
 on top of your `cypress/plugins/index.js` file
+
+-   You can setup baseURL for issue and tms links by adding environment variables:
+
+```
+--env allureIssueUrl=https://url-to-bug-tracking-system,allureTmsUrl=https://url-to-tms
+```
+
+With that you could pass just a path or task ID instead of using full url.
 
 ## Execution
 
-* to enable Allure results writing just pass environment variable `allure=true`, example:
+-   to enable Allure results writing just pass environment variable `allure=true`, example:
+
 ```
 npx cypress run --config video=false --env allure=true --browser chrome
 ```
@@ -38,14 +52,18 @@ npx cypress run --config video=false --env allure=true --browser chrome
 ## API
 
 There is two options of using allure api inside tests:
+
 1. Using interface constructor from `Cypress.Allure.reporter.getInterface()` - synchronous
+
 ```
 const allure = Cypress.Allure.reporter.getInterface();
     allure.feature('This is our feature');
     allure.epic('This is epic');
     allure.issue('google', 'https://google.com');
 ```
+
 2. Using Cypress custom commands, always starting from `cy.allure()` - chainer
+
 ```
 cy.allure()
     .feature('This is feature')
@@ -55,31 +73,50 @@ cy.allure()
     .tag('this is nice tag');
 ```
 
-Allure API available: 
-* epic(epic: string)
-* feature(feature: string)
-* story(story: string)
-* suite(name: string)
-* label(name: LabelName, value: string)
-* parameter(name: string, value: string)
-* link(url: string, name?: string, type?: LinkType)
-* issue(name: string, url: string)
-* tms(name: string, url: string)
-* description(markdown: string)
-* descriptionHtml(html: string)
-* owner(owner: string)
-* severity(severity: Severity)
-* tag(tag: string)
-* attachment(name: string, content: Buffer | string, type: ContentType)
-* testAttachment(name: string, content: Buffer | string, type: ContentType)
-* logStep(name: string, body?: Status | Function)
+3. Using Cypress-cucumber-preprocessor, and passing tags on feature or scenario level:
+
+```
+@subSuite("someSubSuite")
+@feature("nice")
+@epic("thisisepic")
+@story("cool")
+@severity("critical")
+@owner("IAMOwner")
+@package("myPackage")
+@issue("jira","PJD:1234")
+@someOtherTagsWillBeAddedAlso
+Scenario: Here is scenario
+...
+```
+
+Allure API available:
+
+-   epic(epic: string)
+-   feature(feature: string)
+-   story(story: string)
+-   suite(name: string)
+-   label(name: LabelName, value: string)
+-   parameter(name: string, value: string)
+-   link(url: string, name?: string, type?: LinkType)
+-   issue(name: string, url: string)
+-   tms(name: string, url: string)
+-   description(markdown: string)
+-   descriptionHtml(html: string)
+-   owner(owner: string)
+-   severity(severity: Severity)
+-   tag(tag: string)
+-   attachment(name: string, content: Buffer | string, type: ContentType)
+-   testAttachment(name: string, content: Buffer | string, type: ContentType)
+-   logStep(name: string, body?: Status | Function)
 
 ## Screenshots
 
 Screenshots are attached automatically, for other type of content use `testAttachment` (inside test with cy chainer) or `attachment` (outside test with synchronous api)
 
 ## Roadmap
- * configure integration with cypress-cucumber-preprocessor to use gherkin tags instead of commands
+
+-   better steps and commands logging
+-   investigate why some labels are not displayed in report
 
 ## Examples
 
@@ -91,4 +128,4 @@ A lot of respect to [Sergey Korol](serhii.s.korol@gmail.com) who made [Allure-mo
 
 ## License
 
-Copyright 2020 Oleksandr Shevtsov <ovr.shevtsov@gmail.com>.  This project is licensed under the Apache 2.0 License.  
+Copyright 2020 Oleksandr Shevtsov <ovr.shevtsov@gmail.com>. This project is licensed under the Apache 2.0 License.

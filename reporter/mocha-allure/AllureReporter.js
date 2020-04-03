@@ -6,6 +6,7 @@
 const { LabelName, Stage, Status } = require('allure-js-commons');
 const { createHash } = require('crypto');
 const AllureInterface = require('./AllureInterface');
+const { tagToLabel, tagToLink } = require('../gherkinToLabel');
 
 module.exports = class AllureReporter {
     constructor(runtime) {
@@ -91,6 +92,51 @@ module.exports = class AllureReporter {
                     subSuites.join(' > ')
                 );
             }
+        }
+    }
+
+    // accept cucumber tags from cypress-cucumber-preprocessor as commands
+    handleCucumberTags() {
+        if (globalThis && globalThis.testState) {
+            const { testState } = globalThis;
+            const { currentTest } = this;
+            ['currentScenario', 'feature'].forEach(function(type) {
+                testState[type] &&
+                    testState[type].tags
+                        // check for labels
+                        .filter(function({ name }) {
+                            const match = tagToLabel.exec(name);
+                            if (match) {
+                                const [, command, value] = match;
+                                currentTest.addLabel(command, value);
+                            }
+                            return !match;
+                        })
+                        // check for links
+                        .filter(function({ name }) {
+                            const match = tagToLink.exec(name);
+                            if (match) {
+                                const [, command, name, url] = match;
+                                const variable =
+                                    command === 'issue'
+                                        ? 'allureIssueUrl'
+                                        : 'allureTmsUrl';
+                                currentTest.addLink(
+                                    Cypress.env(variable)
+                                        ? `${Cypress.env(variable)}/${url}`
+                                        : url,
+                                    name,
+                                    command
+                                );
+                            }
+                            return !match;
+                        })
+                        // add other tags
+                        .forEach(function({ name }) {
+                            currentTest.addLabel('tag', name.replace('@', ''));
+                        });
+            });
+            currentTest.addLabel('feature', testState.feature.name);
         }
     }
 

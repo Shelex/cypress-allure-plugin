@@ -7,7 +7,8 @@ const {
     EVENT_TEST_PASS,
     EVENT_TEST_PENDING,
     EVENT_SUITE_BEGIN,
-    EVENT_SUITE_END
+    EVENT_SUITE_END,
+    EVENT_TEST_END
 } = Mocha.Runner.constants;
 
 const { AllureRuntime, InMemoryAllureWriter } = require('allure-js-commons');
@@ -41,6 +42,9 @@ class CypressAllureReporter {
             })
             .on(EVENT_TEST_PENDING, (test) => {
                 this.reporter.pendingTestCase(test);
+            })
+            .on(EVENT_TEST_END, () => {
+                this.reporter.handleCucumberTags();
             });
 
         Cypress.on('log:added', (options) => {

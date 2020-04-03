@@ -75,11 +75,13 @@ Cypress.Commands.add(
     }
 );
 Cypress.Commands.add('issue', { prevSubject: true }, (allure, name, url) => {
-    allure.issue(name, url);
+    const baseUrl = Cypress.env('allureIssueUrl');
+    allure.issue(name, baseUrl ? `${baseUrl}/${url}` : url);
     cy.wrap(allure, { log: false });
 });
 Cypress.Commands.add('tms', { prevSubject: true }, (allure, name, url) => {
-    allure.tms(name, url);
+    const baseUrl = Cypress.env('allureTmsUrl');
+    allure.tms(name, baseUrl ? `${baseUrl}/${url}` : url);
     cy.wrap(allure, { log: false });
 });
 Cypress.Commands.add(
