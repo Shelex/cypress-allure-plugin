@@ -2,7 +2,7 @@ const path = require('path');
 const fse = require('fs-extra');
 const uuid = require('uuid');
 
-module.exports = function(on) {
+module.exports = function (on) {
     on('task', {
         writeAllureResults: ({ resultsDir, writer }) => {
             const { groups, tests, attachments } = writer;
@@ -47,7 +47,10 @@ module.exports = function(on) {
         }
     });
     on('after:screenshot', (details) => {
-        const allurePath = `allure-results/${uuid.v4()}-attachment.png`;
+        const allurePath = path.join(
+            `allure-results`,
+            `${uuid.v4()}-attachment.png`
+        );
         return new Promise((resolve, reject) => {
             fse.copy(details.path, allurePath, (err) => {
                 if (err) {

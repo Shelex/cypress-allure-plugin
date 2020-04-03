@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.1] - 2020-04-03
+
+### Fixed
+
+-   path for writing allure results on os windows
+-   change configuration tms and issue from url to prefix
+-   documentation for setting up tms and issue prefixes
+-   cucumber: scenario tags has priority over feature tags
+
 ## [1.0.0] - 2020-04-03
 
 ### Added

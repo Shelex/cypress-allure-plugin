@@ -100,11 +100,15 @@ module.exports = class AllureReporter {
         if (globalThis && globalThis.testState) {
             const { testState } = globalThis;
             const { currentTest } = this;
-            ['currentScenario', 'feature'].forEach(function(type) {
+            /**
+             * tags set on test level has higher priority
+             * to not be overwritten by feature tags
+             */
+            ['feature', 'currentScenario'].forEach(function (type) {
                 testState[type] &&
                     testState[type].tags
                         // check for labels
-                        .filter(function({ name }) {
+                        .filter(function ({ name }) {
                             const match = tagToLabel.exec(name);
                             if (match) {
                                 const [, command, value] = match;
@@ -113,18 +117,17 @@ module.exports = class AllureReporter {
                             return !match;
                         })
                         // check for links
-                        .filter(function({ name }) {
+                        .filter(function ({ name }) {
                             const match = tagToLink.exec(name);
                             if (match) {
                                 const [, command, name, url] = match;
-                                const variable =
+                                const urlPrefix = Cypress.env(
                                     command === 'issue'
-                                        ? 'allureIssueUrl'
-                                        : 'allureTmsUrl';
+                                        ? 'issuePrefix'
+                                        : 'tmsPrefix'
+                                );
                                 currentTest.addLink(
-                                    Cypress.env(variable)
-                                        ? `${Cypress.env(variable)}/${url}`
-                                        : url,
+                                    urlPrefix ? `${urlPrefix}${url}` : url,
                                     name,
                                     command
                                 );
@@ -132,7 +135,7 @@ module.exports = class AllureReporter {
                             return !match;
                         })
                         // add other tags
-                        .forEach(function({ name }) {
+                        .forEach(function ({ name }) {
                             currentTest.addLabel('tag', name.replace('@', ''));
                         });
             });

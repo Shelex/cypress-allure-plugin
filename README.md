@@ -1,7 +1,7 @@
 # cypress-allure-plugin
 
 Plugin for integrating mocha-allure2 reporter in Cypress with support of Allure API.  
-I would call current stage "early beta" or "POC", as still some features missing and polishing required.
+I would call current stage "beta" as still some polishing required.
 
 ## Installation
 
@@ -36,7 +36,18 @@ on top of your `cypress/plugins/index.js` file
 -   You can setup baseURL for issue and tms links by adding environment variables:
 
 ```
---env allureIssueUrl=https://url-to-bug-tracking-system,allureTmsUrl=https://url-to-tms
+--env issuePrefix=https://url-to-bug-tracking-system/task-,tmsPrefix=https://url-to-tms/tests/caseId-
+```
+
+OR set it in `cypress.json`
+
+```cypress.json
+{
+    "env": {
+        "tmsPrefix": "https://url-to-bug-tracking-system/task-",
+        "issuePrefix": "https://url-to-tms/tests/caseId-"
+    }
+}
 ```
 
 With that you could pass just a path or task ID instead of using full url.
@@ -51,7 +62,7 @@ npx cypress run --config video=false --env allure=true --browser chrome
 
 ## API
 
-There is two options of using allure api inside tests:
+There are three options of using allure api inside tests:
 
 1. Using interface constructor from `Cypress.Allure.reporter.getInterface()` - synchronous
 
@@ -73,7 +84,7 @@ cy.allure()
     .tag('this is nice tag');
 ```
 
-3. Using Cypress-cucumber-preprocessor, and passing tags on feature or scenario level:
+3. Using Cypress-cucumber-preprocessor with cucumber tags:
 
 ```
 @subSuite("someSubSuite")
@@ -115,7 +126,7 @@ Screenshots are attached automatically, for other type of content use `testAttac
 
 ## Roadmap
 
--   better steps and commands logging
+-   better steps logging
 -   investigate why some labels are not displayed in report
 
 ## Examples
