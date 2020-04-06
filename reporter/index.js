@@ -55,17 +55,29 @@ class CypressAllureReporter {
             ) {
                 const detailMessage =
                     options.name === 'xhr'
-                        ? `${(options.consoleProps.Stubbed === 'Yes'
-                              ? 'STUBBED '
-                              : '') + options.consoleProps.Method} ${
-                              options.consoleProps.URL
-                          }`
+                        ? `${
+                              (options.consoleProps.Stubbed === 'Yes'
+                                  ? 'STUBBED '
+                                  : '') + options.consoleProps.Method
+                          } ${options.consoleProps.URL}`
                         : '';
+                const isCucumberStep = options.name === 'step';
+                const stepInfo =
+                    isCucumberStep &&
+                    options.consoleProps &&
+                    options.consoleProps.feature &&
+                    Cypress._.get(options, 'consoleProps.step');
+                const cucumberMessage =
+                    stepInfo &&
+                    `${stepInfo.type}: ${stepInfo.keyword}${stepInfo.text}`;
                 this.reporter
                     .getInterface()
-                    .logStep(
-                        `${options.name} ${options.message} ${detailMessage ||
-                            ''}`
+                    .step(
+                        cucumberMessage ||
+                            `${options.name} ${options.message} ${
+                                detailMessage || ''
+                            }`,
+                        isCucumberStep
                     );
             }
         });

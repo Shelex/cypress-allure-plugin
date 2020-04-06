@@ -3,10 +3,10 @@
  * Need to investigate if some should be on suite/currentExecutable
  */
 const availableLabels = [
-    'AS_ID',
     'suite',
     'parentSuite',
     'subSuite',
+    'testType',
     'epic',
     'feature',
     'story',
@@ -20,7 +20,8 @@ const availableLabels = [
     'testClass',
     'package',
     'framework',
-    'language'
+    'language',
+    'resultFormat'
 ];
 const labelPattern = `@(${availableLabels.join('|')})\\("(.*?)"\\)`;
 const linkPattern = `@(issue|tms)\\("(.*?)","(.*?)"\\)`;

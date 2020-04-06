@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.0] - 2020-04-06
+
+### Changed
+
+-   refactored steps handling, now test can have parent steps and child steps
+-   renamed allure.logStep ==> allure.step
+-   set status of all failed tests as "failed" instead of having some "broken"
+
+### Added
+
+-   api to write categories, executorInfo, environmentInfo
+-   cucumber steps are detected as parent steps
+
+### Removed
+
+-   step wrapper as no sense to wrap cypress commands for logging
+
 ## [1.0.1] - 2020-04-03
 
 ### Fixed

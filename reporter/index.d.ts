@@ -1,4 +1,4 @@
-import { Category } from 'allure-js-commons';
+import { Category, ExecutorInfo } from 'allure-js-commons';
 
 type LabelName =
     | 'AS_ID'
@@ -143,6 +143,11 @@ declare global {
              */
             writeCategoriesDefinitions(categories: Category[]): Allure;
             /**
+             * Attach executor information
+             * @param info executor information
+             */
+            writeExecutorInfo(info: ExecutorInfo): Allure;
+            /**
              * Attachment outside test
              * @param name
              * @param content
@@ -168,9 +173,9 @@ declare global {
             /**
              * Log step into Test Execution Body
              * @param name - step name
-             * @param body - may be some status or function which wraps step code
+             * @param isParent - log all commands into created step until next parent step, true by default
              */
-            logStep(name: string, body?: Status | Function): Allure;
+            step(name: string, isParent: boolean): Allure;
         }
     }
 }

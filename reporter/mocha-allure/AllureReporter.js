@@ -15,6 +15,7 @@ module.exports = class AllureReporter {
         this.screenshots = [];
         this.runningTest = null;
         this.runtime = runtime;
+        this.parentStep = null;
     }
 
     /**
@@ -168,10 +169,10 @@ module.exports = class AllureReporter {
                 return;
             }
         }
-        const status =
-            error.name === 'AssertionError' ? Status.FAILED : Status.BROKEN;
-
-        this.endTest(status, { message: error.message, trace: error.stack });
+        this.endTest(Status.FAILED, {
+            message: error.message,
+            trace: error.stack
+        });
     }
 
     writeAttachment(content, type) {
@@ -186,6 +187,22 @@ module.exports = class AllureReporter {
         this.steps.pop();
     }
 
+    finishAllSteps(status = Status.PASSED) {
+        const stepsCount = this.steps.length;
+        this.steps.forEach((step, i) => {
+            step.stepResult.stage = Stage.FINISHED;
+            step.stepResult.status =
+                i === stepsCount - 1 ? status : Status.PASSED;
+            step.endStep();
+        });
+        this.steps = [];
+        this.parentStep &&
+            (this.parentStep.stepResult.stage = Stage.FINISHED) &&
+            (this.parentStep.stepResult.status = status) &&
+            this.parentStep.endStep() &&
+            (this.parentStep = null);
+    }
+
     pushSuite(suite) {
         this.suites.push(suite);
     }
@@ -198,6 +215,8 @@ module.exports = class AllureReporter {
         if (this.currentTest === null) {
             throw new Error('endTest while no test is running');
         }
+        this.finishAllSteps(status);
+        this.parentStep = null;
 
         details && (this.currentTest.statusDetails = details);
         this.currentTest.status = status;

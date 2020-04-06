@@ -118,7 +118,7 @@ Allure API available:
 -   tag(tag: string)
 -   attachment(name: string, content: Buffer | string, type: ContentType)
 -   testAttachment(name: string, content: Buffer | string, type: ContentType)
--   logStep(name: string, body?: Status | Function)
+-   step(name: string, isParent: boolean)
 
 ## Screenshots
 

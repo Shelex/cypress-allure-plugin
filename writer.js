@@ -5,7 +5,14 @@ const uuid = require('uuid');
 module.exports = function (on) {
     on('task', {
         writeAllureResults: ({ resultsDir, writer }) => {
-            const { groups, tests, attachments } = writer;
+            const {
+                groups,
+                tests,
+                attachments,
+                envInfo,
+                categories,
+                executorInfo
+            } = writer;
             try {
                 !fse.existsSync(resultsDir) && fse.mkdirSync(resultsDir);
                 groups &&
@@ -37,6 +44,9 @@ module.exports = function (on) {
                             });
                     }
                 }
+                writeInfoFile('categories.json', categories, resultsDir);
+                writeInfoFile('executor.json', executorInfo, resultsDir);
+                writeInfoFile('environment.properties', envInfo, resultsDir);
             } catch (e) {
                 process.stdout.write(
                     `error while writing allure results: ${e}`
@@ -60,4 +70,23 @@ module.exports = function (on) {
             });
         });
     });
+};
+
+const writeInfoFile = (fileName, data, resultsDir) => {
+    if (data) {
+        const isEnvProps = fileName === 'environment.properties';
+        isEnvProps &&
+            (data = Object.keys(data)
+                .map((key) => `${key}=${data[key]}`)
+                .join('\n'));
+        const filePath = path.join(resultsDir, fileName);
+        !fse.existsSync(filePath) &&
+            fse.outputFileSync(
+                filePath,
+                isEnvProps ? data : JSON.stringify(data),
+                {
+                    encoding: 'binary'
+                }
+            );
+    }
 };

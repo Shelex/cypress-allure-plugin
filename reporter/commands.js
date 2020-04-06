@@ -39,10 +39,14 @@ Cypress.Commands.add(
     }
 );
 
-Cypress.Commands.add('logStep', { prevSubject: true }, (allure, name, body) => {
-    allure.logStep(name, body);
-    cy.wrap(allure, { log: false });
-});
+Cypress.Commands.add(
+    'step',
+    { prevSubject: true },
+    (allure, name, isParent = true) => {
+        allure.step(name, isParent);
+        cy.wrap(allure, { log: false });
+    }
+);
 
 Cypress.Commands.add('epic', { prevSubject: true }, (allure, name) => {
     allure.epic(name);
@@ -110,6 +114,15 @@ Cypress.Commands.add(
     { prevSubject: true },
     (allure, info) => {
         allure.writeEnvironmentInfo(info);
+        cy.wrap(allure, { log: false });
+    }
+);
+
+Cypress.Commands.add(
+    'writeExecutorInfo',
+    { prevSubject: true },
+    (allure, info) => {
+        allure.writeExecutorInfo(info);
         cy.wrap(allure, { log: false });
     }
 );
