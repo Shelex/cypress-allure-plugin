@@ -8,8 +8,7 @@ const {
     EVENT_TEST_PENDING,
     EVENT_SUITE_BEGIN,
     EVENT_SUITE_END,
-    EVENT_TEST_END,
-    EVENT_HOOK_END
+    EVENT_TEST_END
 } = Mocha.Runner.constants;
 
 const { AllureRuntime, InMemoryAllureWriter } = require('allure-js-commons');
@@ -46,12 +45,6 @@ class CypressAllureReporter {
             })
             .on(EVENT_TEST_END, () => {
                 this.reporter.handleCucumberTags();
-            })
-            .on(EVENT_HOOK_END, (hook) => {
-                // Don't keep tests during whole run, clear when each test is written
-                if (hook.title === '"after each" hook') {
-                    this.reporter.runtime.config.writer.tests = [];
-                }
             });
 
         Cypress.on('log:added', (options) => {

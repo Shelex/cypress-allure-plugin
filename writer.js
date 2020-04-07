@@ -4,17 +4,6 @@ const uuid = require('uuid');
 
 module.exports = function (on) {
     on('task', {
-        writeAllureTestResult: ({ resultsDir, writer }) => {
-            try {
-                writeTestInfo(writer.tests, resultsDir);
-            } catch (e) {
-                process.stdout.write(
-                    `error while writing allure test results: ${e}`
-                );
-            } finally {
-                return null;
-            }
-        },
         writeAllureResults: ({ resultsDir, writer }) => {
             const {
                 groups,
@@ -36,7 +25,16 @@ module.exports = function (on) {
                                 JSON.stringify(group)
                             );
                     });
-                writeTestInfo(tests, resultsDir);
+                tests &&
+                    tests.forEach((test) => {
+                        const fileName = `${test.uuid}-result.json`;
+                        const testResultPath = path.join(resultsDir, fileName);
+                        !fse.existsSync(testResultPath) &&
+                            fse.outputFileSync(
+                                testResultPath,
+                                JSON.stringify(test)
+                            );
+                    });
                 if (attachments) {
                     for (let [name, content] of Object.entries(attachments)) {
                         const attachmentPath = path.join(resultsDir, name);
@@ -91,14 +89,4 @@ const writeInfoFile = (fileName, data, resultsDir) => {
                 }
             );
     }
-};
-
-const writeTestInfo = (tests, resultsDir) => {
-    tests &&
-        tests.forEach((test) => {
-            const fileName = `${test.uuid}-result.json`;
-            const testResultPath = path.join(resultsDir, fileName);
-            !fse.existsSync(testResultPath) &&
-                fse.outputFileSync(testResultPath, JSON.stringify(test));
-        });
 };
