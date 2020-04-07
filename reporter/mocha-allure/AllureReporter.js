@@ -196,12 +196,11 @@ module.exports = class AllureReporter {
             step.endStep();
         });
         this.steps = [];
-        if (this.parentStep) {
-            this.parentStep.stepResult.stage = Stage.FINISHED;
-            this.parentStep.stepResult.status = status;
-            this.parentStep.endStep();
-            this.parentStep = null;
-        }
+        this.parentStep &&
+            (this.parentStep.stepResult.stage = Stage.FINISHED) &&
+            (this.parentStep.stepResult.status = status) &&
+            this.parentStep.endStep() &&
+            (this.parentStep = null);
     }
 
     pushSuite(suite) {
