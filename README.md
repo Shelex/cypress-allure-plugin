@@ -9,7 +9,7 @@ I would call current stage "beta" as still some polishing required.
 -   in your `cypress/plugins/index.js` file add Allure writer task:
 
 ```
-const allureWriter = require('cypress-allure-plugin/writer')
+const allureWriter = require('@shelex/cypress-allure-plugin/writer')
 
 module.exports = (on, config) => {
     allureWriter(on)
@@ -20,15 +20,15 @@ module.exports = (on, config) => {
 -   in your `cypress/support/index.js` file connect plugin itself:
 
 ```
-import 'cypress-allure-plugin';
+import '@shelex/cypress-allure-plugin';
 // you can use require also:
-require('cypress-allure-plugin');
+require('@shelex/cypress-allure-plugin');
 ```
 
 -   for IntelliSense (autocompletion) support in your IDE add:
 
 ```
-/// <reference types="cypress-allure-plugin" />
+/// <reference types="@shelex/cypress-allure-plugin" />
 ```
 
 on top of your `cypress/plugins/index.js` file
