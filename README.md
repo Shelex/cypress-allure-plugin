@@ -1,7 +1,6 @@
 # cypress-allure-plugin
 
-Plugin for integrating mocha-allure2 reporter in Cypress with support of Allure API.  
-I would call current stage "beta" as still some polishing required.
+Plugin for integrating allure reporter in Cypress with support of Allure API.
 
 ## Installation
 
@@ -126,8 +125,8 @@ Screenshots are attached automatically, for other type of content use `testAttac
 
 ## Roadmap
 
--   better steps logging
--   investigate why some labels are not displayed in report
+-   API cleanup as not all labels are needed inside test
+-   Better steps lifecycle
 
 ## Examples
 

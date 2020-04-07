@@ -2,8 +2,13 @@
  * Check if any screenshots are available for test
  */
 afterEach(() => {
-    Cypress.env('allure') &&
+    if (Cypress.env('allure')) {
         Cypress.Allure.reporter.getInterface().processScreenshots();
+        cy.task(
+            'writeAllureTestResult',
+            Cypress.Allure.reporter.runtime.config
+        );
+    }
 });
 /**
  * Execute task to write allure results to fs

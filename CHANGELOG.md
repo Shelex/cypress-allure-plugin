@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.3] - 2020-04-08
+
+### Added
+
+-   write test results after each test and clear from inmemory writer
+
 ## [1.1.2] - 2020-04-07
 
 ### Fixed
