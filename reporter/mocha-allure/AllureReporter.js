@@ -15,6 +15,7 @@ module.exports = class AllureReporter {
         this.screenshots = [];
         this.runningTest = null;
         this.runtime = runtime;
+        this.currentHook = null;
         this.parentStep = null;
     }
 
@@ -173,6 +174,12 @@ module.exports = class AllureReporter {
             message: error.message,
             trace: error.stack
         });
+        /**
+         * in case error comes from hook
+         */
+        if (test.type === 'hook') {
+            this.endHook(test);
+        }
     }
 
     writeAttachment(content, type) {
@@ -196,11 +203,39 @@ module.exports = class AllureReporter {
             step.endStep();
         });
         this.steps = [];
-        this.parentStep &&
-            (this.parentStep.stepResult.stage = Stage.FINISHED) &&
-            (this.parentStep.stepResult.status = status) &&
-            this.parentStep.endStep() &&
-            (this.parentStep = null);
+        if (this.parentStep) {
+            this.parentStep.stepResult.stage = Stage.FINISHED;
+            this.parentStep.stepResult.status = status;
+            this.parentStep.endStep();
+        }
+    }
+
+    startHook(hook) {
+        const parent = this.currentSuite;
+        const allureHook = hook.title.includes('before')
+            ? parent.addBefore()
+            : parent.addAfter();
+        this.currentHook = allureHook;
+    }
+
+    endHook(hook) {
+        if (hook.err) {
+            this.currentHook.info.status = Status.FAILED;
+            this.currentHook.info.statusDetails = {
+                message: hook.err.message,
+                trace: hook.err.stack
+            };
+        } else {
+            this.currentHook.info.stage = Stage.FINISHED;
+            this.currentHook.info.status = Status.PASSED;
+        }
+        this.currentHook = null;
+    }
+
+    restartSuite() {
+        const { name } = this.currentSuite;
+        this.endSuite();
+        this.startSuite(name);
     }
 
     pushSuite(suite) {

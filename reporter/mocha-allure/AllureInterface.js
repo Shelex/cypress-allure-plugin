@@ -23,7 +23,7 @@ Allure.prototype.writeExecutorInfo = function (info) {
 Allure.prototype.step = function (name, isParent = true) {
     const item = isParent
         ? this.currentTest
-        : this.reporter.parentStep || this.currentTest;
+        : this.reporter.parentStep || this.currentHook || this.currentTest;
     this.reporter.finishAllSteps();
     const allureStep = item.startStep(name);
     isParent
@@ -51,6 +51,8 @@ module.exports = class AllureInterface {
         this.__proto__ = new Allure(runtime);
         this.reporter = reporter;
         this.currentTest = reporter.currentTest;
-        this.currentExecutable = this.reporter.currentTest;
+        this.currentExecutable =
+            this.reporter.currentHook || this.reporter.currentTest;
+        this.currentHook = this.reporter.currentHook;
     }
 };

@@ -102,7 +102,7 @@ declare global {
              */
             issue(name: string, url: string): Allure;
             /**
-             * Add tms link
+             * Add test management system link
              * @param name
              * @param url
              */
@@ -148,7 +148,7 @@ declare global {
              */
             writeExecutorInfo(info: ExecutorInfo): Allure;
             /**
-             * Attachment outside test
+             * Attachment to current executable item (hook, test)
              * @param name
              * @param content
              * @param type
@@ -159,8 +159,8 @@ declare global {
                 type: ContentType
             ): Allure;
             /**
-             * Attach info to test
-             * Screenshots will be attached automatically
+             * Add attachment for current test
+             * (Screenshots are attached automatically)
              * @param name
              * @param content
              * @param type

@@ -4,8 +4,15 @@ Plugin for integrating allure reporter in Cypress with support of Allure API.
 
 ## Installation
 
--   `yarn add @shelex/cypress-allure-plugin` OR `npm install @shelex/cypress-allure-plugin`
--   in your `cypress/plugins/index.js` file add Allure writer task:
+-   download
+
+```
+yarn add -D @shelex/cypress-allure-plugin
+// OR
+npm i -D @shelex/cypress-allure-plugin
+```
+
+-   in `cypress/plugins/index.js` file connect Allure writer task:
 
 ```
 const allureWriter = require('@shelex/cypress-allure-plugin/writer')
@@ -16,11 +23,11 @@ module.exports = (on, config) => {
 }
 ```
 
--   in your `cypress/support/index.js` file connect plugin itself:
+-   in `cypress/support/index.js` file connect plugin itself:
 
 ```
 import '@shelex/cypress-allure-plugin';
-// you can use require also:
+// you can use require:
 require('@shelex/cypress-allure-plugin');
 ```
 
@@ -32,10 +39,13 @@ require('@shelex/cypress-allure-plugin');
 
 on top of your `cypress/plugins/index.js` file
 
--   You can setup baseURL for issue and tms links by adding environment variables:
+-   You can setup prefix url part for issue and tms links by adding environment variables:
 
 ```
 --env issuePrefix=https://url-to-bug-tracking-system/task-,tmsPrefix=https://url-to-tms/tests/caseId-
+
+// then in test:  cy.allure().issue('blockerIssue', 'AST-111')
+// will result in https://url-to-bug-tracking-system/task-AST-111
 ```
 
 OR set it in `cypress.json`
@@ -49,8 +59,6 @@ OR set it in `cypress.json`
 }
 ```
 
-With that you could pass just a path or task ID instead of using full url.
-
 ## Execution
 
 -   to enable Allure results writing just pass environment variable `allure=true`, example:
@@ -59,11 +67,17 @@ With that you could pass just a path or task ID instead of using full url.
 npx cypress run --config video=false --env allure=true --browser chrome
 ```
 
+-   to check what data is gathered, execute in cypress window with Chrome Developer tools console:
+
+```
+Cypress.Allure.reporter.runtime.writer
+```
+
 ## API
 
 There are three options of using allure api inside tests:
 
-1. Using interface constructor from `Cypress.Allure.reporter.getInterface()` - synchronous
+1. Using interface from `Cypress.Allure.reporter.getInterface()` - synchronous
 
 ```
 const allure = Cypress.Allure.reporter.getInterface();
@@ -121,12 +135,7 @@ Allure API available:
 
 ## Screenshots
 
-Screenshots are attached automatically, for other type of content use `testAttachment` (inside test with cy chainer) or `attachment` (outside test with synchronous api)
-
-## Roadmap
-
--   API cleanup as not all labels are needed inside test
--   Better steps lifecycle
+Screenshots are attached automatically, for other type of content use `testAttachment` (for current test) or `attachment` (for current executable)
 
 ## Examples
 

@@ -6,22 +6,13 @@ const availableLabels = [
     'suite',
     'parentSuite',
     'subSuite',
-    'testType',
     'epic',
     'feature',
     'story',
     'severity',
     'tag',
     'owner',
-    'lead',
-    'host',
-    'thread',
-    'testMethod',
-    'testClass',
-    'package',
-    'framework',
-    'language',
-    'resultFormat'
+    'package'
 ];
 const labelPattern = `@(${availableLabels.join('|')})\\("(.*?)"\\)`;
 const linkPattern = `@(issue|tms)\\("(.*?)","(.*?)"\\)`;

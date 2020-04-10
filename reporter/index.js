@@ -8,7 +8,9 @@ const {
     EVENT_TEST_PENDING,
     EVENT_SUITE_BEGIN,
     EVENT_SUITE_END,
-    EVENT_TEST_END
+    EVENT_TEST_END,
+    EVENT_HOOK_BEGIN,
+    EVENT_HOOK_END
 } = Mocha.Runner.constants;
 
 const { AllureRuntime, InMemoryAllureWriter } = require('allure-js-commons');
@@ -45,14 +47,22 @@ class CypressAllureReporter {
             })
             .on(EVENT_TEST_END, () => {
                 this.reporter.handleCucumberTags();
+            })
+            .on(EVENT_HOOK_BEGIN, (hook) => {
+                this.reporter.startHook(hook);
+            })
+            .on(EVENT_HOOK_END, (hook) => {
+                this.reporter.endHook(hook);
+                /**
+                 * suite should be restarted
+                 * to make `each` level hooks be set for tests separately
+                 */
+                hook.title === '"after each" hook' &&
+                    this.reporter.restartSuite();
             });
 
         Cypress.on('log:added', (options) => {
-            if (
-                options.instrument === 'command' &&
-                options.consoleProps &&
-                options.hookName === 'test'
-            ) {
+            if (options.instrument === 'command' && options.consoleProps) {
                 const detailMessage =
                     options.name === 'xhr'
                         ? `${
@@ -68,12 +78,15 @@ class CypressAllureReporter {
                     options.consoleProps.feature &&
                     Cypress._.get(options, 'consoleProps.step');
                 const cucumberMessage =
-                    stepInfo &&
-                    `${stepInfo.type}: ${stepInfo.keyword}${stepInfo.text}`;
+                    stepInfo && `${stepInfo.keyword}${stepInfo.text}`;
+
+                const requestMessage =
+                    options.name === 'request' && options.renderProps.message;
                 this.reporter
                     .getInterface()
                     .step(
-                        cucumberMessage ||
+                        requestMessage ||
+                            cucumberMessage ||
                             `${options.name} ${options.message} ${
                                 detailMessage || ''
                             }`,
