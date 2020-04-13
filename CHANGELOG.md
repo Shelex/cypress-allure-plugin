@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.3.0] - 2020-04-13
+
+### Removed
+
+-   fs-extra dependency, use fs instead
+
+### Fixed
+
+-   screenshot saving in case allure-results not exist
+
 ## [1.2.0] - 2020-04-10
 
 ### Added

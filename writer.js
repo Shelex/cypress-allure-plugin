@@ -1,5 +1,5 @@
 const path = require('path');
-const fse = require('fs-extra');
+const fs = require('fs');
 const uuid = require('uuid');
 
 module.exports = function (on) {
@@ -14,13 +14,13 @@ module.exports = function (on) {
                 executorInfo
             } = writer;
             try {
-                !fse.existsSync(resultsDir) && fse.mkdirSync(resultsDir);
+                !fs.existsSync(resultsDir) && fs.mkdirSync(resultsDir);
                 groups &&
                     groups.forEach((group) => {
                         const fileName = `${group.uuid}-container.json`;
                         const groupResultPath = path.join(resultsDir, fileName);
-                        !fse.existsSync(groupResultPath) &&
-                            fse.outputFileSync(
+                        !fs.existsSync(groupResultPath) &&
+                            fs.writeFileSync(
                                 groupResultPath,
                                 JSON.stringify(group)
                             );
@@ -29,8 +29,8 @@ module.exports = function (on) {
                     tests.forEach((test) => {
                         const fileName = `${test.uuid}-result.json`;
                         const testResultPath = path.join(resultsDir, fileName);
-                        !fse.existsSync(testResultPath) &&
-                            fse.outputFileSync(
+                        !fs.existsSync(testResultPath) &&
+                            fs.writeFileSync(
                                 testResultPath,
                                 JSON.stringify(test)
                             );
@@ -38,8 +38,8 @@ module.exports = function (on) {
                 if (attachments) {
                     for (let [name, content] of Object.entries(attachments)) {
                         const attachmentPath = path.join(resultsDir, name);
-                        !fse.existsSync(attachmentPath) &&
-                            fse.outputFileSync(attachmentPath, content, {
+                        !fs.existsSync(attachmentPath) &&
+                            fs.writeFileSync(attachmentPath, content, {
                                 encoding: 'binary'
                             });
                     }
@@ -57,12 +57,11 @@ module.exports = function (on) {
         }
     });
     on('after:screenshot', (details) => {
-        const allurePath = path.join(
-            `allure-results`,
-            `${uuid.v4()}-attachment.png`
-        );
+        const resultsDir = `allure-results`;
+        !fs.existsSync(resultsDir) && fs.mkdirSync(resultsDir);
+        const allurePath = path.join(resultsDir, `${uuid.v4()}-attachment.png`);
         return new Promise((resolve, reject) => {
-            fse.copy(details.path, allurePath, (err) => {
+            fs.copyFile(details.path, allurePath, (err) => {
                 if (err) {
                     return reject(err);
                 }
@@ -80,8 +79,8 @@ const writeInfoFile = (fileName, data, resultsDir) => {
                 .map((key) => `${key}=${data[key]}`)
                 .join('\n'));
         const filePath = path.join(resultsDir, fileName);
-        !fse.existsSync(filePath) &&
-            fse.outputFileSync(
+        !fs.existsSync(filePath) &&
+            fs.writeFileSync(
                 filePath,
                 isEnvProps ? data : JSON.stringify(data),
                 {
