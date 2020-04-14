@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.1] - 2020-04-14
+
+### Fixed
+
+-   not rename screenshots if allure is disabled
+
 ## [1.4.0] - 2020-04-14
 
 ### Changed

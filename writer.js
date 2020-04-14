@@ -57,17 +57,22 @@ module.exports = function (on) {
         }
     });
     on('after:screenshot', (details) => {
-        const resultsDir = `allure-results`;
-        !fs.existsSync(resultsDir) && fs.mkdirSync(resultsDir);
-        const allurePath = path.join(resultsDir, `${uuid.v4()}-attachment.png`);
-        return new Promise((resolve, reject) => {
-            fs.copyFile(details.path, allurePath, (err) => {
-                if (err) {
-                    return reject(err);
-                }
-                resolve({ path: allurePath });
+        if (Cypress.env('allure') === true) {
+            const resultsDir = `allure-results`;
+            !fs.existsSync(resultsDir) && fs.mkdirSync(resultsDir);
+            const allurePath = path.join(
+                resultsDir,
+                `${uuid.v4()}-attachment.png`
+            );
+            return new Promise((resolve, reject) => {
+                fs.copyFile(details.path, allurePath, (err) => {
+                    if (err) {
+                        return reject(err);
+                    }
+                    resolve({ path: allurePath });
+                });
             });
-        });
+        }
     });
 };
 
