@@ -21,6 +21,19 @@ module.exports = (on, config) => {
     allureWriter(on)
     return config
 }
+
+
+// if you have webpack or other ts preprocessors
+// just add another exports section with allure writer:
+
+module.exports = on => {
+  on('file:preprocessor', webpackPreprocessor)
+}
+
+module.exports = on => {
+  allureWriter(on)
+}
+
 ```
 
 -   in `cypress/support/index.js` file connect plugin itself:
@@ -57,6 +70,15 @@ OR set it in `cypress.json`
         "issuePrefix": "https://url-to-tms/tests/caseId-"
     }
 }
+```
+
+-   In case you are using typescript, update your tsconfig.json:
+
+```
+"include": [
+   "../node_modules/@shelex/cypress-allure-plugin/reporter",
+   "../node_modules/cypress"
+ ]
 ```
 
 ## Execution
