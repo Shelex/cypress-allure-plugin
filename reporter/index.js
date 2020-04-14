@@ -97,10 +97,10 @@ class CypressAllureReporter {
     }
 }
 
-Cypress.Allure = new CypressAllureReporter();
+Cypress.Allure = Cypress.env('allure') ? new CypressAllureReporter() : null;
 
 Cypress.Screenshot.defaults({
     onAfterScreenshot(el, details) {
-        Cypress.Allure.reporter.screenshots.push(details);
+        Cypress.Allure && Cypress.Allure.reporter.screenshots.push(details);
     }
 });

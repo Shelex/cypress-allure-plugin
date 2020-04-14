@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.4.0] - 2020-04-14
+
+### Changed
+
+-   not only disable writer, but Allure not added to Cypress at all if env variable not passed
+
 ## [1.3.0] - 2020-04-13
 
 ### Removed
