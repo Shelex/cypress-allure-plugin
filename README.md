@@ -83,6 +83,8 @@ OR set it in `cypress.json`
 
 ## Execution
 
+-   be sure your docker or local browser versions are next: Chrome 71+, Edge 79+. Firefox 65+
+
 -   to enable Allure results writing just pass environment variable `allure=true`, example:
 
 ```
