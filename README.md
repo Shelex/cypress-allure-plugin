@@ -198,7 +198,7 @@ Copyright 2020 Oleksandr Shevtsov <ovr.shevtsov@gmail.com>. This project is lice
 [semantic-url]: https://github.com/semantic-release/semantic-release
 [license-image]: https://img.shields.io/badge/License-Apache%202.0-blue.svg
 [license-url]: https://opensource.org/licenses/Apache-2.0
-[version-image]: https://badgen.net/npm/v/@shelex/cypress-allure-plugin
+[version-image]: https://badgen.net/npm/v/@shelex/cypress-allure-plugin/latest
 [size-image]: https://badgen.net/packagephobia/publish/@shelex/cypress-allure-plugin
 [downloads-image]: https://badgen.net/npm/dt/@shelex/cypress-allure-plugin
 [types-image]: https://badgen.net/npm/types/@shelex/cypress-allure-plugin
