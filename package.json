@@ -36,6 +36,7 @@
     "devDependencies": {
         "@types/fs-extra": "^8.1.0",
         "@types/mocha": "^7.0.2",
-        "cypress": "^4.1.0"
+        "cypress": "^4.1.0",
+        "semantic-release": "^17.0.4"
     }
 }

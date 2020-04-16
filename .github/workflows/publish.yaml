@@ -3,7 +3,7 @@ on: [push]
 jobs:
     build-and-test:
         runs-on: ubuntu-latest
-        name: Build and test
+        name: Publish
         steps:
             - uses: actions/checkout@v1
 

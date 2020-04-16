@@ -174,3 +174,6 @@ A lot of respect to [Sergey Korol](serhii.s.korol@gmail.com) who made [Allure-mo
 ## License
 
 Copyright 2020 Oleksandr Shevtsov <ovr.shevtsov@gmail.com>. This project is licensed under the Apache 2.0 License.
+
+[npm-icon]: https://nodeico.herokuapp.com/@shelex/cypress-allure-plugin.svg
+[npm-url]: https://npmjs.com/package/@shelex/cypress-allure-plugin
