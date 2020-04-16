@@ -2,10 +2,12 @@
 
 > Plugin for integrating allure reporter in Cypress with support of Allure API.
 
-[![NPM][npm-icon] ][npm-url]
-
 [![semantic-release][semantic-image] ][semantic-url]
-[![License][license-image] ][license-url]
+[![version][version-image]][npm-url]
+[![License][license-image]][license-url]  
+[![Publish Size][size-image]][npm-url]
+[![Downloads][downloads-image]][npm-url]
+[![Types][types-image]][types-path]
 
 ## Installation
 
@@ -190,9 +192,13 @@ A lot of respect to [Sergey Korol](serhii.s.korol@gmail.com) who made [Allure-mo
 
 Copyright 2020 Oleksandr Shevtsov <ovr.shevtsov@gmail.com>. This project is licensed under the Apache 2.0 License.
 
-[npm-icon]: https://nodeico.herokuapp.com/@shelex/cypress-allure-plugin.svg
 [npm-url]: https://npmjs.com/package/@shelex/cypress-allure-plugin
+[types-path]: ./reporter/index.d.ts
 [semantic-image]: https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg
 [semantic-url]: https://github.com/semantic-release/semantic-release
 [license-image]: https://img.shields.io/badge/License-Apache%202.0-blue.svg
 [license-url]: https://opensource.org/licenses/Apache-2.0
+[version-image]: https://badgen.net/npm/v/@shelex/cypress-allure-plugin
+[size-image]: https://badgen.net/packagephobia/publish/@shelex/cypress-allure-plugin
+[downloads-image]: https://badgen.net/npm/dt/@shelex/cypress-allure-plugin
+[types-image]: https://badgen.net/npm/types/@shelex/cypress-allure-plugin
