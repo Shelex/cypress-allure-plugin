@@ -10,17 +10,26 @@
         "email": "ovr.shevtsov@gmail.com"
     },
     "repository": {
-        "url": "git@github.com:Shelex/cypress-allure-plugin.git"
+        "type": "git",
+        "url": "https://github.com/Shelex/cypress-allure-plugin.git"
+    },
+    "files": [
+        "reporter",
+        "writer.js"
+    ],
+    "bugs": "https://github.com/Shelex/cypress-allure-plugin/issues",
+    "publishConfig": {
+        "registry": "http://registry.npmjs.org/"
     },
     "keywords": [
         "cypress",
-        "cypress-io",
-        "cypress-plugin",
         "allure",
         "allure2",
-        "cypress-allure",
-        "reports"
+        "reporter"
     ],
+    "scripts": {
+        "semantic-release": "semantic-release"
+    },
     "dependencies": {
         "allure-js-commons": "^2.0.0-beta.6"
     },

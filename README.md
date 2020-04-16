@@ -1,6 +1,8 @@
 # cypress-allure-plugin
 
-Plugin for integrating allure reporter in Cypress with support of Allure API.
+> Plugin for integrating allure reporter in Cypress with support of Allure API.
+
+[![NPM][npm-icon] ][npm-url]
 
 ## Installation
 
@@ -97,6 +99,14 @@ npx cypress run --config video=false --env allure=true --browser chrome
 Cypress.Allure.reporter.runtime.writer
 ```
 
+## Screenshots
+
+Screenshots are attached automatically, for other type of content use `testAttachment` (for current test) or `attachment` (for current executable)
+
+## Examples
+
+See [cypress-allure-plugin-example](https://github.com/Shelex/cypress-allure-plugin-example) project, which is already configured to use this plugin.
+
 ## API
 
 There are three options of using allure api inside tests:
@@ -156,14 +166,6 @@ Allure API available:
 -   attachment(name: string, content: Buffer | string, type: ContentType)
 -   testAttachment(name: string, content: Buffer | string, type: ContentType)
 -   step(name: string, isParent: boolean)
-
-## Screenshots
-
-Screenshots are attached automatically, for other type of content use `testAttachment` (for current test) or `attachment` (for current executable)
-
-## Examples
-
-See [cypress-allure-plugin-example](https://github.com/Shelex/cypress-allure-plugin-example) project, which is already configured to use this plugin.
 
 ## Credits
 
