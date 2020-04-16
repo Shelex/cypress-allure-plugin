@@ -2,7 +2,8 @@
 
 > Plugin for integrating allure reporter in Cypress with support of Allure API.
 
-[![NPM][npm-icon] ][npm-url]  
+[![NPM][npm-icon] ][npm-url]
+
 [![semantic-release][semantic-image] ][semantic-url]
 [![License][license-image] ][license-url]
 
