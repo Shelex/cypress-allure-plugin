@@ -170,6 +170,18 @@ Allure API available:
 -   testAttachment(name: string, content: Buffer | string, type: ContentType)
 -   step(name: string, isParent: boolean)
 
+## VS Code for cypress + cucumber
+
+In case you are using VS Code and [Cypress Helper](https://marketplace.visualstudio.com/items?itemName=Shelex.vscode-cy-helper) extension, it has configuration for allure cucumber tags autocompletion available:
+
+```
+"cypressHelper.cucumberTagsAutocomplete": {
+        "enable": true,
+        "allurePlugin": true,
+        "tags": ["focus", "someOtherTag"]
+    }
+```
+
 ## Credits
 
 A lot of respect to [Sergey Korol](serhii.s.korol@gmail.com) who made [Allure-mocha](https://github.com/allure-framework/allure-js/tree/master/packages/allure-mocha) reporter. Major part of interaction from mocha to allure is based on that solution technically and ideologically.
