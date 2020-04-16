@@ -2,7 +2,9 @@
 
 > Plugin for integrating allure reporter in Cypress with support of Allure API.
 
-[![NPM][npm-icon] ][npm-url]
+[![NPM][npm-icon] ][npm-url]  
+[![semantic-release][semantic-image] ][semantic-url]
+[![License][license-image] ][license-url]
 
 ## Installation
 
@@ -177,3 +179,7 @@ Copyright 2020 Oleksandr Shevtsov <ovr.shevtsov@gmail.com>. This project is lice
 
 [npm-icon]: https://nodeico.herokuapp.com/@shelex/cypress-allure-plugin.svg
 [npm-url]: https://npmjs.com/package/@shelex/cypress-allure-plugin
+[semantic-image]: https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg
+[semantic-url]: https://github.com/semantic-release/semantic-release
+[license-image]: https://img.shields.io/badge/License-Apache%202.0-blue.svg
+[license-url]: https://opensource.org/licenses/Apache-2.0
