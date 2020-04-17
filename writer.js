@@ -57,7 +57,9 @@ module.exports = function (on) {
         }
     });
     on('after:screenshot', (details) => {
-        if (Cypress.env('allure') === true) {
+        // TODO: investigate better way of handling after:screenshot when it finishes after test
+        // Now it will save screenshot to results even if allure env var is not passed
+        if (typeof Cypress === 'undefined' || Cypress.env('allure') === true) {
             const resultsDir = `allure-results`;
             !fs.existsSync(resultsDir) && fs.mkdirSync(resultsDir);
             const allurePath = path.join(

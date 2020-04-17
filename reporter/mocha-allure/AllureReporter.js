@@ -219,6 +219,9 @@ module.exports = class AllureReporter {
     }
 
     endHook(hook) {
+        if (hook.title.includes('all')) {
+            return;
+        }
         if (hook.err) {
             this.currentHook.info.status = Status.FAILED;
             this.currentHook.info.statusDetails = {
