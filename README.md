@@ -21,7 +21,7 @@ npm i -D @shelex/cypress-allure-plugin
 
 -   in `cypress/plugins/index.js` file connect Allure writer task:
 
-```
+```js
 const allureWriter = require('@shelex/cypress-allure-plugin/writer')
 
 module.exports = (on, config) => {
@@ -45,7 +45,7 @@ module.exports = on => {
 
 -   in `cypress/support/index.js` file connect plugin itself:
 
-```
+```js
 import '@shelex/cypress-allure-plugin';
 // you can use require:
 require('@shelex/cypress-allure-plugin');
@@ -53,7 +53,7 @@ require('@shelex/cypress-allure-plugin');
 
 -   for IntelliSense (autocompletion) support in your IDE add:
 
-```
+```js
 /// <reference types="@shelex/cypress-allure-plugin" />
 ```
 
@@ -61,7 +61,7 @@ on top of your `cypress/plugins/index.js` file
 
 -   You can setup prefix url part for issue and tms links by adding environment variables:
 
-```
+```js
 --env issuePrefix=https://url-to-bug-tracking-system/task-,tmsPrefix=https://url-to-tms/tests/caseId-
 
 // then in test:  cy.allure().issue('blockerIssue', 'AST-111')
@@ -70,7 +70,7 @@ on top of your `cypress/plugins/index.js` file
 
 OR set it in `cypress.json`
 
-```cypress.json
+```json
 {
     "env": {
         "tmsPrefix": "https://url-to-bug-tracking-system/task-",
@@ -81,7 +81,7 @@ OR set it in `cypress.json`
 
 -   In case you are using typescript, update your tsconfig.json:
 
-```
+```json
 "include": [
    "../node_modules/@shelex/cypress-allure-plugin/reporter",
    "../node_modules/cypress"
@@ -118,7 +118,7 @@ There are three options of using allure api inside tests:
 
 1. Using interface from `Cypress.Allure.reporter.getInterface()` - synchronous
 
-```
+```js
 const allure = Cypress.Allure.reporter.getInterface();
     allure.feature('This is our feature');
     allure.epic('This is epic');
@@ -127,7 +127,7 @@ const allure = Cypress.Allure.reporter.getInterface();
 
 2. Using Cypress custom commands, always starting from `cy.allure()` - chainer
 
-```
+```js
 cy.allure()
     .feature('This is feature')
     .epic('This is epic')
@@ -138,7 +138,7 @@ cy.allure()
 
 3. Using Cypress-cucumber-preprocessor with cucumber tags:
 
-```
+```js
 @subSuite("someSubSuite")
 @feature("nice")
 @epic("thisisepic")
@@ -176,7 +176,7 @@ Allure API available:
 
 In case you are using VS Code and [Cypress Helper](https://marketplace.visualstudio.com/items?itemName=Shelex.vscode-cy-helper) extension, it has configuration for allure cucumber tags autocompletion available:
 
-```
+```js
 "cypressHelper.cucumberTagsAutocomplete": {
         "enable": true,
         "allurePlugin": true,
