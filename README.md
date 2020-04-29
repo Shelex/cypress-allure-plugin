@@ -11,39 +11,43 @@
 
 ## Installation
 
--   download
+-   [Allure reporter](https://docs.qameta.io/allure/#_get_started): [java package](https://github.com/allure-framework/allure2#download) or [allure-commandline npm package](https://www.npmjs.com/package/allure-commandline).
 
-```
+-   [Java 8](https://www.oracle.com/java/technologies/javase-jdk8-downloads.html)
+
+-   There is no need to set this plugin as reporter in Cypress or use any other allure reporters. Just download:
+
+```bash
 yarn add -D @shelex/cypress-allure-plugin
 // OR
 npm i -D @shelex/cypress-allure-plugin
 ```
 
--   in `cypress/plugins/index.js` file connect Allure writer task:
+## Configuration
+
+-   Connect plugin in `cypress/plugins/index.js` in order to add Allure writer task:
 
 ```js
-const allureWriter = require('@shelex/cypress-allure-plugin/writer')
+const allureWriter = require('@shelex/cypress-allure-plugin/writer');
 
 module.exports = (on, config) => {
-    allureWriter(on)
-    return config
-}
-
+    allureWriter(on, config);
+    return config;
+};
 
 // if you have webpack or other ts preprocessors
 // just add another exports section with allure writer:
 
-module.exports = on => {
-  on('file:preprocessor', webpackPreprocessor)
-}
+module.exports = (on) => {
+    on('file:preprocessor', webpackPreprocessor);
+};
 
-module.exports = on => {
-  allureWriter(on)
-}
-
+module.exports = (on, config) => {
+    allureWriter(on, config);
+};
 ```
 
--   in `cypress/support/index.js` file connect plugin itself:
+-   Register commands in `cypress/support/index.js` file:
 
 ```js
 import '@shelex/cypress-allure-plugin';
@@ -51,24 +55,48 @@ import '@shelex/cypress-allure-plugin';
 require('@shelex/cypress-allure-plugin');
 ```
 
--   for IntelliSense (autocompletion) support in your IDE add:
+-   for IntelliSense (autocompletion) support in your IDE add on top of your `cypress/plugins/index.js` file:
 
 ```js
 /// <reference types="@shelex/cypress-allure-plugin" />
 ```
 
-on top of your `cypress/plugins/index.js` file
+or in case you are using typescript, update your tsconfig.json:
 
--   You can setup prefix url part for issue and tms links by adding environment variables:
-
-```js
---env issuePrefix=https://url-to-bug-tracking-system/task-,tmsPrefix=https://url-to-tms/tests/caseId-
-
-// then in test:  cy.allure().issue('blockerIssue', 'AST-111')
-// will result in https://url-to-bug-tracking-system/task-AST-111
+```json
+"include": [
+   "../node_modules/@shelex/cypress-allure-plugin/reporter",
+   "../node_modules/cypress"
+ ]
 ```
 
-OR set it in `cypress.json`
+-   You can customize allure-results folder by passing `allureResultsPath` env variable.  
+    `cypress.json`:
+
+```json
+{
+    "env": {
+        "allureResultsPath": "someFolder/results"
+    }
+}
+```
+
+or via command line:
+
+```js
+yarn cypress run --env allure=true,allureResultsPath=someFolder/results
+```
+
+-   You can setup prefix for issue and tms links by adding env variables:
+
+```bash
+--env issuePrefix=https://url-to-bug-tracking-system/task-,tmsPrefix=https://url-to-tms/tests/caseId-
+
+# usage:  cy.allure().issue('blockerIssue', 'AST-111')
+# result: https://url-to-bug-tracking-system/task-AST-111
+```
+
+or use `cypress.json`:
 
 ```json
 {
@@ -77,15 +105,6 @@ OR set it in `cypress.json`
         "issuePrefix": "https://url-to-tms/tests/caseId-"
     }
 }
-```
-
--   In case you are using typescript, update your tsconfig.json:
-
-```json
-"include": [
-   "../node_modules/@shelex/cypress-allure-plugin/reporter",
-   "../node_modules/cypress"
- ]
 ```
 
 ## Execution
@@ -98,7 +117,7 @@ OR set it in `cypress.json`
 npx cypress run --config video=false --env allure=true --browser chrome
 ```
 
--   to check what data is gathered, execute in cypress window with Chrome Developer tools console:
+-   if allure is enabled, you can check gathered data, in cypress window with Chrome Developer tools console:
 
 ```
 Cypress.Allure.reporter.runtime.writer
@@ -107,6 +126,10 @@ Cypress.Allure.reporter.runtime.writer
 ## Screenshots
 
 Screenshots are attached automatically, for other type of content use `testAttachment` (for current test) or `attachment` (for current executable)
+
+## Cypress commands
+
+Commands are logged automatically as report steps
 
 ## Examples
 
@@ -120,9 +143,9 @@ There are three options of using allure api inside tests:
 
 ```js
 const allure = Cypress.Allure.reporter.getInterface();
-    allure.feature('This is our feature');
-    allure.epic('This is epic');
-    allure.issue('google', 'https://google.com');
+allure.feature('This is our feature');
+allure.epic('This is epic');
+allure.issue('google', 'https://google.com');
 ```
 
 2. Using Cypress custom commands, always starting from `cy.allure()` - chainer
@@ -138,14 +161,13 @@ cy.allure()
 
 3. Using Cypress-cucumber-preprocessor with cucumber tags:
 
-```js
+```feature
 @subSuite("someSubSuite")
 @feature("nice")
 @epic("thisisepic")
 @story("cool")
 @severity("critical")
 @owner("IAMOwner")
-@package("myPackage")
 @issue("jira","PJD:1234")
 @someOtherTagsWillBeAddedAlso
 Scenario: Here is scenario
@@ -190,7 +212,8 @@ A lot of respect to [Sergey Korol](serhii.s.korol@gmail.com) who made [Allure-mo
 
 ## License
 
-Copyright 2020 Oleksandr Shevtsov <ovr.shevtsov@gmail.com>. This project is licensed under the Apache 2.0 License.
+Copyright 2020 Oleksandr Shevtsov <ovr.shevtsov@gmail.com>.  
+This project is licensed under the Apache 2.0 License.
 
 [npm-url]: https://npmjs.com/package/@shelex/cypress-allure-plugin
 [types-path]: ./reporter/index.d.ts

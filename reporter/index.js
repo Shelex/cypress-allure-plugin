@@ -15,12 +15,15 @@ const {
 
 const { AllureRuntime, InMemoryAllureWriter } = require('allure-js-commons');
 const AllureReporter = require('./mocha-allure/AllureReporter');
+const stubbedAllure = require('./stubbedAllure');
+const allureEnabled = Cypress.env('allure') === true;
 
 class CypressAllureReporter {
     constructor() {
         this.reporter = new AllureReporter(
             new AllureRuntime({
-                resultsDir: 'allure-results',
+                resultsDir:
+                    Cypress.env('allureResultsPath') || 'allure-results',
                 writer: new InMemoryAllureWriter()
             })
         );
@@ -97,10 +100,10 @@ class CypressAllureReporter {
     }
 }
 
-Cypress.Allure = Cypress.env('allure') ? new CypressAllureReporter() : null;
+Cypress.Allure = allureEnabled ? new CypressAllureReporter() : stubbedAllure;
 
 Cypress.Screenshot.defaults({
     onAfterScreenshot(el, details) {
-        Cypress.Allure && Cypress.Allure.reporter.screenshots.push(details);
+        allureEnabled && Cypress.Allure.reporter.screenshots.push(details);
     }
 });

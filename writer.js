@@ -2,7 +2,14 @@ const path = require('path');
 const fs = require('fs');
 const uuid = require('uuid');
 
-module.exports = function (on) {
+function allureWriter(on, config) {
+    // pass allure config from Cypress.env to process.env
+    // to get access from node context
+    process.env.allure = config.env.allure;
+
+    process.env.allureResultsPath =
+        config.env.allureResultsPath || 'allure-results';
+
     on('task', {
         writeAllureResults: ({ resultsDir, writer }) => {
             const {
@@ -57,11 +64,15 @@ module.exports = function (on) {
         }
     });
     on('after:screenshot', (details) => {
-        // TODO: investigate better way of handling after:screenshot when it finishes after test
-        // Now it will save screenshot to results even if allure env var is not passed
-        if (typeof Cypress === 'undefined' || Cypress.env('allure') === true) {
-            const resultsDir = `allure-results`;
-            !fs.existsSync(resultsDir) && fs.mkdirSync(resultsDir);
+        const resultsDir = process.env.allureResultsPath;
+
+        // As after:screenshot is an event when screenshot file is saved
+        // sometimes (when saving was after test finished)
+        // we cannot access Cypress or Cypress.Allure context here
+
+        if (process.env.allure === 'true') {
+            !fs.existsSync(resultsDir) &&
+                fs.mkdirSync(resultsDir, { recursive: true });
             const allurePath = path.join(
                 resultsDir,
                 `${uuid.v4()}-attachment.png`
@@ -76,7 +87,7 @@ module.exports = function (on) {
             });
         }
     });
-};
+}
 
 const writeInfoFile = (fileName, data, resultsDir) => {
     if (data) {
@@ -96,3 +107,5 @@ const writeInfoFile = (fileName, data, resultsDir) => {
             );
     }
 };
+
+module.exports = allureWriter;
