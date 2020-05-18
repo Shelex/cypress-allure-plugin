@@ -1,0 +1,6 @@
+{
+    "env": {
+        "issuePrefix": "issuePrefix-",
+        "tmsPrefix": "tmsPrefix-"
+    }
+}

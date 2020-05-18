@@ -24,13 +24,18 @@ function allureWriter(on, config) {
                 !fs.existsSync(resultsDir) && fs.mkdirSync(resultsDir);
                 groups &&
                     groups.forEach((group) => {
-                        const fileName = `${group.uuid}-container.json`;
-                        const groupResultPath = path.join(resultsDir, fileName);
-                        !fs.existsSync(groupResultPath) &&
-                            fs.writeFileSync(
-                                groupResultPath,
-                                JSON.stringify(group)
+                        if (group.children.length) {
+                            const fileName = `${group.uuid}-container.json`;
+                            const groupResultPath = path.join(
+                                resultsDir,
+                                fileName
                             );
+                            !fs.existsSync(groupResultPath) &&
+                                fs.writeFileSync(
+                                    groupResultPath,
+                                    JSON.stringify(group)
+                                );
+                        }
                     });
                 tests &&
                     tests.forEach((test) => {

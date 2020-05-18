@@ -206,6 +206,11 @@ In case you are using VS Code and [Cypress Helper](https://marketplace.visualstu
     }
 ```
 
+## Testing
+
+-   `yarn test:prepare` - generate allure results for tests in `cypress/integration` `basic` and `cucumber` folders
+-   `test` - run tests from `cypress/integration/results` against these allure results
+
 ## Credits
 
 A lot of respect to [Sergey Korol](serhii.s.korol@gmail.com) who made [Allure-mocha](https://github.com/allure-framework/allure-js/tree/master/packages/allure-mocha) reporter. Major part of interaction from mocha to allure is based on that solution technically and ideologically.
