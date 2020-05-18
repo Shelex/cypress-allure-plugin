@@ -1,7 +1,7 @@
 const cypress = require('cypress');
 
 // basic or cucumber
-const mode = process.argv.slice(2);
+const mode = process.argv.slice(2)[0];
 
 const cypressConfig = {
     env: {
