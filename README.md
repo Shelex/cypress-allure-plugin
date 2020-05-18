@@ -223,7 +223,7 @@ Copyright 2020 Oleksandr Shevtsov <ovr.shevtsov@gmail.com>.
 This project is licensed under the Apache 2.0 License.
 
 [npm-url]: https://npmjs.com/package/@shelex/cypress-allure-plugin
-[gh-image]: https://github.com/Shelex/cypress-allure-plugin/workflows/main/badge.svg?branch=master
+[gh-image]: https://github.com/Shelex/cypress-allure-plugin/workflows/build/badge.svg?branch=master
 [types-path]: ./reporter/index.d.ts
 [semantic-image]: https://img.shields.io/badge/%20%20%F0%9F%93%A6%F0%9F%9A%80-semantic--release-e10079.svg
 [semantic-url]: https://github.com/semantic-release/semantic-release
