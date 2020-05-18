@@ -28,7 +28,10 @@
         "reporter"
     ],
     "scripts": {
-        "semantic-release": "semantic-release"
+        "semantic-release": "semantic-release",
+        "test": "yarn cypress run --config integrationFolder=cypress/integration/results,testFiles=**/*.js,video=false",
+        "test:prepare": "node cypress/scripts/runner",
+        "fixtures:clear": "rm -r cypress/fixtures/*"
     },
     "dependencies": {
         "allure-js-commons": "^2.0.0-beta.6"
@@ -36,7 +39,11 @@
     "devDependencies": {
         "@types/fs-extra": "^8.1.0",
         "@types/mocha": "^7.0.2",
-        "cypress": "^4.1.0",
+        "cypress": "^4.5.0",
+        "cypress-cucumber-preprocessor": "^2.3.1",
         "semantic-release": "^17.0.4"
+    },
+    "cypress-cucumber-preprocessor": {
+        "nonGlobalStepDefinitions": true
     }
 }
