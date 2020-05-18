@@ -11,33 +11,33 @@ jobs:
             - uses: actions/checkout@v1
 
             - name: Download Cypress
-                uses: bahmutov/npm-install@v1
-                env:
-                CYPRESS_INSTALL_BINARY: 0
+              uses: bahmutov/npm-install@v1
+              env:
+                  CYPRESS_INSTALL_BINARY: 0
 
             - name: Check Cypress cache
-                run: |
-                    npx cypress cache path
-                    npx cypress cache list
-  
+              run: |
+                  npx cypress cache path
+                  npx cypress cache list
+
             - name: Restore / Cache the binary
-                id: cache-cypress
-                uses: actions/cache@v1
-                with:
-                    path: ~/.cache/Cypress
-                    key: >-
-                        cypress-cache-v2-${{ runner.os }}-${{ hashFiles('**/package.json')
-                        }}
-            
+              id: cache-cypress
+              uses: actions/cache@v1
+              with:
+                  path: ~/.cache/Cypress
+                  key: >-
+                      cypress-cache-v2-${{ runner.os }}-${{ hashFiles('**/package.json')
+                      }}
+
             - name: Install Cypress
-                run: |
-                    npx cypress install
-                    npx cypress cache list
+              run: |
+                  npx cypress install
+                  npx cypress cache list
 
             - name: Testing
-                run: |
-                    npm run test:prepare
-                    npm run test
+              run: |
+                  npm run test:prepare
+                  npm run test
 
             # https://github.com/cycjimmy/semantic-release-action
             - name: Semantic Release
