@@ -1,26 +1,25 @@
 const cypress = require('cypress');
 
-const modes = ['basic', 'cucumber'];
+// basic or cucumber
+const mode = process.argv.slice(2);
 
-modes.forEach((mode) => {
-    const cypressConfig = {
-        env: {
-            allure: true,
-            allureResultsPath: `cypress/fixtures/${mode}`
-        }
-    };
+const cypressConfig = {
+    env: {
+        allure: true,
+        allureResultsPath: `cypress/fixtures/${mode}`
+    }
+};
 
-    cypressConfig.config =
-        mode === 'cucumber'
-            ? {
-                  ignoreTestFiles: '*.js',
-                  testFiles: '**/*.{feature,features}',
-                  video: false
-              }
-            : {
-                  integrationFolder: 'cypress/integration/basic',
-                  video: false
-              };
+cypressConfig.config =
+    mode === 'cucumber'
+        ? {
+              ignoreTestFiles: '*.js',
+              testFiles: '**/*.{feature,features}',
+              video: false
+          }
+        : {
+              integrationFolder: 'cypress/integration/basic',
+              video: false
+          };
 
-    cypress.run(cypressConfig);
-});
+cypress.run(cypressConfig);
