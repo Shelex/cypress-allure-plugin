@@ -21,7 +21,8 @@ function allureWriter(on, config) {
                 executorInfo
             } = writer;
             try {
-                !fs.existsSync(resultsDir) && fs.mkdirSync(resultsDir);
+                !fs.existsSync(resultsDir) &&
+                    fs.mkdirSync(resultsDir, { recursive: true });
                 groups &&
                     groups.forEach((group) => {
                         if (group.children.length) {
