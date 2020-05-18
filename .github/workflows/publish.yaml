@@ -36,7 +36,8 @@ jobs:
 
             - name: Testing
               run: |
-                  npm run test:prepare
+                  npm run test:prepare:basic
+                  npm run test:prepare:cucumber
                   npm run test
 
             # https://github.com/cycjimmy/semantic-release-action

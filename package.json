@@ -30,7 +30,8 @@
     "scripts": {
         "semantic-release": "semantic-release",
         "test": "yarn cypress run --config integrationFolder=cypress/integration/results,testFiles=**/*.js,video=false",
-        "test:prepare": "node cypress/scripts/runner cucumber && node cypress/scripts/runner basic",
+        "test:prepare:basic": "node cypress/scripts/runner basic",
+        "test:prepare:cucumber": "node cypress/scripts/runner cucumber",
         "fixtures:clear": "rm -r cypress/fixtures/*"
     },
     "dependencies": {
