@@ -37,7 +37,7 @@ type Severity = 'blocker' | 'critical' | 'normal' | 'minor' | 'trivial';
 
 declare global {
     namespace Cypress {
-        interface Chainable<Subject = null> {
+        interface Chainable {
             /**
              * Parent command to start interaction with Allure API
              */
