@@ -50,6 +50,16 @@ Cypress.Commands.add(
     }
 );
 
+Cypress.Commands.add('startStep', { prevSubject: true }, (allure, name) => {
+    allure.stepStart(name);
+    cy.wrap(allure, { log: false });
+});
+
+Cypress.Commands.add('endStep', { prevSubject: true }, (allure) => {
+    allure.stepEnd();
+    cy.wrap(allure, { log: false });
+});
+
 Cypress.Commands.add('epic', { prevSubject: true }, (allure, name) => {
     allure.epic(name);
     cy.wrap(allure, { log: false });

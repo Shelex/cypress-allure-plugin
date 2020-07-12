@@ -64,38 +64,21 @@ class CypressAllureReporter {
                     this.reporter.restartSuite();
             });
 
-        Cypress.on('log:added', (options) => {
-            if (options.instrument === 'command' && options.consoleProps) {
-                const detailMessage =
-                    options.name === 'xhr'
-                        ? `${
-                              (options.consoleProps.Stubbed === 'Yes'
-                                  ? 'STUBBED '
-                                  : '') + options.consoleProps.Method
-                          } ${options.consoleProps.URL}`
-                        : '';
-                const isCucumberStep = options.name === 'step';
-                const stepInfo =
-                    isCucumberStep &&
-                    options.consoleProps &&
-                    options.consoleProps.feature &&
-                    Cypress._.get(options, 'consoleProps.step');
-                const cucumberMessage =
-                    stepInfo && `${stepInfo.keyword}${stepInfo.text}`;
+        Cypress.on('command:enqueued', (command) => {
+            this.reporter.cyCommandEnqueue(command);
+        });
 
-                const requestMessage =
-                    options.name === 'request' && options.renderProps.message;
-                this.reporter
-                    .getInterface()
-                    .step(
-                        requestMessage ||
-                            cucumberMessage ||
-                            `${options.name} ${options.message} ${
-                                detailMessage || ''
-                            }`,
-                        isCucumberStep
-                    );
-            }
+        Cypress.on('command:start', (command) => {
+            this.reporter.cyCommandStart(command.attributes);
+        });
+
+        Cypress.on('command:end', (command) => {
+            this.reporter.cyCommandEnd(command.attributes);
+        });
+
+        Cypress.on('fail', (err) => {
+            this.reporter.cyCommandsFinish();
+            throw err;
         });
     }
 }

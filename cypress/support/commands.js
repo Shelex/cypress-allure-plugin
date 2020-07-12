@@ -23,3 +23,17 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
+
+Cypress.Commands.add('thisiscustom', (name) => {
+    cy.log('command started');
+    cy.log(name);
+    cy.thisissecond('one', ['two'], { name: 'three' }).then((res) => {
+        expect(res).to.be.eq(200);
+    });
+    cy.log('command finished');
+});
+
+Cypress.Commands.add('thisissecond', (one, two, three) => {
+    cy.log('doing second command');
+    cy.request('https://facebook.com').its('status').should('be.eq', 200);
+});

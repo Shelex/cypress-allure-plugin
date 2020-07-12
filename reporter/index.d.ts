@@ -176,6 +176,15 @@ declare global {
              * @param isParent - log all commands into created step until next parent step, true by default
              */
             step(name: string, isParent: boolean): Allure;
+            /**
+             * Start allure step with specified name
+             * @param name - name of step to create
+             */
+            startStep(name: string): Allure;
+            /**
+             * End last created allure step
+             */
+            endStep(): Allure;
         }
     }
 }

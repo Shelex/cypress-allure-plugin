@@ -33,6 +33,39 @@ Allure.prototype.step = function (name, isParent = true) {
           this.reporter.pushStep(allureStep);
 };
 
+Allure.prototype.stepStart = function (name) {
+    // define last chainer that still not finished and has allure step
+    const chainer = this.reporter.commands
+        .reverse()
+        .find((c) => !c.finished && c.step && c.step.info.name);
+
+    // define fallback allure executable
+    const previousExecutable =
+        this.reporter.currentStep ||
+        this.reporter.parentStep ||
+        this.currentHook ||
+        this.currentTest;
+
+    // in case chaner step is newer then allure fallback executable - use chainer step for creating new
+    const executable =
+        chainer && chainer.step.info.start > previousExecutable.info.start
+            ? chainer.step
+            : previousExecutable;
+
+    const step = executable.startStep(name);
+    this.reporter.pushStep(step);
+};
+
+Allure.prototype.stepEnd = function () {
+    // just find the last user created step and finish it
+    const step = this.reporter.popStep();
+    if (step) {
+        step.stepResult.stage = Stage.FINISHED;
+        step.stepResult.status = this.currentTest.info.status || Status.PASSED;
+        step.endStep();
+    }
+};
+
 // Process Cypress screenshots automatically
 Allure.prototype.processScreenshots = function () {
     const { currentTest } = this;

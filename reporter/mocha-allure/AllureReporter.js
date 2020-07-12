@@ -7,11 +7,14 @@ const { LabelName, Stage, Status } = require('allure-js-commons');
 const { createHash } = require('crypto');
 const AllureInterface = require('./AllureInterface');
 const { tagToLabel, tagToLink } = require('../gherkinToLabel');
+const stubbedAllure = require('../stubbedAllure');
 
 module.exports = class AllureReporter {
     constructor(runtime) {
         this.suites = [];
         this.steps = [];
+        this.commands = [];
+        this.currentChainer = null;
         this.screenshots = [];
         this.runningTest = null;
         this.runtime = runtime;
@@ -73,6 +76,7 @@ module.exports = class AllureReporter {
             throw new Error('No active suite');
         }
 
+        this.commands = [];
         this.currentTest = this.currentSuite.startTest(test.title);
         this.currentTest.fullName = test.title;
         this.currentTest.historyId = createHash('md5')
@@ -191,21 +195,19 @@ module.exports = class AllureReporter {
     }
 
     popStep() {
-        this.steps.pop();
+        return this.steps.pop();
     }
 
     finishAllSteps(status = Status.PASSED) {
-        const stepsCount = this.steps.length;
-        this.steps.forEach((step, i) => {
-            step.stepResult.stage = Stage.FINISHED;
-            step.stepResult.status =
-                i === stepsCount - 1 ? status : Status.PASSED;
+        this.steps.forEach((step) => {
+            step.info.stage = Stage.FINISHED;
+            step.info.status = status;
             step.endStep();
         });
         this.steps = [];
         if (this.parentStep) {
-            this.parentStep.stepResult.stage = Stage.FINISHED;
-            this.parentStep.stepResult.status = status;
+            this.parentStep.info.stage = Stage.FINISHED;
+            this.parentStep.info.status = status;
             this.parentStep.endStep();
         }
     }
@@ -220,6 +222,7 @@ module.exports = class AllureReporter {
 
     endHook(hook) {
         if (hook.title.includes('all')) {
+            this.currentHook = null;
             return;
         }
         if (hook.err) {
@@ -253,6 +256,7 @@ module.exports = class AllureReporter {
         if (this.currentTest === null) {
             throw new Error('endTest while no test is running');
         }
+        this.cyCommandsFinish(status);
         this.finishAllSteps(status);
         this.parentStep = null;
 
@@ -260,5 +264,291 @@ module.exports = class AllureReporter {
         this.currentTest.status = status;
         this.currentTest.stage = Stage.FINISHED;
         this.currentTest.endTest();
+    }
+
+    cyCommandExecutable(command) {
+        if (command.parent) {
+            const parent = this.commands.find(
+                (c) => c.id === command.parent && c.step && !c.finished
+            );
+            // such commands contain argument
+            // which is basically a function that will be executed
+            if (['then', 'spread', 'each'].includes(parent.name)) {
+                return this.cyCommandExecutable(parent);
+            }
+            // in case latest step in newer then parent - attach to user defined step
+            return this.currentStep &&
+                this.currentStep.info.start > parent.step.info.start
+                ? this.currentStep
+                : parent.step;
+        }
+        return (
+            this.currentStep ||
+            this.parentStep ||
+            this.currentHook ||
+            this.currentTest
+        );
+    }
+
+    cyCommandEnqueue(attributes) {
+        // skipped are:
+        // assertions, as they don't receive command:start and command:end events and are hardly trackable
+        // allure custom command used for interacting with allure api
+        // commands, where second argument has {log: false}
+        // commands, which are child commands of cy.allure command
+        const commandShouldBeSkipped = (attributes) => {
+            return (
+                attributes.type === 'assertion' ||
+                attributes.name === 'allure' ||
+                (attributes.args.length &&
+                    attributes.args[1] &&
+                    attributes.args[1].log === false) ||
+                (Object.getOwnPropertyNames(
+                    stubbedAllure.reporter.getInterface()
+                ).includes(attributes.name) &&
+                    attributes.type === 'child')
+            );
+        };
+
+        if (commandShouldBeSkipped(attributes)) {
+            return;
+        }
+
+        // prepare chainer command object with specific information to process it with events
+        const command = {
+            id: attributes.chainerId,
+            name: attributes.name,
+            type: attributes.type,
+            parent: this.currentChainer && this.currentChainer.chainerId,
+            children: [],
+            passed: true, // will be set false in case failed or failed child command
+            finished: false,
+            step: null,
+            commandLog: null
+        };
+
+        this.commands.push(command);
+
+        // in case command in enqueued while there was active chainer - treat it as parent
+        // so this command should be added as child to track if we should finish parent command step
+        if (command.parent) {
+            const parent = this.commands.find(
+                (c) => c.id === command.parent && !c.finished && c.step
+            );
+            // set new child from start as command queue works as LIFO (last in - first out) approach
+            parent.children.unshift(command.id);
+        }
+    }
+
+    cyCommandStart(attributes) {
+        // check if we have enqueued command
+        const command = this.commands.find(
+            (command) =>
+                command.id === attributes.chainerId &&
+                command.name === attributes.name &&
+                !command.step &&
+                !command.finished
+        );
+
+        if (!command) {
+            return;
+        }
+
+        command.commandLog = attributes;
+
+        // add dummy allure step implementation for "then" commands to avoid adding them to report
+        // as they mostly expose other plugin internals and other functions not related to test
+        // on other hand, if they produce info for command log - step will be created when command end
+        if (['then', 'spread', 'each'].includes(command.name)) {
+            command.step = {
+                info: {},
+                stepResult: {},
+                endStep() {}
+            };
+        } else {
+            const executable = this.cyCommandExecutable(command);
+
+            const step = executable.startStep(
+                `${command.name}${
+                    attributes.args.length
+                        ? ` (${attributes.args
+                              .map((a) => `"${String(a)}"`)
+                              .join('; ')})`
+                        : ''
+                }`
+            );
+
+            command.step = step;
+        }
+        this.currentChainer = attributes;
+    }
+
+    cyCommandEnd(attributes, failed = false) {
+        // check if we have enqueued command
+        const command = this.commands.find(
+            (command) =>
+                command.id === attributes.chainerId &&
+                command.name === attributes.name &&
+                command.step &&
+                !command.finished
+        );
+
+        if (!command) {
+            return;
+        }
+        this.currentChainer = null;
+
+        // in case no children enqueued - finish this step
+        if (!command.children.length) {
+            // check if command has some entries for command log
+            if (command.commandLog.logs.length) {
+                // set first command log (which refers to current command) as last
+                // and process other child logs first (asserts are processed such way)
+
+                command.commandLog.logs.push(command.commandLog.logs.shift());
+
+                command.commandLog.logs.forEach((entry, index) => {
+                    const log = entry.toJSON();
+
+                    // for main log (which we set last) we should finish command step
+                    if (index === command.commandLog.logs.length - 1) {
+                        // in case "then" command has some logging - create step for that
+                        if (['then', 'spread', 'each'].includes(command.name)) {
+                            const executable = this.cyCommandExecutable(
+                                command
+                            );
+
+                            const step = this.cyStartStepForLog(
+                                executable,
+                                log
+                            );
+
+                            command.step = step;
+
+                            if (log.name === 'step') {
+                                this.finishAllSteps(
+                                    command.passed
+                                        ? Status.PASSED
+                                        : Status.FAILED
+                                );
+                                this.steps.push(step);
+                                this.parentStep = step;
+                            }
+                        }
+
+                        const commandPassed = this.cyCommandEndStep(
+                            command.step,
+                            log
+                        );
+
+                        !commandPassed && (command.passed = false);
+                    } else {
+                        // handle case when other logs refer to chained assertions
+                        // so steps should be created
+                        const executable = this.cyCommandExecutable({
+                            id: log.id,
+                            parent: command.parent
+                        });
+
+                        const step = this.cyStartStepForLog(executable, log);
+
+                        const commandPassed = this.cyCommandEndStep(step, log);
+
+                        !commandPassed && (command.passed = false);
+                    }
+                });
+            } else {
+                this.cyCommandEndStep(command.step, {
+                    state: command.passed ? 'passed' : 'failed'
+                });
+            }
+            command.finished = true;
+            // notify parent that one of child commands is finished
+            // and pass status
+            this.cyRemoveChildFromParent(command, failed);
+        }
+    }
+
+    cyRemoveChildFromParent(child, failed = false) {
+        if (child.parent) {
+            const parent = this.commands.find(
+                (c) => c.id === child.parent && c.step && !c.finished
+            );
+            const childIndex = parent.children.indexOf(child.id);
+
+            // if found child - remove it from parent
+            if (childIndex > -1) {
+                parent.children.splice(childIndex, 1);
+                // update status of parent in case any of children failed
+                if (!child.passed) {
+                    parent.passed = false;
+                }
+            }
+
+            // finish parent step when no children left or when test is failed
+            if (!parent.children.length || failed) {
+                this.cyCommandEnd(parent.commandLog, failed);
+            }
+        }
+    }
+
+    cyCommandsFinish(state = 'failed') {
+        // process all not finished steps from chainer left
+        // usually is executed on fail
+        this.commands
+            .filter((c) => !c.finished && c.step && c.step.info.name)
+            .reverse()
+            .forEach((command) => {
+                this.cyCommandEnd(command.commandLog, state === 'failed');
+            });
+        this.currentChainer = null;
+    }
+
+    cyCommandEndStep(step, log) {
+        const passed = log.state !== 'failed';
+
+        step.info.stage = Stage.FINISHED;
+        step.info.status = passed ? Status.PASSED : Status.FAILED;
+
+        log &&
+            log.err &&
+            (step.info.statusDetails = {
+                message: log.err.message,
+                trace: log.err.sourceMappedStack || log.err.stack
+            });
+        log.name !== 'step' && step.endStep();
+        return passed;
+    }
+
+    cyStartStepForLog(executable, log) {
+        // define step name based on cypress log name or messages
+        const messages = {
+            xhr: () =>
+                `${
+                    (log.consoleProps.Stubbed === 'Yes' ? 'STUBBED ' : '') +
+                    log.consoleProps.Method
+                } ${log.consoleProps.URL}`,
+            step: () => `${log.displayName}${log.message.replace(/\*/g, '')}`,
+            stub: () =>
+                `${log.name} [ function: ${log.functionName} ] ${
+                    log.alias ? `as ${log.alias}` : ''
+                }`,
+            route: () => `${log.name} ${log.method} ${log.url}`,
+            default: () =>
+                log.message ? `${log.message} ${log.name}` : `${log.name}`
+        };
+
+        // handle cases with stubs name containing increments (stub-1, stub-2, etc.)
+        const lookupName = log.name.startsWith('stub') ? 'stub' : log.name;
+
+        const message = messages[lookupName] || messages.default;
+
+        // in case log name is "step" - assumed that it comes from cucumber preprocessor
+        // in case it is cucumber step - executable should be current test
+        if (log.name === 'step') {
+            executable = this.currentTest;
+        }
+
+        return executable.startStep(message());
     }
 };

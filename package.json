@@ -29,7 +29,7 @@
     ],
     "scripts": {
         "semantic-release": "semantic-release",
-        "test": "yarn cypress run --config integrationFolder=cypress/integration/results,testFiles=**/*.js,video=false",
+        "test": "yarn cypress run --config integrationFolder=cypress/integration/results,testFiles=**/*.spec.js,video=false",
         "test:prepare:basic": "node cypress/scripts/runner basic",
         "test:prepare:cucumber": "node cypress/scripts/runner cucumber",
         "fixtures:clear": "rm -r cypress/fixtures/*"
@@ -40,9 +40,9 @@
     "devDependencies": {
         "@types/fs-extra": "^8.1.0",
         "@types/mocha": "^7.0.2",
-        "cypress": "^4.5.0",
+        "cypress": "^4.10.0",
         "cypress-cucumber-preprocessor": "^2.3.1",
-        "semantic-release": "^17.0.4"
+        "semantic-release": "^17.1.1"
     },
     "cypress-cucumber-preprocessor": {
         "nonGlobalStepDefinitions": true

@@ -29,7 +29,7 @@ describe('Allure results', () => {
                 expect(hook.status).to.be.eq('passed');
                 expect(hook.steps).to.have.length(1);
                 expect(hook.steps[0].name).to.be.eq(
-                    `log This will run ${name} every scenario `
+                    `log ("This will run ${name} every scenario")`
                 );
             };
             result[mode].suites.forEach((suite) => {
@@ -117,19 +117,19 @@ describe('Cucumber specific', () => {
         const expectedSteps = [
             {
                 name: 'Given I have allure tags set for Feature',
-                child: 'log child command for given '
+                child: 'log ("child command for given")'
             },
             {
                 name: 'When I run any test',
-                child: 'log child command for when '
+                child: 'log ("child command for when")'
             },
             {
                 name: 'Then I should see allure api working properly',
-                child: 'log child command for allure api "then" step '
+                child: 'log ("child command for allure api "then" step")'
             },
             {
                 name: 'And Tags from test should overwrite tags from feature',
-                child: 'log child command for tags overwriting "then" step '
+                child: 'log ("child command for tags overwriting "then" step")'
             }
         ];
 
@@ -270,7 +270,7 @@ describe('Basic specific', () => {
             const [childStep] = step.steps;
             verifyStep(childStep);
             expect(childStep.name).to.be.eq(
-                `log child command for ${order} step `
+                `log ("child command for ${order} step")`
             );
         });
     });

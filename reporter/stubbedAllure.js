@@ -30,5 +30,7 @@ const stubbedAllure = {
     writeExecutorInfo: () => {},
     attachment: () => {},
     testAttachment: () => {},
-    step: () => {}
+    step: () => {},
+    startStep: () => {},
+    endStep: () => {}
 };

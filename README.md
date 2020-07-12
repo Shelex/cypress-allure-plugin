@@ -36,15 +36,12 @@ module.exports = (on, config) => {
     return config;
 };
 
-// if you have webpack or other ts preprocessors
-// just add another exports section with allure writer:
+// if you have webpack or other ts preprocessors:
 
 module.exports = (on) => {
     on('file:preprocessor', webpackPreprocessor);
-};
-
-module.exports = (on, config) => {
     allureWriter(on, config);
+    return config;
 };
 ```
 
@@ -112,6 +109,8 @@ or use `cypress.json`:
 
 -   be sure your docker or local browser versions are next: Chrome 71+, Edge 79+. Firefox 65+
 
+-   plugin might not be applied to older Cypress versions, 4+ is recommended
+
 -   to enable Allure results writing just pass environment variable `allure=true`, example:
 
 ```
@@ -124,17 +123,17 @@ npx cypress run --config video=false --env allure=true --browser chrome
 Cypress.Allure.reporter.runtime.writer
 ```
 
-## Screenshots
-
-Screenshots are attached automatically, for other type of content use `testAttachment` (for current test) or `attachment` (for current executable)
-
-## Cypress commands
-
-Commands are logged automatically as report steps
-
 ## Examples
 
-See [cypress-allure-plugin-example](https://github.com/Shelex/cypress-allure-plugin-example) project, which is already configured to use this plugin.
+See [cypress-allure-plugin-example](https://github.com/Shelex/cypress-allure-plugin-example) project, which is already configured to use this plugin, hosting report as github page and run by github action. It has configuration for basic allure history saving (just having numbers and statuses in trends and history).  
+For complete history (allure can display 20 build results ) with links to older reports and links to CI builds check [cypress-allure-historical-example](https://github.com/Shelex/cypress-allure-historical-example) with basic and straightforward idea how to achieve it.
+
+## How to open report
+
+Assuming allure is already installed:
+
+-   generate new report based on current "allure-results" folder: `allure generate`
+-   open generated report from "allure-report" folder: `allure open`
 
 ## API
 
@@ -193,7 +192,11 @@ Allure API available:
 -   tag(tag: string)
 -   attachment(name: string, content: Buffer | string, type: ContentType)
 -   testAttachment(name: string, content: Buffer | string, type: ContentType)
+-   startStep(name: string)
+-   endStep()
 -   step(name: string, isParent: boolean)
+
+It may be assumed that Allure API method used in hooks (before/after all/each) would be applied to all/each test, but actually it is dealing with current allure executable (current test or hook) and obviously will not work. In case you need such behaviour it is better to try `test:before:run` or `test:after:run` cypress events to do so, when Allure interface commands will be applied to current test.
 
 ## VS Code for cypress + cucumber
 
@@ -206,6 +209,19 @@ In case you are using VS Code and [Cypress Helper](https://marketplace.visualstu
         "tags": ["focus", "someOtherTag"]
     }
 ```
+
+## Screenshots
+
+Screenshots are attached automatically, for other type of content use `testAttachment` (for current test) or `attachment` (for current executable)
+
+## Cypress commands
+
+Commands are producing allure steps automatically based on cypress events and are trying to represent how code and custom commands are executed with nested structure.  
+Moreover, steps functionality could be expanded with:
+
+-   `cy.allure().step('name')` - will create step "name" for current test. This step will be finished when next step is created or test is finished.
+-   `cy.allure().step('name', false)` - will create step "name" for current parent step (like previous one, without passing `false` as second argument) or current hook/test. Will be finished when next step is created or test finished.
+-   `cy.allure().startStep('name')` - will create step "name" for current cypress command step / current step / current parent step / current hook or test. Is automatically finished on fail event or test end, but I would recommend to explicitly mention `cy.allure().endStep()` which will finish last created step.
 
 ## Testing
 
