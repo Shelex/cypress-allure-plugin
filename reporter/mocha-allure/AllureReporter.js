@@ -30,7 +30,13 @@ module.exports = class AllureReporter {
     }
 
     get currentExecutable() {
-        return this.currentSuite || this.currentTest;
+        return (
+            this.currentStep ||
+            this.parentStep ||
+            this.currentHook ||
+            this.currentTest ||
+            this.currentSuite
+        );
     }
 
     get currentSuite() {
@@ -282,12 +288,7 @@ module.exports = class AllureReporter {
                 ? this.currentStep
                 : parent.step;
         }
-        return (
-            this.currentStep ||
-            this.parentStep ||
-            this.currentHook ||
-            this.currentTest
-        );
+        return this.currentExecutable;
     }
 
     cyCommandEnqueue(attributes) {
@@ -399,7 +400,7 @@ module.exports = class AllureReporter {
         this.currentChainer = null;
 
         // in case no children enqueued - finish this step
-        if (!command.children.length) {
+        if (!command.children.length || failed) {
             // check if command has some entries for command log
             if (command.commandLog.logs.length) {
                 // set first command log (which refers to current command) as last
@@ -438,7 +439,8 @@ module.exports = class AllureReporter {
 
                         const commandPassed = this.cyCommandEndStep(
                             command.step,
-                            log
+                            log,
+                            command.passed
                         );
 
                         !commandPassed && (command.passed = false);
@@ -458,11 +460,16 @@ module.exports = class AllureReporter {
                     }
                 });
             } else {
-                this.cyCommandEndStep(command.step, {
-                    state: command.passed ? 'passed' : 'failed'
-                });
+                this.cyCommandEndStep(
+                    command.step,
+                    {
+                        state: command.passed ? 'passed' : 'failed'
+                    },
+                    command.passed
+                );
             }
             command.finished = true;
+            !command.passed && (failed = true);
             // notify parent that one of child commands is finished
             // and pass status
             this.cyRemoveChildFromParent(command, failed);
@@ -480,13 +487,14 @@ module.exports = class AllureReporter {
             if (childIndex > -1) {
                 parent.children.splice(childIndex, 1);
                 // update status of parent in case any of children failed
-                if (!child.passed) {
+                if (!child.passed || failed) {
                     parent.passed = false;
                 }
             }
 
             // finish parent step when no children left or when test is failed
             if (!parent.children.length || failed) {
+                !parent.passed && (failed = true);
                 this.cyCommandEnd(parent.commandLog, failed);
             }
         }
@@ -499,13 +507,17 @@ module.exports = class AllureReporter {
             .filter((c) => !c.finished && c.step && c.step.info.name)
             .reverse()
             .forEach((command) => {
-                this.cyCommandEnd(command.commandLog, state === 'failed');
+                !command.finished &&
+                    this.cyCommandEnd(command.commandLog, state === 'failed');
             });
         this.currentChainer = null;
     }
 
-    cyCommandEndStep(step, log) {
-        const passed = log.state !== 'failed';
+    cyCommandEndStep(step, log, commandStatus) {
+        const passed =
+            commandStatus !== undefined
+                ? commandStatus
+                : log.state !== 'failed';
 
         step.info.stage = Stage.FINISHED;
         step.info.status = passed ? Status.PASSED : Status.FAILED;

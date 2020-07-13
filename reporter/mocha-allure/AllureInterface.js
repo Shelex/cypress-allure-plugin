@@ -84,8 +84,7 @@ module.exports = class AllureInterface {
         this.__proto__ = new Allure(runtime);
         this.reporter = reporter;
         this.currentTest = reporter.currentTest;
-        this.currentExecutable =
-            this.reporter.currentHook || this.reporter.currentTest;
+        this.currentExecutable = this.reporter.currentExecutable;
         this.currentHook = this.reporter.currentHook;
     }
 };
