@@ -526,20 +526,23 @@ module.exports = class AllureReporter {
     }
 
     cyCommandEndStep(step, log, commandStatus) {
-        const passed =
+        let passed =
             commandStatus !== undefined
                 ? commandStatus
                 : log.state !== 'failed';
 
         step.info.stage = Stage.FINISHED;
-        step.info.status = passed ? Status.PASSED : Status.FAILED;
 
-        log &&
-            log.err &&
-            (step.info.statusDetails = {
+        if (log && log.err) {
+            step.info.statusDetails = {
                 message: log.err.message,
                 trace: log.err.sourceMappedStack || log.err.stack
-            });
+            };
+            passed = false;
+        }
+
+        step.info.status = passed ? Status.PASSED : Status.FAILED;
+
         log.name !== 'step' && step.endStep();
         return passed;
     }
