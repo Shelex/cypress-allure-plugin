@@ -277,11 +277,17 @@ module.exports = class AllureReporter {
             const parent = this.commands.find(
                 (c) => c.id === command.parent && c.step && !c.finished
             );
+
+            if (!parent) {
+                return this.currentExecutable;
+            }
+
             // such commands contain argument
             // which is basically a function that will be executed
             if (['then', 'spread', 'each'].includes(parent.name)) {
                 return this.cyCommandExecutable(parent);
             }
+
             // in case latest step in newer then parent - attach to user defined step
             return this.currentStep &&
                 this.currentStep.info.start > parent.step.info.start
@@ -481,6 +487,12 @@ module.exports = class AllureReporter {
             const parent = this.commands.find(
                 (c) => c.id === child.parent && c.step && !c.finished
             );
+
+            // better to skip case when no parent found
+            if (!parent) {
+                return;
+            }
+
             const childIndex = parent.children.indexOf(child.id);
 
             // if found child - remove it from parent
