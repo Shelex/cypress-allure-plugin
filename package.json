@@ -35,7 +35,8 @@
         "fixtures:clear": "rm -r cypress/fixtures/*"
     },
     "dependencies": {
-        "allure-js-commons": "^2.0.0-beta.6"
+        "allure-js-commons": "^2.0.0-beta.6",
+        "uuid": "^7.0.2"
     },
     "devDependencies": {
         "@types/fs-extra": "^8.1.0",

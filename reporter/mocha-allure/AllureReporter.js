@@ -116,11 +116,11 @@ module.exports = class AllureReporter {
              * tags set on test level has higher priority
              * to not be overwritten by feature tags
              */
-            ['feature', 'currentScenario'].forEach(function (type) {
+            ['feature', 'currentScenario'].forEach(function(type) {
                 testState[type] &&
                     testState[type].tags
                         // check for labels
-                        .filter(function ({ name }) {
+                        .filter(function({ name }) {
                             const match = tagToLabel.exec(name);
                             if (match) {
                                 const [, command, value] = match;
@@ -129,7 +129,7 @@ module.exports = class AllureReporter {
                             return !match;
                         })
                         // check for links
-                        .filter(function ({ name }) {
+                        .filter(function({ name }) {
                             const match = tagToLink.exec(name);
                             if (match) {
                                 const [, command, name, url] = match;
@@ -147,7 +147,7 @@ module.exports = class AllureReporter {
                             return !match;
                         })
                         // add other tags
-                        .forEach(function ({ name }) {
+                        .forEach(function({ name }) {
                             currentTest.addLabel('tag', name.replace('@', ''));
                         });
             });
@@ -308,8 +308,7 @@ module.exports = class AllureReporter {
                 attributes.type === 'assertion' ||
                 attributes.name === 'allure' ||
                 (attributes.args.length &&
-                    attributes.args[1] &&
-                    attributes.args[1].log === false) ||
+                    attributes.args.find((arg) => arg && arg.log === false)) ||
                 (Object.getOwnPropertyNames(
                     stubbedAllure.reporter.getInterface()
                 ).includes(attributes.name) &&
@@ -375,14 +374,12 @@ module.exports = class AllureReporter {
         } else {
             const executable = this.cyCommandExecutable(command);
 
+            const commandArgs =
+                attributes.args.length &&
+                attributes.args.map((a) => `"${String(a)}"`).join('; ');
+
             const step = executable.startStep(
-                `${command.name}${
-                    attributes.args.length
-                        ? ` (${attributes.args
-                              .map((a) => `"${String(a)}"`)
-                              .join('; ')})`
-                        : ''
-                }`
+                `${command.name}${commandArgs ? ` (${commandArgs})` : ''}`
             );
 
             command.step = step;
@@ -516,7 +513,7 @@ module.exports = class AllureReporter {
         // process all not finished steps from chainer left
         // usually is executed on fail
         this.commands
-            .filter((c) => !c.finished && c.step && c.step.info.name)
+            .filter((c) => !c.finished && c.step)
             .reverse()
             .forEach((command) => {
                 !command.finished &&
@@ -534,10 +531,6 @@ module.exports = class AllureReporter {
         step.info.stage = Stage.FINISHED;
 
         if (log && log.err) {
-            step.info.statusDetails = {
-                message: log.err.message,
-                trace: log.err.sourceMappedStack || log.err.stack
-            };
             passed = false;
         }
 
@@ -551,10 +544,8 @@ module.exports = class AllureReporter {
         // define step name based on cypress log name or messages
         const messages = {
             xhr: () =>
-                `${
-                    (log.consoleProps.Stubbed === 'Yes' ? 'STUBBED ' : '') +
-                    log.consoleProps.Method
-                } ${log.consoleProps.URL}`,
+                `${(log.consoleProps.Stubbed === 'Yes' ? 'STUBBED ' : '') +
+                    log.consoleProps.Method} ${log.consoleProps.URL}`,
             step: () => `${log.displayName}${log.message.replace(/\*/g, '')}`,
             stub: () =>
                 `${log.name} [ function: ${log.functionName} ] ${
