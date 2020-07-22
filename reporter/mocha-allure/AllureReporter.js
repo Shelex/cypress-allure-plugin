@@ -3,7 +3,8 @@
  * Allure-mocha reporter: "https://github.com/allure-framework/allure-js/tree/master/packages/allure-mocha"
  */
 
-const { LabelName, Stage, Status } = require('allure-js-commons');
+const { LabelName, Stage, Status, ContentType } = require('allure-js-commons');
+const path = require('path');
 const { createHash } = require('crypto');
 const AllureInterface = require('./AllureInterface');
 const { tagToLabel, tagToLink } = require('../gherkinToLabel');
@@ -116,11 +117,11 @@ module.exports = class AllureReporter {
              * tags set on test level has higher priority
              * to not be overwritten by feature tags
              */
-            ['feature', 'currentScenario'].forEach(function(type) {
+            ['feature', 'currentScenario'].forEach(function (type) {
                 testState[type] &&
                     testState[type].tags
                         // check for labels
-                        .filter(function({ name }) {
+                        .filter(function ({ name }) {
                             const match = tagToLabel.exec(name);
                             if (match) {
                                 const [, command, value] = match;
@@ -129,7 +130,7 @@ module.exports = class AllureReporter {
                             return !match;
                         })
                         // check for links
-                        .filter(function({ name }) {
+                        .filter(function ({ name }) {
                             const match = tagToLink.exec(name);
                             if (match) {
                                 const [, command, name, url] = match;
@@ -147,12 +148,25 @@ module.exports = class AllureReporter {
                             return !match;
                         })
                         // add other tags
-                        .forEach(function({ name }) {
+                        .forEach(function ({ name }) {
                             currentTest.addLabel('tag', name.replace('@', ''));
                         });
             });
             currentTest.addLabel('feature', testState.feature.name);
         }
+    }
+
+    // Process Cypress screenshots automatically
+    processScreenshots() {
+        const { screenshots, currentTest } = this;
+        screenshots.forEach(function (s) {
+            currentTest.addAttachment(
+                `${s.specName}:${s.takenAt}`,
+                ContentType.PNG,
+                path.basename(s.path)
+            );
+        });
+        this.screenshots = [];
     }
 
     passTestCase(test) {
@@ -269,6 +283,7 @@ module.exports = class AllureReporter {
         details && (this.currentTest.statusDetails = details);
         this.currentTest.status = status;
         this.currentTest.stage = Stage.FINISHED;
+        this.processScreenshots();
         this.currentTest.endTest();
     }
 
@@ -544,8 +559,10 @@ module.exports = class AllureReporter {
         // define step name based on cypress log name or messages
         const messages = {
             xhr: () =>
-                `${(log.consoleProps.Stubbed === 'Yes' ? 'STUBBED ' : '') +
-                    log.consoleProps.Method} ${log.consoleProps.URL}`,
+                `${
+                    (log.consoleProps.Stubbed === 'Yes' ? 'STUBBED ' : '') +
+                    log.consoleProps.Method
+                } ${log.consoleProps.URL}`,
             step: () => `${log.displayName}${log.message.replace(/\*/g, '')}`,
             stub: () =>
                 `${log.name} [ function: ${log.functionName} ] ${
