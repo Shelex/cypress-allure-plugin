@@ -210,9 +210,15 @@ In case you are using VS Code and [Cypress Helper](https://marketplace.visualstu
     }
 ```
 
-## Screenshots
+## Screenshots and Videos
 
-Screenshots are attached automatically, for other type of content use `testAttachment` (for current test) or `attachment` (for current executable)
+Screenshots are attached automatically, for other type of content use `testAttachment` (for current test) or `attachment` (for current executable).  
+Videos are attached for failed tests only and in case you have not passed video=false to Cypress configuration.
+This process also has some nuances:
+
+-   take into account, that in case spec files have same name, cypress is trying to create subfolders in videos folder, and unfortunately it cannot be somehow handled from plugin, so video may not have correct path in such edge case.
+-   for now plugin cannot detect what mode is cypress running (open / run), so in case you are gathering allure results during cypress open - it will contain link to not existing video.
+-   for now default videos path is used: `cypress/videos`. Please open a feature request in case you are using custom folder paths.
 
 ## Cypress commands
 

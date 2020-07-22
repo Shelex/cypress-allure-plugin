@@ -31,6 +31,7 @@ type ContentType =
     | 'image/png'
     | 'application/json'
     | 'video/webm'
+    | 'video/mp4'
     | 'image/jpeg';
 type Status = 'failed' | 'broken' | 'passed' | 'skipped';
 type Severity = 'blocker' | 'critical' | 'normal' | 'minor' | 'trivial';

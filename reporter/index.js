@@ -13,6 +13,7 @@ const {
     EVENT_HOOK_END
 } = Mocha.Runner.constants;
 
+const path = require('path');
 const { AllureRuntime, InMemoryAllureWriter } = require('allure-js-commons');
 const AllureReporter = require('./mocha-allure/AllureReporter');
 const stubbedAllure = require('./stubbedAllure');
@@ -78,6 +79,19 @@ class CypressAllureReporter {
 
         Cypress.on('fail', (err) => {
             this.reporter.cyCommandsFinish();
+            // add video to failed test case:
+            if (Cypress.config().video) {
+                this.reporter.currentTest.addAttachment(
+                    `${Cypress.spec.name}.mp4`,
+                    'video/mp4',
+                    path.join(
+                        '..',
+                        'cypress',
+                        'videos',
+                        `${Cypress.spec.name}.mp4`
+                    )
+                );
+            }
             throw err;
         });
     }

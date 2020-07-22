@@ -47,9 +47,7 @@ Allure.prototype.stepStart = function (name) {
 
     // in case chaner step is newer then allure fallback executable - use chainer step for creating new
     const executable =
-        chainer &&
-        chainer.step &&
-        chainer.step.info.start > previousExecutable.info.start
+        chainer && chainer.step.info.start > previousExecutable.info.start
             ? chainer.step
             : previousExecutable;
 
@@ -62,9 +60,8 @@ Allure.prototype.stepEnd = function () {
     const step = this.reporter.popStep();
     if (step) {
         step.stepResult.stage = Stage.FINISHED;
-        step.stepResult.status = this.currentTest
-            ? this.currentTest.info.status
-            : Status.PASSED;
+        step.stepResult.status =
+            (this.currentTest && this.currentTest.info.status) || Status.PASSED;
 
         step.endStep();
     }
