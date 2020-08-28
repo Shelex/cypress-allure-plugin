@@ -92,18 +92,27 @@ module.exports = class AllureReporter {
         this.currentTest.stage = Stage.RUNNING;
 
         if (test.parent) {
-            const [parentSuite, suite, ...subSuites] = test.parent.titlePath();
-            if (parentSuite) {
-                this.currentTest.addLabel(LabelName.PARENT_SUITE, parentSuite);
-            }
-            if (suite) {
-                this.currentTest.addLabel(LabelName.SUITE, suite);
-            }
-            if (subSuites.length > 0) {
-                this.currentTest.addLabel(
-                    LabelName.SUB_SUITE,
-                    subSuites.join(' > ')
-                );
+            const titlePath = test.parent.titlePath();
+            // only suite available:
+            if (titlePath.length === 1) {
+                this.currentTest.addLabel(LabelName.SUITE, titlePath.pop());
+            } else {
+                const [parentSuite, suite, ...subSuites] = titlePath;
+                if (parentSuite) {
+                    this.currentTest.addLabel(
+                        LabelName.PARENT_SUITE,
+                        parentSuite
+                    );
+                }
+                if (suite) {
+                    this.currentTest.addLabel(LabelName.SUITE, suite);
+                }
+                if (subSuites.length > 0) {
+                    this.currentTest.addLabel(
+                        LabelName.SUB_SUITE,
+                        subSuites.join(' > ')
+                    );
+                }
             }
         }
     }
@@ -276,7 +285,7 @@ module.exports = class AllureReporter {
 
     endTest(status, details) {
         if (this.currentTest === null) {
-            throw new Error('endTest while no test is running');
+            throw new Error('finishing test while no test is running');
         }
         this.cyCommandsFinish(status);
         this.finishAllSteps(status);
