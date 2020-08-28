@@ -60,17 +60,17 @@ describe('Allure results', () => {
 const expectedLabels = (mode, type) =>
     mode === 'basic'
         ? [
-              { name: 'parentSuite', value: 'Allure API Context' },
+              { name: 'parentSuite', value: 'Allure API Parent Suite' },
               { name: 'epic', value: 'Allure API' },
               { name: 'feature', value: type },
               { name: 'owner', value: 'Oleksandr Shevtsov' },
               { name: 'severity', value: 'critical' },
               { name: 'story', value: `${type} api should work` },
-              { name: 'suite', value: 'Allure API Suite' },
+              { name: 'suite', value: 'Allure API Context' },
               { name: 'tag', value: 'customTag' }
           ]
         : [
-              { name: 'parentSuite', value: 'AllureAPI' },
+              { name: 'suite', value: 'AllureAPI' },
               { name: 'epic', value: 'AllureAPI' },
               { name: 'story', value: 'Cucumber' },
               { name: 'owner', value: 'OleksandrShevtsov' },

@@ -14,7 +14,7 @@ context('Allure API Context', () => {
         allure.severity('critical');
         allure.step('custom step');
         allure.story('Synchronous api should work');
-        allure.suite('Allure API Suite');
+        allure.label('parentSuite', 'Allure API Parent Suite');
         allure.issue('bug', 'issueUrl');
         allure.tms('test case', 'tmsUrl');
         allure.tag('customTag');
@@ -31,7 +31,7 @@ context('Allure API Context', () => {
             .severity('critical')
             .step('custom step')
             .story('Chainer api should work')
-            .suite('Allure API Suite')
+            .label('parentSuite', 'Allure API Parent Suite')
             .issue('bug', 'issueUrl')
             .tms('test case', 'tmsUrl')
             .tag('customTag');
