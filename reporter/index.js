@@ -85,9 +85,7 @@ class CypressAllureReporter {
                     `${Cypress.spec.name}.mp4`,
                     'video/mp4',
                     path.join(
-                        '..',
-                        'cypress',
-                        'videos',
+                        Cypress.config().videosFolder,
                         `${Cypress.spec.name}.mp4`
                     )
                 );

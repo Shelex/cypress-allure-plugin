@@ -18,40 +18,56 @@
 
 -   There is no need to set this plugin as reporter in Cypress or use any other allure reporters. Just download:
 
-```bash
-yarn add -D @shelex/cypress-allure-plugin
-// OR
-npm i -D @shelex/cypress-allure-plugin
-```
+    -   using yarn:
+
+    ```bash
+    yarn add -D @shelex/cypress-allure-plugin
+    ```
+
+    -   using npm:
+
+    ```
+    npm i -D @shelex/cypress-allure-plugin
+    ```
 
 ## Configuration
 
 -   Connect plugin in `cypress/plugins/index.js` in order to add Allure writer task:
 
-```js
-const allureWriter = require('@shelex/cypress-allure-plugin/writer');
+    -   as only plugin:
 
-module.exports = (on, config) => {
-    allureWriter(on, config);
-    return config;
-};
+    ```js
+    const allureWriter = require('@shelex/cypress-allure-plugin/writer');
 
-// if you have webpack or other ts preprocessors:
+    module.exports = (on, config) => {
+        allureWriter(on, config);
+        return config;
+    };
+    ```
 
-module.exports = (on) => {
-    on('file:preprocessor', webpackPreprocessor);
-    allureWriter(on, config);
-    return config;
-};
-```
+    -   if you have webpack or other preprocessors please set allure writer last:
+
+    ```js
+    module.exports = (on) => {
+        on('file:preprocessor', webpackPreprocessor);
+        allureWriter(on, config);
+        return config;
+    };
+    ```
 
 -   Register commands in `cypress/support/index.js` file:
 
-```js
-import '@shelex/cypress-allure-plugin';
-// you can use require:
-require('@shelex/cypress-allure-plugin');
-```
+    -   with `import`:
+
+    ```js
+    import '@shelex/cypress-allure-plugin';
+    ```
+
+    -   with `require`:
+
+    ```js
+    require('@shelex/cypress-allure-plugin');
+    ```
 
 -   for IntelliSense (autocompletion) support in your IDE add on top of your `cypress/plugins/index.js` file:
 
@@ -59,7 +75,7 @@ require('@shelex/cypress-allure-plugin');
 /// <reference types="@shelex/cypress-allure-plugin" />
 ```
 
-or in case you are using typescript, update your tsconfig.json:
+-   for typescript support, update your tsconfig.json:
 
 ```json
 "include": [
@@ -68,42 +84,40 @@ or in case you are using typescript, update your tsconfig.json:
  ]
 ```
 
--   You can customize allure-results folder by passing `allureResultsPath` env variable.  
-    `cypress.json`:
+-   You can customize allure-results folder by passing `allureResultsPath` env variable.
 
-```json
-{
-    "env": {
-        "allureResultsPath": "someFolder/results"
+    -   via `cypress.json`
+
+    ```json
+    {
+        "env": {
+            "allureResultsPath": "someFolder/results"
+        }
     }
-}
-```
+    ```
 
-or via command line:
+    -   via command line:
 
-```js
-yarn cypress run --env allure=true,allureResultsPath=someFolder/results
-```
+    ```js
+    yarn cypress run --env allure=true,allureResultsPath=someFolder/results
+    ```
 
--   You can setup prefix for issue and tms links by adding env variables:
-
-```bash
---env issuePrefix=https://url-to-bug-tracking-system/task-,tmsPrefix=https://url-to-tms/tests/caseId-
-
-# usage:  cy.allure().issue('blockerIssue', 'AST-111')
-# result: https://url-to-bug-tracking-system/task-AST-111
-```
-
-or use `cypress.json`:
-
-```json
-{
-    "env": {
-        "tmsPrefix": "https://url-to-bug-tracking-system/task-",
-        "issuePrefix": "https://url-to-tms/tests/caseId-"
+-   You can setup prefix for issue and tms links by adding env variables
+    -   via `cypress.json`:
+    ```json
+    {
+        "env": {
+            "tmsPrefix": "https://url-to-bug-tracking-system/task-",
+            "issuePrefix": "https://url-to-tms/tests/caseId-"
+        }
     }
-}
-```
+    # usage:  cy.allure().issue('blockerIssue', 'AST-111')
+    # result: https://url-to-bug-tracking-system/task-AST-111
+    ```
+    -   via command line:
+    ```bash
+    --env issuePrefix=https://url-to-bug-tracking-system/task-,tmsPrefix=https://url-to-tms/tests/caseId-
+    ```
 
 ## Execution
 
@@ -113,14 +127,14 @@ or use `cypress.json`:
 
 -   to enable Allure results writing just pass environment variable `allure=true`, example:
 
-```
+```bash
 npx cypress run --config video=false --env allure=true --browser chrome
 ```
 
 -   if allure is enabled, you can check gathered data, in cypress window with Chrome Developer tools console:
 
-```
-Cypress.Allure.reporter.runtime.writer
+```js
+Cypress.Allure.reporter.runtime.writer;
 ```
 
 ## Examples
@@ -213,12 +227,8 @@ In case you are using VS Code and [Cypress Helper](https://marketplace.visualstu
 ## Screenshots and Videos
 
 Screenshots are attached automatically, for other type of content use `testAttachment` (for current test) or `attachment` (for current executable).  
-Videos are attached for failed tests only and in case you have not passed video=false to Cypress configuration.
-This process also has some nuances:
-
--   take into account, that in case spec files have same name, cypress is trying to create subfolders in videos folder, and unfortunately it cannot be somehow handled from plugin, so video may not have correct path in such edge case.
--   for now plugin cannot detect what mode is cypress running (open / run), so in case you are gathering allure results during cypress open - it will contain link to not existing video.
--   for now default videos path is used: `cypress/videos`. Please open a feature request in case you are using custom folder paths.
+Videos are attached for failed tests only from path specified in cypress config `videosFolder` and in case you have not passed video=false to Cypress configuration.
+Please take into account, that in case spec files have same name, cypress is trying to create subfolders in videos folder, and it is not handled from plugin unfortunately, so video may not have correct path in such edge case.
 
 ## Cypress commands
 
