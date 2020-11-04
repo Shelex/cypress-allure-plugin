@@ -80,7 +80,7 @@ class CypressAllureReporter {
         Cypress.on('fail', (err) => {
             this.reporter.cyCommandsFinish();
             // add video to failed test case:
-            if (Cypress.config().video) {
+            if (Cypress.config().video && this.reporter.currentTest) {
                 this.reporter.currentTest.addAttachment(
                     `${Cypress.spec.name}.mp4`,
                     'video/mp4',
