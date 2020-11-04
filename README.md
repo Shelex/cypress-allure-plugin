@@ -126,7 +126,6 @@
 -   plugin might not be applied to older Cypress versions, 4+ is recommended
 
 -   to enable Allure results writing just pass environment variable `allure=true`, example:
-
 ```bash
 npx cypress run --config video=false --env allure=true --browser chrome
 ```
