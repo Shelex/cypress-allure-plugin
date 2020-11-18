@@ -167,16 +167,18 @@ module.exports = class AllureReporter {
 
     // Process Cypress screenshots automatically
     processScreenshots() {
-        const { screenshots, currentTest } = this;
-        screenshots.forEach(function (s) {
-            currentTest.addAttachment(
-                `${s.specName}:${s.takenAt}`,
-                ContentType.PNG,
-                Cypress && Cypress.platform === 'win32'
-                    ? s.path.split('\\').pop()
-                    : path.basename(s.path)
-            );
-        });
+        const { screenshots, currentTest, currentSuite } = this;
+        const executable = currentTest || currentSuite;
+        executable &&
+            screenshots.forEach(function (s) {
+                executable.addAttachment(
+                    `${s.specName}:${s.takenAt}`,
+                    ContentType.PNG,
+                    Cypress && Cypress.platform === 'win32'
+                        ? s.path.split('\\').pop()
+                        : path.basename(s.path)
+                );
+            });
         this.screenshots = [];
     }
 

@@ -3,12 +3,10 @@
 > Plugin for integrating allure reporter in Cypress with support of Allure API.
 
 ![Build][gh-image]
-[![semantic-release][semantic-image]][semantic-url]
-[![version][version-image]][npm-url]
-[![License][license-image]][license-url]  
-[![Publish Size][size-image]][npm-url]
 [![Downloads][downloads-image]][npm-url]
-[![Types][types-image]][types-path]
+[![semantic-release][semantic-image]][semantic-url]  
+[![version][version-image]][npm-url]
+[![License][license-image]][license-url]
 
 ## Installation
 
@@ -48,7 +46,7 @@
     -   if you have webpack or other preprocessors please set allure writer last:
 
     ```js
-    module.exports = (on) => {
+    module.exports = (on, config) => {
         on('file:preprocessor', webpackPreprocessor);
         allureWriter(on, config);
         return config;
@@ -126,6 +124,7 @@
 -   plugin might not be applied to older Cypress versions, 4+ is recommended
 
 -   to enable Allure results writing just pass environment variable `allure=true`, example:
+
 ```bash
 npx cypress run --config video=false --env allure=true --browser chrome
 ```
@@ -261,6 +260,4 @@ This project is licensed under the Apache 2.0 License.
 [license-image]: https://img.shields.io/badge/License-Apache%202.0-blue.svg
 [license-url]: https://opensource.org/licenses/Apache-2.0
 [version-image]: https://badgen.net/npm/v/@shelex/cypress-allure-plugin/latest
-[size-image]: https://badgen.net/packagephobia/publish/@shelex/cypress-allure-plugin
 [downloads-image]: https://badgen.net/npm/dt/@shelex/cypress-allure-plugin
-[types-image]: https://badgen.net/npm/types/@shelex/cypress-allure-plugin
