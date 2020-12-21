@@ -18,6 +18,7 @@ const { AllureRuntime, InMemoryAllureWriter } = require('allure-js-commons');
 const AllureReporter = require('./mocha-allure/AllureReporter');
 const stubbedAllure = require('./stubbedAllure');
 const allureEnabled = Cypress.env('allure') === true;
+const shouldLogCypress = Cypress.env('allureLogCypress') !== false;
 
 class CypressAllureReporter {
     constructor() {
@@ -26,7 +27,10 @@ class CypressAllureReporter {
                 resultsDir:
                     Cypress.env('allureResultsPath') || 'allure-results',
                 writer: new InMemoryAllureWriter()
-            })
+            }),
+            {
+                logCypress: shouldLogCypress
+            }
         );
 
         Cypress.mocha
@@ -66,19 +70,20 @@ class CypressAllureReporter {
             });
 
         Cypress.on('command:enqueued', (command) => {
-            this.reporter.cyCommandEnqueue(command);
+            shouldLogCypress && this.reporter.cyCommandEnqueue(command);
         });
 
         Cypress.on('command:start', (command) => {
-            this.reporter.cyCommandStart(command.attributes);
+            shouldLogCypress &&
+                this.reporter.cyCommandStart(command.attributes);
         });
 
         Cypress.on('command:end', (command) => {
-            this.reporter.cyCommandEnd(command.attributes);
+            shouldLogCypress && this.reporter.cyCommandEnd(command.attributes);
         });
 
         Cypress.on('fail', (err) => {
-            this.reporter.cyCommandsFinish();
+            shouldLogCypress && this.reporter.cyCommandsFinish();
             // add video to failed test case:
             if (Cypress.config().video && this.reporter.currentTest) {
                 this.reporter.currentTest.addAttachment(

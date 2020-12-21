@@ -101,7 +101,9 @@
     ```
 
 -   You can setup prefix for issue and tms links by adding env variables
+
     -   via `cypress.json`:
+
     ```json
     {
         "env": {
@@ -112,10 +114,21 @@
     # usage:  cy.allure().issue('blockerIssue', 'AST-111')
     # result: https://url-to-bug-tracking-system/task-AST-111
     ```
+
     -   via command line:
+
     ```bash
     --env issuePrefix=https://url-to-bug-tracking-system/task-,tmsPrefix=https://url-to-tms/tests/caseId-
     ```
+
+-   Logging of cypress commands inside Allure could be disabled with passing env variable:
+    -   ```json
+        {
+            "env": {
+                "allureLogCypress": false
+            }
+        }
+        ```
 
 ## Execution
 

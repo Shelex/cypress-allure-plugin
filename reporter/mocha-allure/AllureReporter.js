@@ -12,7 +12,7 @@ const stubbedAllure = require('../stubbedAllure');
 const callbacks = ['then', 'spread', 'each', 'within'];
 
 module.exports = class AllureReporter {
-    constructor(runtime) {
+    constructor(runtime, options) {
         this.suites = [];
         this.steps = [];
         this.commands = [];
@@ -22,6 +22,7 @@ module.exports = class AllureReporter {
         this.runtime = runtime;
         this.currentHook = null;
         this.parentStep = null;
+        this.logCypress = options.logCypress || false;
     }
 
     /**
@@ -290,7 +291,7 @@ module.exports = class AllureReporter {
         if (this.currentTest === null) {
             throw new Error('finishing test while no test is running');
         }
-        this.cyCommandsFinish(status);
+        this.logCypress && this.cyCommandsFinish(status);
         this.finishAllSteps(status);
         this.parentStep = null;
 
