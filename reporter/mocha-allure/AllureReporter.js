@@ -9,6 +9,7 @@ const { createHash } = require('crypto');
 const AllureInterface = require('./AllureInterface');
 const { tagToLabel, tagToLink } = require('../gherkinToLabel');
 const stubbedAllure = require('../stubbedAllure');
+const callbacks = ['then', 'spread', 'each', 'within'];
 
 module.exports = class AllureReporter {
     constructor(runtime) {
@@ -312,7 +313,7 @@ module.exports = class AllureReporter {
 
             // such commands contain argument
             // which is basically a function that will be executed
-            if (['then', 'spread', 'each'].includes(parent.name)) {
+            if (callbacks.includes(parent.name)) {
                 return this.cyCommandExecutable(parent);
             }
 
@@ -393,7 +394,7 @@ module.exports = class AllureReporter {
         // add dummy allure step implementation for "then" commands to avoid adding them to report
         // as they mostly expose other plugin internals and other functions not related to test
         // on other hand, if they produce info for command log - step will be created when command end
-        if (['then', 'spread', 'each'].includes(command.name)) {
+        if (callbacks.includes(command.name)) {
             command.step = {
                 info: {},
                 stepResult: {},
@@ -445,7 +446,7 @@ module.exports = class AllureReporter {
                     // for main log (which we set last) we should finish command step
                     if (index === command.commandLog.logs.length - 1) {
                         // in case "then" command has some logging - create step for that
-                        if (['then', 'spread', 'each'].includes(command.name)) {
+                        if (callbacks.includes(command.name)) {
                             const executable = this.cyCommandExecutable(
                                 command
                             );
