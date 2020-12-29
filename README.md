@@ -153,6 +153,12 @@ Cypress.Allure.reporter.runtime.writer;
 See [cypress-allure-plugin-example](https://github.com/Shelex/cypress-allure-plugin-example) project, which is already configured to use this plugin, hosting report as github page and run by github action. It has configuration for basic allure history saving (just having numbers and statuses in trends and history).  
 For complete history (allure can display 20 build results ) with links to older reports and links to CI builds check [cypress-allure-historical-example](https://github.com/Shelex/cypress-allure-historical-example) with basic and straightforward idea how to achieve it.
 
+There are also existing solutions that may help you prepare your report infrastructure:
+
+-   [Allure Server](https://github.com/kochetkov-ma/allure-server) - self-hosted portal with your reports
+-   [Github Action](https://github.com/simple-elf/allure-report-action) - report generation + better implementation for historic reports described above
+-   [Allure TestOps](https://docs.qameta.io/allure-testops/) - Allure portal for those who want more than report
+
 ## How to open report
 
 Assuming allure is already installed:
@@ -207,11 +213,14 @@ Allure API available:
 -   suite(name: string)
 -   label(name: LabelName, value: string)
 -   parameter(name: string, value: string)
+-   testParameter(name: string, value: string)
 -   link(url: string, name?: string, type?: LinkType)
 -   issue(name: string, url: string)
 -   tms(name: string, url: string)
 -   description(markdown: string)
+-   testDescription(markdown: string)
 -   descriptionHtml(html: string)
+-   testDescriptionHtml(html: string)
 -   owner(owner: string)
 -   severity(severity: Severity)
 -   tag(tag: string)
@@ -220,8 +229,6 @@ Allure API available:
 -   startStep(name: string)
 -   endStep()
 -   step(name: string, isParent: boolean)
-
-It may be assumed that Allure API method used in hooks (before/after all/each) would be applied to all/each test, but actually it is dealing with current allure executable (current test or hook) and obviously will not work. In case you need such behaviour it is better to try `test:before:run` or `test:after:run` cypress events to do so, when Allure interface commands will be applied to current test.
 
 ## VS Code for cypress + cucumber
 
@@ -237,7 +244,7 @@ In case you are using VS Code and [Cypress Helper](https://marketplace.visualstu
 
 ## Screenshots and Videos
 
-Screenshots are attached automatically, for other type of content use `testAttachment` (for current test) or `attachment` (for current executable).  
+Screenshots are attached automatically, for other type of content feel free to use `testAttachment` (for current test), `attachment` (for current executable), `attachFile` (for existing file).  
 Videos are attached for failed tests only from path specified in cypress config `videosFolder` and in case you have not passed video=false to Cypress configuration.
 Please take into account, that in case spec files have same name, cypress is trying to create subfolders in videos folder, and it is not handled from plugin unfortunately, so video may not have correct path in such edge case.
 

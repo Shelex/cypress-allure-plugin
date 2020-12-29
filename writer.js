@@ -67,30 +67,24 @@ function allureWriter(on, config) {
             } finally {
                 return null;
             }
-        }
-    });
-    on('after:screenshot', (details) => {
-        const resultsDir = process.env.allureResultsPath;
+        },
+        copyFileToAllure: (filePath) => {
+            const resultsDir = process.env.allureResultsPath;
+            if (process.env.allure === 'true') {
+                !fs.existsSync(resultsDir) &&
+                    fs.mkdirSync(resultsDir, { recursive: true });
+                const ext = path.extname(filePath);
+                const allurePath = path.join(
+                    resultsDir,
+                    `${uuid.v4()}-attachment${ext}`
+                );
 
-        // As after:screenshot is an event when screenshot file is saved
-        // sometimes (when saving was after test finished)
-        // we cannot access Cypress or Cypress.Allure context here
+                fs.copyFileSync(filePath, allurePath);
 
-        if (process.env.allure === 'true') {
-            !fs.existsSync(resultsDir) &&
-                fs.mkdirSync(resultsDir, { recursive: true });
-            const allurePath = path.join(
-                resultsDir,
-                `${uuid.v4()}-attachment.png`
-            );
-            return new Promise((resolve, reject) => {
-                fs.copyFile(details.path, allurePath, (err) => {
-                    if (err) {
-                        return reject(err);
-                    }
-                    resolve({ path: allurePath });
-                });
-            });
+                return fs.existsSync(allurePath)
+                    ? path.basename(allurePath)
+                    : null;
+            }
         }
     });
 }

@@ -10,11 +10,8 @@ describe('Allure results', () => {
     ['basic', 'cucumber'].forEach((mode) => {
         it(`should contain suite results for ${mode}`, () => {
             const { suites, tests } = result[mode];
-            expect(suites).to.have.length(mode === 'basic' ? 4 : 1);
-            expect(suites.every((s) => s.children.length === 1)).to.be.eq(
-                true,
-                'every suite has single test'
-            );
+            expect(suites).to.have.length(1);
+            expect(suites[0].children).to.have.length(mode === 'basic' ? 4 : 1);
             expect(
                 tests.every((t) =>
                     suites.find((s) => s.children.includes(t.uuid))
@@ -22,20 +19,49 @@ describe('Allure results', () => {
             ).to.be.eq(true, 'every test is linked to suite by uuid');
         });
 
+        it(`should contain before all and after all hooks for ${mode}`, () => {
+            const [suite] = result[mode].suites;
+            expect(suite.befores).to.have.length(mode === 'basic' ? 1 : 2);
+            expect(
+                suite.befores.every(
+                    (hook) =>
+                        hook.status === 'passed' && hook.stage === 'finished'
+                )
+            ).to.be.eq(true, 'before all hooks attached');
+            expect(suite.afters).to.have.length(mode === 'basic' ? 1 : 2);
+            expect(
+                suite.afters.every(
+                    (hook) =>
+                        hook.status === 'passed' && hook.stage === 'finished'
+                )
+            ).to.be.eq(true, 'after all hooks attached');
+        });
+
         it(`should contain before each and after each hooks for ${mode}`, () => {
-            const verifyEachHook = (name, suite) => {
-                const data = suite[`${name}s`];
-                const hook = data.filter((h) => h.steps.length)[0];
-                expect(hook.status).to.be.eq('passed');
-                expect(hook.steps).to.have.length(1);
-                expect(hook.steps[0].name).to.be.eq(
-                    `log ("This will run ${name} every scenario")`
-                );
-            };
-            result[mode].suites.forEach((suite) => {
-                verifyEachHook('before', suite);
-                verifyEachHook('after', suite);
-            });
+            const hooks = result[mode].tests
+                .map((test) =>
+                    test.steps.filter((step) => step.name.includes('each'))
+                )
+                .flat();
+
+            expect(
+                hooks.every(
+                    (hook) =>
+                        hook.stage === 'finished' && hook.status === 'passed'
+                )
+            ).to.be.eq(true, 'every hook passed');
+
+            mode === 'cucumber' && hooks.splice(1, 1);
+            expect(
+                hooks.every(
+                    (hook) =>
+                        hook.steps.length === 1 &&
+                        hook.steps[0].name ===
+                            `log ("This will run ${hook.name
+                                .replace(' each" hook', '')
+                                .substring(1)} every scenario")`
+                )
+            ).to.be.eq(true, 'step attached');
         });
 
         it(`should contain test results for ${mode}`, () => {
@@ -133,10 +159,11 @@ describe('Cucumber specific', () => {
             }
         ];
 
-        expect(test.steps).to.have.length(expectedSteps.length);
+        const steps = test.steps.filter((s) => !s.name.includes('each'));
+        expect(steps).to.have.length(expectedSteps.length);
 
         expectedSteps.forEach(({ name, child }, index) => {
-            const parentStep = test.steps[index];
+            const parentStep = steps[index];
             expect(parentStep.status).to.be.eq('passed');
             expect(parentStep).to.have.property('start');
             expect(parentStep).to.have.property('stop');
@@ -158,8 +185,9 @@ describe('Basic specific', () => {
     it('should have every attachment be linked to test', () => {
         const { attachments, tests } = result.basic;
         attachments.forEach(({ fileName }) => {
+            console.warn(`checking ${fileName}`);
             const test = tests.find((t) =>
-                t.attachments.find((a) => a.source === fileName)
+                t.attachments.some((a) => a && a.source.endsWith(fileName))
             );
             expect(test.attachments).to.have.length(1);
             const [testAttachment] = test.attachments;
@@ -246,10 +274,10 @@ describe('Basic specific', () => {
 
     it('should contain test steps', () => {
         const { tests } = result.basic;
+
         const test = tests.find(
             (t) => t.name === 'should attach cypress command log as steps'
         );
-
         const verifyStep = (step) => {
             expect(step.status).to.be.eq('passed');
             expect(step.stage).to.be.eq('finished');
@@ -257,21 +285,31 @@ describe('Basic specific', () => {
             expect(step).to.have.property('stop');
         };
 
-        expect(test.steps).to.have.length(2);
+        expect(test.steps).to.have.length(4);
+        console.log(test.steps);
+        const steps = [
+            '"before each" hook',
+            `first parent step`,
+            `second parent step`,
+            '"after each" hook'
+        ];
         test.steps.forEach((step, i) => {
-            const order = i === 0 ? 'first' : 'second';
+            const stepName = (index) => steps[index];
 
-            expect(step.name).to.be.eq(`${order} parent step`);
+            expect(step.name).to.be.eq(stepName(i));
 
             verifyStep(step);
 
             //child steps
-            expect(step.steps).to.have.length(1);
-            const [childStep] = step.steps;
-            verifyStep(childStep);
-            expect(childStep.name).to.be.eq(
-                `log ("child command for ${order} step")`
-            );
+            if (i > 0 && i < steps.length - 1) {
+                const order = i === 1 ? 'first' : 'second';
+                expect(step.steps).to.have.length(1);
+                const [childStep] = step.steps;
+                verifyStep(childStep);
+                expect(childStep.name).to.be.eq(
+                    `log ("child command for ${order} step")`
+                );
+            }
         });
     });
 });
