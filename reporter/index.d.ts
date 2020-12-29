@@ -32,7 +32,8 @@ type ContentType =
     | 'application/json'
     | 'video/webm'
     | 'video/mp4'
-    | 'image/jpeg';
+    | 'image/jpeg'
+    | 'application/pdf';
 type Status = 'failed' | 'broken' | 'passed' | 'skipped';
 type Severity = 'blocker' | 'critical' | 'normal' | 'minor' | 'trivial';
 
@@ -84,11 +85,17 @@ declare global {
              */
             label(name: LabelName, value: string): Allure;
             /**
-             * Add Parameter
+             * Add Parameter for current executable (step/test)
              * @param name
              * @param value
              */
             parameter(name: string, value: string): Allure;
+            /**
+             * Add Parameter for current test
+             * @param name
+             * @param value
+             */
+            testParameter(name: string, value: string): Allure;
             /**
              * Add customized link
              * @param {string} url
@@ -109,15 +116,25 @@ declare global {
              */
             tms(name: string, url: string): Allure;
             /**
-             * Add test description in markdown format
+             * Add test description in markdown format for step/test
              * @param markdown
              */
             description(markdown: string): Allure;
             /**
-             * Add test description in html format
+             * Add test description in html format for step/test
              * @param html
              */
             descriptionHtml(html: string): Allure;
+            /**
+             * Add test description in markdown format for test
+             * @param markdown
+             */
+            testDescription(markdown: string): Allure;
+            /**
+             * Add test description in html format for test
+             * @param html
+             */
+            testDescriptionHtml(html: string): Allure;
             /**
              * Add test owner
              * @param owner
@@ -169,6 +186,17 @@ declare global {
             testAttachment(
                 name: string,
                 content: Buffer | string,
+                type: ContentType
+            ): Allure;
+            /**
+             * Attach existing file to current test
+             * @param name
+             * @param path
+             * @param type
+             */
+            attachFile(
+                name: string,
+                path: string,
                 type: ContentType
             ): Allure;
             /**

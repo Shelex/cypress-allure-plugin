@@ -13,6 +13,15 @@ Cypress.Commands.add(
     }
 );
 
+Cypress.Commands.add(
+    'testParameter',
+    { prevSubject: true },
+    (allure, name, value) => {
+        allure.testParameter(name, value);
+        cy.wrap(allure, { log: false });
+    }
+);
+
 Cypress.Commands.add('severity', { prevSubject: true }, (allure, level) => {
     allure.severity(level);
     cy.wrap(allure, { log: false });
@@ -37,6 +46,15 @@ Cypress.Commands.add(
     { prevSubject: true },
     (allure, name, content, type) => {
         allure.attachment(name, content, type);
+        cy.wrap(allure, { log: false });
+    }
+);
+
+Cypress.Commands.add(
+    'attachFile',
+    { prevSubject: true },
+    (allure, name, path, type) => {
+        allure.attachFile(name, path, type);
         cy.wrap(allure, { log: false });
     }
 );
@@ -113,6 +131,22 @@ Cypress.Commands.add(
     { prevSubject: true },
     (allure, html) => {
         allure.descriptionHtml(html);
+        cy.wrap(allure, { log: false });
+    }
+);
+Cypress.Commands.add(
+    'testDescription',
+    { prevSubject: true },
+    (allure, markdown) => {
+        allure.testDescription(markdown);
+        cy.wrap(allure, { log: false });
+    }
+);
+Cypress.Commands.add(
+    'testDescriptionHtml',
+    { prevSubject: true },
+    (allure, html) => {
+        allure.testDescriptionHtml(html);
         cy.wrap(allure, { log: false });
     }
 );

@@ -1,4 +1,12 @@
-context('Allure API Context', () => {
+before(() => {
+    cy.log('This will run before scenarios');
+});
+
+after(() => {
+    cy.log('This will run after scenarios');
+});
+
+describe('Allure API Context', () => {
     beforeEach(() => {
         cy.log('This will run before every scenario');
     });

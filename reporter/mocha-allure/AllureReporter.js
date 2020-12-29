@@ -17,7 +17,6 @@ module.exports = class AllureReporter {
         this.steps = [];
         this.commands = [];
         this.currentChainer = null;
-        this.screenshots = [];
         this.runningTest = null;
         this.runtime = runtime;
         this.currentHook = null;
@@ -49,6 +48,13 @@ module.exports = class AllureReporter {
         return this.suites[this.suites.length - 1];
     }
 
+    get currentSuiteIsGlobal() {
+        return (
+            this.currentSuite &&
+            this.currentSuite.testResultContainer.name === 'Global'
+        );
+    }
+
     get currentStep() {
         if (this.steps.length > 0) {
             return this.steps[this.steps.length - 1];
@@ -65,16 +71,35 @@ module.exports = class AllureReporter {
     }
 
     startSuite(suiteName) {
+        if (this.currentSuite) {
+            if (this.currentSuiteIsGlobal) {
+                /**
+                 * cypress creates suite for spec file
+                 * where global hooks and other nested suites are held
+                 * in order to have global hooks available
+                 * this global suite can just be renamed
+                 * to the first user's suite
+                 */
+                this.currentSuite.testResultContainer.name = suiteName;
+                return;
+            } else {
+                /**
+                 * but if previous suite is not global
+                 * it should be finished, and new one created
+                 */
+                this.endSuite(true);
+            }
+        }
         const scope = this.currentSuite || this.runtime;
         const suite = scope.startGroup(suiteName || 'Global');
         this.pushSuite(suite);
     }
 
-    endSuite() {
-        if (this.currentSuite !== null) {
-            if (this.currentStep !== null) {
-                this.currentStep.endStep();
-            }
+    endSuite(isGlobal = false) {
+        if (this.currentSuite && isGlobal) {
+            this.cyCommandsFinish('passed');
+            this.finishAllSteps(Status.PASSED);
+            this.currentStep !== null && this.currentStep.endStep();
             this.currentSuite.endGroup();
             this.popSuite();
         }
@@ -83,6 +108,16 @@ module.exports = class AllureReporter {
     startCase(test) {
         if (this.currentSuite === null) {
             throw new Error('No active suite');
+        }
+
+        /**
+         * for skipped test firstly comes pending event
+         * where test will be created
+         * and then comes start test event followed by end test
+         * so start for skipped test should be omitted
+         */
+        if (this.currentTest && this.currentTest.info.status === 'skipped') {
+            return;
         }
 
         this.commands = [];
@@ -95,7 +130,7 @@ module.exports = class AllureReporter {
 
         if (test.parent) {
             const titlePath = test.parent.titlePath();
-            // only suite available:
+            // should add suite label for test if it has parent
             if (titlePath.length === 1) {
                 this.currentTest.addLabel(LabelName.SUITE, titlePath.pop());
             } else {
@@ -167,33 +202,16 @@ module.exports = class AllureReporter {
         }
     }
 
-    // Process Cypress screenshots automatically
-    processScreenshots() {
-        const { screenshots, currentTest, currentSuite } = this;
-        const executable = currentTest || currentSuite;
-        executable &&
-            screenshots.forEach(function (s) {
-                executable.addAttachment(
-                    `${s.specName}:${s.takenAt}`,
-                    ContentType.PNG,
-                    Cypress && Cypress.platform === 'win32'
-                        ? s.path.split('\\').pop()
-                        : path.basename(s.path)
-                );
-            });
-        this.screenshots = [];
-    }
-
     passTestCase(test) {
         if (this.currentTest === null) {
             this.startCase(test);
         }
-        this.endTest(Status.PASSED);
+        this.updateTest(Status.PASSED);
     }
 
     pendingTestCase(test) {
         this.startCase(test);
-        this.endTest(Status.SKIPPED, { message: 'Test ignored' });
+        this.updateTest(Status.SKIPPED, { message: 'Test ignored' });
     }
 
     failTestCase(test, error) {
@@ -202,14 +220,11 @@ module.exports = class AllureReporter {
         } else {
             const latestStatus = this.currentTest.status;
             // if test already has a failed state, we should not overwrite it
-            if (
-                latestStatus === Status.FAILED ||
-                latestStatus === Status.BROKEN
-            ) {
+            if (latestStatus && latestStatus !== Status.PASSED) {
                 return;
             }
         }
-        this.endTest(Status.FAILED, {
+        this.updateTest(Status.FAILED, {
             message: error.message,
             trace: error.stack
         });
@@ -217,7 +232,16 @@ module.exports = class AllureReporter {
          * in case error comes from hook
          */
         if (test.type === 'hook') {
-            this.endHook(test);
+            this.endHook(test, true);
+            /**
+             * in case of before all cypress creates new test
+             * which not produce any mocha events
+             * as result should be finished manually
+             */
+
+            if (test.hookName && test.hookName === 'before all') {
+                this.endTest();
+            }
         }
     }
 
@@ -248,35 +272,52 @@ module.exports = class AllureReporter {
     }
 
     startHook(hook) {
-        const parent = this.currentSuite;
-        const allureHook = hook.title.includes('before')
-            ? parent.addBefore()
-            : parent.addAfter();
-        this.currentHook = allureHook;
-    }
-
-    endHook(hook) {
-        if (hook.title.includes('all')) {
-            this.currentHook = null;
+        if (!this.currentSuite) {
             return;
         }
+        /**
+         * When hook is global - it is attached to suite
+         * and will be displayed as precondition
+         * `each` hooks will be available as test steps
+         */
+        if (hook.title.includes('all')) {
+            const parent = this.currentSuite;
+            const allureHook = hook.title.includes('before')
+                ? parent.addBefore()
+                : parent.addAfter();
+            this.currentHook = allureHook;
+        } else {
+            const step = this.currentTest.startStep(hook.title);
+            this.currentHook = step;
+        }
+    }
+
+    endHook(hook, failed = false) {
+        if (!this.currentSuite) {
+            return;
+        }
+        // should define results property for all or each hook
+        const currentHookInfo = hook.title.includes('all')
+            ? this.currentHook.info
+            : this.currentHook.stepResult;
+
         if (hook.err) {
-            this.currentHook.info.status = Status.FAILED;
-            this.currentHook.info.statusDetails = {
+            currentHookInfo.status = Status.FAILED;
+            currentHookInfo.stage = Stage.FINISHED;
+            currentHookInfo.statusDetails = {
                 message: hook.err.message,
                 trace: hook.err.stack
             };
         } else {
-            this.currentHook.info.stage = Stage.FINISHED;
-            this.currentHook.info.status = Status.PASSED;
+            currentHookInfo.status = Status.PASSED;
+            currentHookInfo.stage = Stage.FINISHED;
         }
-        this.currentHook = null;
-    }
 
-    restartSuite() {
-        const { name } = this.currentSuite;
-        this.endSuite();
-        this.startSuite(name);
+        // in case hook is a step we should complete it
+        if (hook.title.includes('each')) {
+            this.currentHook.endStep();
+        }
+        !failed && (this.currentHook = null);
     }
 
     pushSuite(suite) {
@@ -287,7 +328,7 @@ module.exports = class AllureReporter {
         this.suites.pop();
     }
 
-    endTest(status, details) {
+    updateTest(status, details) {
         if (this.currentTest === null) {
             throw new Error('finishing test while no test is running');
         }
@@ -298,8 +339,14 @@ module.exports = class AllureReporter {
         details && (this.currentTest.statusDetails = details);
         this.currentTest.status = status;
         this.currentTest.stage = Stage.FINISHED;
-        this.processScreenshots();
-        this.currentTest.endTest();
+        this.currentTest.testResult.stop = Date.now();
+    }
+
+    endTest() {
+        this.currentTest && this.currentTest.endTest();
+        if (this.currentTest.status === Status.SKIPPED) {
+            this.currentTest = null;
+        }
     }
 
     cyCommandExecutable(command) {

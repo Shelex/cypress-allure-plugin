@@ -15,6 +15,14 @@ Allure.prototype.testAttachment = function (name, content, type) {
     this.currentTest.addAttachment(name, type, fileName);
 };
 
+Allure.prototype.attachFile = function (name, path, type) {
+    cy.now('task', 'copyFileToAllure', path, {
+        log: false
+    }).then((allurePath) =>
+        this.currentTest.addAttachment(name, type, allurePath)
+    );
+};
+
 Allure.prototype.writeExecutorInfo = function (info) {
     this.runtime.writer.executorInfo = info;
 };
@@ -23,13 +31,16 @@ Allure.prototype.step = function (name, isParent = true) {
     const item = isParent
         ? this.currentTest
         : this.reporter.parentStep || this.currentHook || this.currentTest;
-    this.reporter.finishAllSteps();
+
     const allureStep = item.startStep(name);
-    isParent
-        ? (this.reporter.parentStep = allureStep)
-        : (allureStep.stepResult.stage = Stage.FINISHED) &&
-          (allureStep.stepResult.status = Status.PASSED) &&
-          this.reporter.pushStep(allureStep);
+    if (isParent) {
+        this.reporter.parentStep = allureStep;
+        this.reporter.pushStep(allureStep);
+    } else {
+        allureStep.stepResult.stage = Stage.FINISHED;
+        allureStep.stepResult.status = Status.PASSED;
+        this.reporter.pushStep(allureStep);
+    }
 };
 
 Allure.prototype.stepStart = function (name) {
@@ -53,6 +64,7 @@ Allure.prototype.stepStart = function (name) {
 
     const step = executable.startStep(name);
     this.reporter.pushStep(step);
+    return step;
 };
 
 Allure.prototype.stepEnd = function () {
@@ -65,6 +77,18 @@ Allure.prototype.stepEnd = function () {
 
         step.endStep();
     }
+};
+
+Allure.prototype.testParameter = function (name, value) {
+    this.currentTest.addParameter(name, value);
+};
+
+Allure.prototype.testDescription = function (markdown) {
+    this.currentTest.description = markdown;
+};
+
+Allure.prototype.testDescriptionHtml = function (html) {
+    this.currentTest.descriptionHtml = html;
 };
 
 module.exports = class AllureInterface {
