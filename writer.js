@@ -11,7 +11,8 @@ function allureWriter(on, config) {
         config.env.allureResultsPath || 'allure-results';
 
     on('task', {
-        writeAllureResults: ({ resultsDir, writer }) => {
+        writeAllureResults: ({ results, files }) => {
+            const { resultsDir, writer } = results;
             const {
                 groups,
                 tests,
@@ -23,6 +24,32 @@ function allureWriter(on, config) {
             try {
                 !fs.existsSync(resultsDir) &&
                     fs.mkdirSync(resultsDir, { recursive: true });
+                files &&
+                    files.forEach((file) => {
+                        if (fs.existsSync(file.path)) {
+                            const ext = path.extname(file.path);
+                            const allureFilePath = path.join(
+                                resultsDir,
+                                `${uuid.v4()}-attachment${ext}`
+                            );
+
+                            fs.copyFileSync(file.path, allureFilePath);
+
+                            if (fs.existsSync(allureFilePath)) {
+                                const testsForAttachment = tests.filter(
+                                    (t) => t.name === file.testName
+                                );
+
+                                testsForAttachment.forEach((test) => {
+                                    test.attachments.push({
+                                        name: file.name,
+                                        type: file.type,
+                                        source: path.basename(allureFilePath)
+                                    });
+                                });
+                            }
+                        }
+                    });
                 groups &&
                     groups.forEach((group) => {
                         if (group.children.length) {
@@ -66,24 +93,6 @@ function allureWriter(on, config) {
                 );
             } finally {
                 return null;
-            }
-        },
-        copyFileToAllure: (filePath) => {
-            const resultsDir = process.env.allureResultsPath;
-            if (process.env.allure === 'true') {
-                !fs.existsSync(resultsDir) &&
-                    fs.mkdirSync(resultsDir, { recursive: true });
-                const ext = path.extname(filePath);
-                const allurePath = path.join(
-                    resultsDir,
-                    `${uuid.v4()}-attachment${ext}`
-                );
-
-                fs.copyFileSync(filePath, allurePath);
-
-                return fs.existsSync(allurePath)
-                    ? path.basename(allurePath)
-                    : null;
             }
         }
     });

@@ -16,8 +16,10 @@ module.exports = class AllureReporter {
         this.suites = [];
         this.steps = [];
         this.commands = [];
+        this.files = [];
         this.currentChainer = null;
         this.runningTest = null;
+        this.previousTestName = null;
         this.runtime = runtime;
         this.currentHook = null;
         this.parentStep = null;
@@ -67,7 +69,19 @@ module.exports = class AllureReporter {
     }
 
     set currentTest(test) {
+        if (this.runningTest) {
+            this.previousTestName = this.runningTest.info.name;
+        }
         this.runningTest = test;
+    }
+
+    get testNameForAttachment() {
+        const cyTest = cy.state().test;
+        return (
+            (cyTest && cyTest.title) ||
+            (this.currentTest && this.currentTest.info.name) ||
+            previousTestName
+        );
     }
 
     startSuite(suiteName) {

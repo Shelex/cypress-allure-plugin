@@ -16,11 +16,12 @@ Allure.prototype.testAttachment = function (name, content, type) {
 };
 
 Allure.prototype.attachFile = function (name, path, type) {
-    cy.now('task', 'copyFileToAllure', path, {
-        log: false
-    }).then((allurePath) =>
-        this.currentTest.addAttachment(name, type, allurePath)
-    );
+    this.reporter.files.push({
+        name: name,
+        path: path,
+        type: type,
+        testName: this.reporter.testNameForAttachment
+    });
 };
 
 Allure.prototype.writeExecutorInfo = function (info) {

@@ -56,7 +56,10 @@ class CypressAllureReporter {
                         .now(
                             'task',
                             'writeAllureResults',
-                            this.reporter.runtime.config,
+                            {
+                                results: this.reporter.runtime.config,
+                                files: this.reporter.files
+                            },
                             { log: false }
                         )
                         .catch((e) => allureDebug && console.error(e));
@@ -120,17 +123,12 @@ Cypress.Allure = allureEnabled ? new CypressAllureReporter() : stubbedAllure;
 Cypress.Screenshot.defaults({
     onAfterScreenshot(_, details) {
         if (allureEnabled) {
-            cy.task('copyFileToAllure', details.path, { log: false }).then(
-                (filePath) => {
-                    filePath &&
-                        Cypress.Allure.reporter.currentTest.addAttachment(
-                            details.name ||
-                                `${details.specName}:${details.takenAt}`,
-                            ContentType.PNG,
-                            filePath
-                        );
-                }
-            );
+            Cypress.Allure.reporter.files.push({
+                name: details.name || `${details.specName}:${details.takenAt}`,
+                path: details.path,
+                type: ContentType.PNG,
+                testName: Cypress.Allure.reporter.testNameForAttachment
+            });
         }
     }
 });
