@@ -51,10 +51,10 @@ Cypress.Commands.add(
 );
 
 Cypress.Commands.add(
-    'attachFile',
+    'fileAttachment',
     { prevSubject: true },
     (allure, name, path, type) => {
-        allure.attachFile(name, path, type);
+        allure.fileAttachment(name, path, type);
         cy.wrap(allure, { log: false });
     }
 );

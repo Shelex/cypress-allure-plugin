@@ -15,7 +15,7 @@ Allure.prototype.testAttachment = function (name, content, type) {
     this.currentTest.addAttachment(name, type, fileName);
 };
 
-Allure.prototype.attachFile = function (name, path, type) {
+Allure.prototype.fileAttachment = function (name, path, type) {
     this.reporter.files.push({
         name: name,
         path: path,

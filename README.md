@@ -226,6 +226,7 @@ Allure API available:
 -   tag(tag: string)
 -   attachment(name: string, content: Buffer | string, type: ContentType)
 -   testAttachment(name: string, content: Buffer | string, type: ContentType)
+-   fileAttachment(name: string, path: string, type: ContentType)
 -   startStep(name: string)
 -   endStep()
 -   step(name: string, isParent: boolean)
@@ -244,7 +245,7 @@ In case you are using VS Code and [Cypress Helper](https://marketplace.visualstu
 
 ## Screenshots and Videos
 
-Screenshots are attached automatically, for other type of content feel free to use `testAttachment` (for current test), `attachment` (for current executable), `attachFile` (for existing file).  
+Screenshots are attached automatically, for other type of content feel free to use `testAttachment` (for current test), `attachment` (for current executable), `fileAttachment` (for existing file).  
 Videos are attached for failed tests only from path specified in cypress config `videosFolder` and in case you have not passed video=false to Cypress configuration.
 Please take into account, that in case spec files have same name, cypress is trying to create subfolders in videos folder, and it is not handled from plugin unfortunately, so video may not have correct path in such edge case.
 

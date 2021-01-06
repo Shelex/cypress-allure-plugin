@@ -194,7 +194,7 @@ declare global {
              * @param path
              * @param type
              */
-            attachFile(
+            fileAttachment(
                 name: string,
                 path: string,
                 type: ContentType
