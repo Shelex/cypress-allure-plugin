@@ -398,12 +398,13 @@ module.exports = class AllureReporter {
             return (
                 attributes.type === 'assertion' ||
                 attributes.name === 'allure' ||
-                (attributes.args.length &&
-                    attributes.args.find((arg) => arg && arg.log === false)) ||
                 (Object.getOwnPropertyNames(
                     stubbedAllure.reporter.getInterface()
                 ).includes(attributes.name) &&
-                    attributes.type === 'child')
+                    attributes.type === 'child') ||
+                (attributes.args &&
+                    attributes.args.length &&
+                    attributes.args.find((arg) => arg && arg.log === false))
             );
         };
 
