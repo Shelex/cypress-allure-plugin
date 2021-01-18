@@ -434,7 +434,7 @@ module.exports = class AllureReporter {
                 (c) => c.id === command.parent && !c.finished && c.step
             );
             // set new child from start as command queue works as LIFO (last in - first out) approach
-            parent.children.unshift(command.id);
+            parent && parent.children.unshift(command.id);
         }
     }
 
