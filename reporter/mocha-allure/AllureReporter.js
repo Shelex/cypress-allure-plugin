@@ -84,6 +84,10 @@ module.exports = class AllureReporter {
         );
     }
 
+    originalNameOf(hook) {
+        return hook.hookName || hook.originalTitle || hook.title;
+    }
+
     startSuite(suiteName) {
         if (this.currentSuite) {
             if (this.currentSuiteIsGlobal) {
@@ -119,7 +123,7 @@ module.exports = class AllureReporter {
         }
     }
 
-    startCase(test) {
+    startCase(test, clearFilesForPreviousAttempt) {
         if (this.currentSuite === null) {
             throw new Error('No active suite');
         }
@@ -141,6 +145,16 @@ module.exports = class AllureReporter {
             .update(test.fullTitle())
             .digest('hex');
         this.currentTest.stage = Stage.RUNNING;
+
+        if (clearFilesForPreviousAttempt) {
+            const state = cy && cy.state().runnable;
+            if (state && state.prevAttempts && state.prevAttempts.length > 0) {
+                // remove screenshots from previous attempt
+                this.files = this.files.filter(
+                    (file) => file.testName !== test.title
+                );
+            }
+        }
 
         if (test.parent) {
             const titlePath = test.parent.titlePath();
@@ -294,9 +308,9 @@ module.exports = class AllureReporter {
          * and will be displayed as precondition
          * `each` hooks will be available as test steps
          */
-        if (hook.title.includes('all')) {
+        if (this.originalNameOf(hook).includes('all')) {
             const parent = this.currentSuite;
-            const allureHook = hook.title.includes('before')
+            const allureHook = this.originalNameOf(hook).includes('before')
                 ? parent.addBefore()
                 : parent.addAfter();
             this.currentHook = allureHook;
@@ -311,7 +325,7 @@ module.exports = class AllureReporter {
             return;
         }
         // should define results property for all or each hook
-        const currentHookInfo = hook.title.includes('all')
+        const currentHookInfo = this.originalNameOf(hook).includes('all')
             ? this.currentHook.info
             : this.currentHook.stepResult;
 
@@ -328,8 +342,8 @@ module.exports = class AllureReporter {
         }
 
         // in case hook is a step we should complete it
-        if (hook.title.includes('each')) {
-            this.currentHook.endStep();
+        if (this.originalNameOf(hook).includes('each')) {
+            this.currentHook && this.currentHook.endStep();
         }
         !failed && (this.currentHook = null);
     }

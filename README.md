@@ -28,7 +28,7 @@
     npm i -D @shelex/cypress-allure-plugin
     ```
 
-## Configuration
+## Setup
 
 -   Connect plugin in `cypress/plugins/index.js` in order to add Allure writer task:
 
@@ -82,53 +82,45 @@
  ]
 ```
 
--   You can customize allure-results folder by passing `allureResultsPath` env variable.
+## Configuration
 
-    -   via `cypress.json`
+Plugin is customizable via Cypress environment variables:
+
+| env variable name                      | description                                                          | default          |
+| :------------------------------------- | :------------------------------------------------------------------- | :--------------- |
+| `allure`                               | enable Allure plugin                                                 | false            |
+| `allureResultsPath `                   | customize path to allure results folder                              | `allure-results` |
+| `tmsPrefix`                            | prefix for links from allure API in tests to test management system  | ``               |
+| `issuePrefix`                          | prefix for links from allure API in tests to bug tracking system     | ``               |
+| `allureLogCypress`                     | log cypress chainer (commands) and display them as steps in report   | true             |
+| `allureOmitPreviousAttemptScreenshots` | omit screenshots attached in previous attempts when retries are used | false            |
+
+This options could be passed:
+
+-   via `cypress.json`
 
     ```json
     {
         "env": {
-            "allureResultsPath": "someFolder/results"
+            "allureResultsPath": "someFolder/results",
+            "tmsPrefix": "https://url-to-bug-tracking-system/task-",
+            "issuePrefix": "https://url-to-tms/tests/caseId-"
+            // usage:  cy.allure().issue('blockerIssue', 'AST-111')
+            // result: https://url-to-bug-tracking-system/task-AST-111
         }
     }
     ```
 
-    -   via command line:
+-   via `command line`:
 
     ```js
     yarn cypress run --env allure=true,allureResultsPath=someFolder/results
     ```
 
--   You can setup prefix for issue and tms links by adding env variables
-
-    -   via `cypress.json`:
-
-    ```json
-    {
-        "env": {
-            "tmsPrefix": "https://url-to-bug-tracking-system/task-",
-            "issuePrefix": "https://url-to-tms/tests/caseId-"
-        }
-    }
-    # usage:  cy.allure().issue('blockerIssue', 'AST-111')
-    # result: https://url-to-bug-tracking-system/task-AST-111
+-   via `Cypress environment variables`:
+    ```js
+    Cypress.env('issuePrefix', 'url_to_bug_tracker');
     ```
-
-    -   via command line:
-
-    ```bash
-    --env issuePrefix=https://url-to-bug-tracking-system/task-,tmsPrefix=https://url-to-tms/tests/caseId-
-    ```
-
--   Logging of cypress commands inside Allure could be disabled with passing env variable:
-    -   ```json
-        {
-            "env": {
-                "allureLogCypress": false
-            }
-        }
-        ```
 
 ## Execution
 
@@ -139,7 +131,7 @@
 -   to enable Allure results writing just pass environment variable `allure=true`, example:
 
 ```bash
-npx cypress run --config video=false --env allure=true --browser chrome
+npx cypress run --env allure=true
 ```
 
 -   if allure is enabled, you can check gathered data, in cypress window with Chrome Developer tools console:
@@ -156,6 +148,7 @@ For complete history (allure can display 20 build results ) with links to older 
 There are also existing solutions that may help you prepare your report infrastructure:
 
 -   [Allure Server](https://github.com/kochetkov-ma/allure-server) - self-hosted portal with your reports
+-   [allure-reports-portal](https://github.com/pumano/allure-reports-portal) - another portal which allows to gather reports for multiple projects in single ui
 -   [Github Action](https://github.com/simple-elf/allure-report-action) - report generation + better implementation for historic reports described above
 -   [Allure TestOps](https://docs.qameta.io/allure-testops/) - Allure portal for those who want more than report
 
@@ -163,6 +156,7 @@ There are also existing solutions that may help you prepare your report infrastr
 
 Assuming allure is already installed:
 
+-   serve report based on current "allure-results" folder: `allure serve`
 -   generate new report based on current "allure-results" folder: `allure generate`
 -   open generated report from "allure-report" folder: `allure open`
 
