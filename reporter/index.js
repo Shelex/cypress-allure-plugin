@@ -23,6 +23,8 @@ const stubbedAllure = require('./stubbedAllure');
 const allureEnabled = Cypress.env('allure') === true;
 const shouldLogCypress = Cypress.env('allureLogCypress') !== false;
 const allureDebug = Cypress.env('allureDebug') === true;
+const omitPreviousAttemptScreenshots =
+    Cypress.env('allureOmitPreviousAttemptScreenshots') === true;
 
 class CypressAllureReporter {
     constructor() {
@@ -65,7 +67,7 @@ class CypressAllureReporter {
                         .catch((e) => allureDebug && console.error(e));
             })
             .on(EVENT_TEST_BEGIN, (test) => {
-                this.reporter.startCase(test);
+                this.reporter.startCase(test, omitPreviousAttemptScreenshots);
             })
             .on(EVENT_TEST_FAIL, (test, err) => {
                 this.reporter.failTestCase(test, err);
