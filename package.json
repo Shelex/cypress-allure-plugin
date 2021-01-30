@@ -1,23 +1,23 @@
 {
-    "name": "@shelex/cypress-allure-plugin",
+    "name": "@frinzekt/cypress-allure-plugin",
     "version": "0.0.0-development",
-    "description": "allure reporting plugin for cypress",
+    "description": "allure reporting plugin for cypress modified for video. Originally by @shelex",
     "main": "reporter/index.js",
     "types": "reporter/index.d.ts",
     "license": "Apache-2.0",
     "author": {
-        "name": "Oleksandr Shevtsov",
-        "email": "ovr.shevtsov@gmail.com"
+        "name": "Frinze Erin Lapuz",
+        "email": "frinzekt@gmail.com"
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/Shelex/cypress-allure-plugin.git"
+        "url": "https://github.com/frinzekt/cypress-allure-plugin.git"
     },
     "files": [
         "reporter",
         "writer.js"
     ],
-    "bugs": "https://github.com/Shelex/cypress-allure-plugin/issues",
+    "bugs": "https://github.com/frinzekt/cypress-allure-plugin/issues",
     "publishConfig": {
         "registry": "http://registry.npmjs.org/"
     },
@@ -29,6 +29,7 @@
     ],
     "scripts": {
         "semantic-release": "semantic-release",
+        "example": "yarn cypress run --config integrationFolder=cypress/integration/example --env allure=true",
         "test": "yarn cypress run --config integrationFolder=cypress/integration/results,testFiles=**/*.spec.js,video=false",
         "test:prepare:basic": "node cypress/scripts/runner basic",
         "test:prepare:cucumber": "node cypress/scripts/runner cucumber",
