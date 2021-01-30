@@ -1,6 +1,6 @@
 {
     "name": "@frinzekt/cypress-allure-plugin",
-    "version": "0.0.0-development",
+    "version": "0.0.1-development",
     "description": "allure reporting plugin for cypress modified for video. Originally by @shelex",
     "main": "reporter/index.js",
     "types": "reporter/index.d.ts",
