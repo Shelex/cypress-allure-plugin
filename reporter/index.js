@@ -114,6 +114,7 @@ class CypressAllureReporter {
                 this.reporter.currentTest.addAttachment(
                     `${Cypress.spec.name}.mp4`,
                     'video/mp4',
+                    Cypress.env('flattenVideoFolder') ? `${Cypress.spec.name}.mp4`.split("/").pop() :
                     path.join(
                         videoDirectory.pop(),
                         `${Cypress.spec.name}.mp4`
