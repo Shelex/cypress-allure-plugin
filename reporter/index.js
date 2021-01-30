@@ -105,12 +105,17 @@ class CypressAllureReporter {
         Cypress.on('fail', (err) => {
             shouldLogCypress && this.reporter.cyCommandsFinish();
             // add video to failed test case:
+
+            // videoDirectory is split with the name of the allure results path
+            // if the allure results path is part of the videos folder, then only take the last one
+            // Length is 1 (for no match), 2 if matched
+            const videoDirectory = Cypress.config().videosFolder.split(Cypress.env('allureResultsPath'))
             if (Cypress.config().video && this.reporter.currentTest) {
                 this.reporter.currentTest.addAttachment(
                     `${Cypress.spec.name}.mp4`,
                     'video/mp4',
                     path.join(
-                        Cypress.config().videosFolder,
+                        videoDirectory.pop(),
                         `${Cypress.spec.name}.mp4`
                     )
                 );
