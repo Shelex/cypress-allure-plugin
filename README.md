@@ -84,16 +84,18 @@
 
 ## Configuration
 
-Plugin is customizable via Cypress environment variables:
+Plugin is customizable via Cypress environment variables and Configuration:
 
-| env variable name                      | description                                                          | default          |
-| :------------------------------------- | :------------------------------------------------------------------- | :--------------- |
-| `allure`                               | enable Allure plugin                                                 | false            |
-| `allureResultsPath `                   | customize path to allure results folder                              | `allure-results` |
-| `tmsPrefix`                            | prefix for links from allure API in tests to test management system  | ``               |
-| `issuePrefix`                          | prefix for links from allure API in tests to bug tracking system     | ``               |
-| `allureLogCypress`                     | log cypress chainer (commands) and display them as steps in report   | true             |
-| `allureOmitPreviousAttemptScreenshots` | omit screenshots attached in previous attempts when retries are used | false            |
+| env variable name                      | description                                                                          | default          |
+| :------------------------------------- | :----------------------------------------------------------------------------------- | :--------------- |
+| `allure`                               | enable Allure plugin                                                                 | false            |
+| `allureResultsPath `                   | customize path to allure results folder                                              | `allure-results` |
+| `tmsPrefix`                            | prefix for links from allure API in tests to test management system                  | ``               |
+| `issuePrefix`                          | prefix for links from allure API in tests to bug tracking system                     | ``               |
+| `allureLogCypress`                     | log cypress chainer (commands) and display them as steps in report                   | true             |
+| `allureOmitPreviousAttemptScreenshots` | omit screenshots attached in previous attempts when retries are used                 | false            |
+| `runMode`                              | number of retries when test fails via 'cypress run' cmd Cypress 5+ compatible only   | ``               |
+| `openMode`                             | number of retries when test fails via 'cypress open' cmd Cypress 5+ compatible only  | ``               |
 
 This options could be passed:
 
@@ -101,6 +103,11 @@ This options could be passed:
 
     ```json
     {
+         "retries": {
+            "runMode": 1,
+            "openMode": 1
+        },
+
         "env": {
             "allureResultsPath": "someFolder/results",
             "tmsPrefix": "https://url-to-bug-tracking-system/task-",

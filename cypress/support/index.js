@@ -19,3 +19,7 @@ import '../../reporter';
 
 // Alternatively you can use CommonJS syntax:
 // require('./commands')
+
+Cypress.Screenshot.defaults({
+    capture: 'runner'
+});

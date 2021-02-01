@@ -147,8 +147,9 @@ module.exports = class AllureReporter {
         this.currentTest.stage = Stage.RUNNING;
 
         if (clearFilesForPreviousAttempt) {
+            let retry = test._currentRetry;
             const state = cy && cy.state().runnable;
-            if (state && state.prevAttempts && state.prevAttempts.length > 0) {
+            if (state && retry > 0) {
                 // remove screenshots from previous attempt
                 this.files = this.files.filter(
                     (file) => file.testName !== test.title
@@ -475,7 +476,7 @@ module.exports = class AllureReporter {
             command.step = {
                 info: {},
                 stepResult: {},
-                endStep() {}
+                endStep() { }
             };
         } else {
             const executable = this.cyCommandExecutable(command);
@@ -651,13 +652,13 @@ module.exports = class AllureReporter {
         const messages = {
             xhr: () =>
                 `${
-                    (log.consoleProps.Stubbed === 'Yes' ? 'STUBBED ' : '') +
-                    log.consoleProps.Method
+                (log.consoleProps.Stubbed === 'Yes' ? 'STUBBED ' : '') +
+                log.consoleProps.Method
                 } ${log.consoleProps.URL}`,
             step: () => `${log.displayName}${log.message.replace(/\*/g, '')}`,
             stub: () =>
                 `${log.name} [ function: ${log.functionName} ] ${
-                    log.alias ? `as ${log.alias}` : ''
+                log.alias ? `as ${log.alias}` : ''
                 }`,
             route: () => `${log.name} ${log.method} ${log.url}`,
             default: () =>
