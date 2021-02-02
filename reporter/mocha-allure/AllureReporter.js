@@ -146,15 +146,12 @@ module.exports = class AllureReporter {
             .digest('hex');
         this.currentTest.stage = Stage.RUNNING;
 
-        if (clearFilesForPreviousAttempt) {
-            let retry = test._currentRetry;
-            const state = cy && cy.state().runnable;
-            if (state && retry > 0) {
-                // remove screenshots from previous attempt
-                this.files = this.files.filter(
-                    (file) => file.testName !== test.title
-                );
-            }
+        if (clearFilesForPreviousAttempt && test._currentRetry > 0) {
+
+            // remove screenshots from previous attempt
+            this.files = this.files.filter(
+                (file) => file.testName !== test.title
+            );
         }
 
         if (test.parent) {
