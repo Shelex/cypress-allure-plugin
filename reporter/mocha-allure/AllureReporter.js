@@ -3,7 +3,7 @@
  * Allure-mocha reporter: "https://github.com/allure-framework/allure-js/tree/master/packages/allure-mocha"
  */
 
-const { LabelName, Stage, Status, ContentType } = require('allure-js-commons');
+const { LabelName, Stage, Status } = require('allure-js-commons');
 const path = require('path');
 const { createHash } = require('crypto');
 const AllureInterface = require('./AllureInterface');
@@ -115,7 +115,7 @@ module.exports = class AllureReporter {
 
     endSuite(isGlobal = false) {
         if (this.currentSuite && isGlobal) {
-            this.cyCommandsFinish('passed');
+            this.cyCommandsFinish(Status.PASSED);
             this.finishAllSteps(Status.PASSED);
             this.currentStep !== null && this.currentStep.endStep();
             this.currentSuite.endGroup();
@@ -286,7 +286,11 @@ module.exports = class AllureReporter {
     finishAllSteps(status = Status.PASSED) {
         this.steps.forEach((step) => {
             step.info.stage = Stage.FINISHED;
-            step.info.status = status;
+            if (step.info.steps.length) {
+                step.info.status = step.info.steps.some(step => step.status === Status.FAILED) ? Status.FAILED : Status.PASSED
+            } else {
+                step.info.status = status
+            }
             step.endStep();
         });
         this.steps = [];
@@ -570,7 +574,7 @@ module.exports = class AllureReporter {
                 this.cyCommandEndStep(
                     command.step,
                     {
-                        state: command.passed ? 'passed' : 'failed'
+                        state: command.passed ? Status.PASSED : Status.FAILED
                     },
                     command.passed
                 );
@@ -613,7 +617,7 @@ module.exports = class AllureReporter {
         }
     }
 
-    cyCommandsFinish(state = 'failed') {
+    cyCommandsFinish(state = Status.FAILED) {
         // process all not finished steps from chainer left
         // usually is executed on fail
         this.commands
@@ -621,22 +625,15 @@ module.exports = class AllureReporter {
             .reverse()
             .forEach((command) => {
                 !command.finished &&
-                    this.cyCommandEnd(command.commandLog, state === 'failed');
+                    this.cyCommandEnd(command.commandLog, state === Status.FAILED);
             });
         this.currentChainer = null;
     }
 
     cyCommandEndStep(step, log, commandStatus) {
-        let passed =
-            commandStatus !== undefined
-                ? commandStatus
-                : log.state !== 'failed';
+        const passed = log && log.err ? false : commandStatus || log.state !== Status.FAILED
 
         step.info.stage = Stage.FINISHED;
-
-        if (log && log.err) {
-            passed = false;
-        }
 
         step.info.status = passed ? Status.PASSED : Status.FAILED;
 

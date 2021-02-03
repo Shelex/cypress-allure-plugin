@@ -115,7 +115,8 @@ Cypress.Commands.add('issue', { prevSubject: true }, (allure, name, url) => {
 });
 Cypress.Commands.add('tms', { prevSubject: true }, (allure, name, url) => {
     const tmsPrefix = Cypress.env('tmsPrefix');
-    allure.tms(name, tmsPrefix ? `${tmsPrefix}${url}` : url);
+    const pattern = tmsPrefix && tmsPrefix.includes('*') ? tmsPrefix : `${tmsPrefix}*`
+    allure.tms(name, tmsPrefix ? pattern.replace(/\*/g, url) : url);
     cy.wrap(allure, { log: false });
 });
 Cypress.Commands.add(

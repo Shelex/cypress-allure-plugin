@@ -90,7 +90,7 @@ Plugin is customizable via Cypress environment variables:
 | :------------------------------------- | :------------------------------------------------------------------- | :--------------- |
 | `allure`                               | enable Allure plugin                                                 | false            |
 | `allureResultsPath `                   | customize path to allure results folder                              | `allure-results` |
-| `tmsPrefix`                            | prefix for links from allure API in tests to test management system  | ``               |
+| `tmsPrefix`                            | just a prefix substring or pattern with `*` for links from allure API in tests to test management system  | ``               |
 | `issuePrefix`                          | prefix for links from allure API in tests to bug tracking system     | ``               |
 | `allureLogCypress`                     | log cypress chainer (commands) and display them as steps in report   | true             |
 | `allureOmitPreviousAttemptScreenshots` | omit screenshots attached in previous attempts when retries are used | false            |
@@ -103,6 +103,7 @@ This options could be passed:
     {
         "env": {
             "allureResultsPath": "someFolder/results",
+            // tms prefix used without `*`, equivalent to `https://url-to-bug-tracking-system/task-*`
             "tmsPrefix": "https://url-to-bug-tracking-system/task-",
             "issuePrefix": "https://url-to-tms/tests/caseId-"
             // usage:  cy.allure().issue('blockerIssue', 'AST-111')
