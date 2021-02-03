@@ -185,7 +185,6 @@ describe('Basic specific', () => {
     it('should have every attachment be linked to test', () => {
         const { attachments, tests } = result.basic;
         attachments.forEach(({ fileName }) => {
-            console.warn(`checking ${fileName}`);
             const test = tests.find((t) =>
                 t.attachments.some((a) => a && a.source.endsWith(fileName))
             );
@@ -286,7 +285,6 @@ describe('Basic specific', () => {
         };
 
         expect(test.steps).to.have.length(4);
-        console.log(test.steps);
         const steps = [
             '"before each" hook',
             `first parent step`,

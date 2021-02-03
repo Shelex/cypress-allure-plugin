@@ -1,8 +1,33 @@
 {
     "root": true,
+    "extends": [
+        "prettier",
+        "plugin:cypress/recommended"
+    ],
+    "parserOptions": {
+        "ecmaVersion": 2018
+    },
     "rules": {
+        "prettier/prettier": [
+            "error",
+            {
+                "singleQuote": true,
+                "trailingComma": "none",
+                "arrowParens": "always",
+                "printWidth": 80,
+                "tabWidth": 4,
+                "semi": true,
+                "bracketSpacing": true
+            }
+        ],
+        "newline-per-chained-call": "off",
         "prefer-template": "error",
-        "curly": ["error", "all"],
+        "arrow-body-style": "off",
+        "prefer-arrow-callback":"off",
+        "curly": [
+            "error",
+            "all"
+        ],
         "no-restricted-globals": "off",
         "no-restricted-syntax": [
             "error",
@@ -68,8 +93,16 @@
         "no-unneeded-ternary": "warn",
         "no-useless-computed-key": "error"
     },
+    "plugins": [
+        "prettier",
+        "cypress",
+        "chai-friendly"
+    ],
     "globals": {
         "cy": true,
         "Cypress": true
+    },
+    "env": {
+        "cypress/globals": true
     }
 }

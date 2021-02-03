@@ -115,7 +115,8 @@ Cypress.Commands.add('issue', { prevSubject: true }, (allure, name, url) => {
 });
 Cypress.Commands.add('tms', { prevSubject: true }, (allure, name, url) => {
     const tmsPrefix = Cypress.env('tmsPrefix');
-    const pattern = tmsPrefix && tmsPrefix.includes('*') ? tmsPrefix : `${tmsPrefix}*`
+    const pattern =
+        tmsPrefix && tmsPrefix.includes('*') ? tmsPrefix : `${tmsPrefix}*`;
     allure.tms(name, tmsPrefix ? pattern.replace(/\*/g, url) : url);
     cy.wrap(allure, { log: false });
 });
@@ -156,10 +157,10 @@ Cypress.Commands.add('tag', { prevSubject: true }, (allure, tag) => {
     cy.wrap(allure, { log: false });
 });
 
-Cypress.Commands.add('testID', {prevSubject: true}, (allure, id) => {
+Cypress.Commands.add('testID', { prevSubject: true }, (allure, id) => {
     allure.label('AS_ID', id);
     cy.wrap(allure, { log: false });
-})
+});
 
 Cypress.Commands.add(
     'writeEnvironmentInfo',

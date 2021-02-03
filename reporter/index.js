@@ -64,6 +64,7 @@ class CypressAllureReporter {
                             },
                             { log: false }
                         )
+                        // eslint-disable-next-line no-console
                         .catch((e) => allureDebug && console.error(e));
             })
             .on(EVENT_TEST_BEGIN, (test) => {

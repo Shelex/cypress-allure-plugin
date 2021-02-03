@@ -10,6 +10,9 @@ jobs:
         steps:
             - uses: actions/checkout@v1
 
+            - name: Eslint and Prettify
+              run: npm run lint
+
             - name: Download Cypress
               uses: bahmutov/npm-install@v1
               env:

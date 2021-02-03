@@ -4,7 +4,6 @@
  */
 
 const { LabelName, Stage, Status } = require('allure-js-commons');
-const path = require('path');
 const { createHash } = require('crypto');
 const AllureInterface = require('./AllureInterface');
 const { tagToLabel, tagToLink } = require('../gherkinToLabel');
@@ -147,7 +146,6 @@ module.exports = class AllureReporter {
         this.currentTest.stage = Stage.RUNNING;
 
         if (clearFilesForPreviousAttempt && test._currentRetry > 0) {
-
             // remove screenshots from previous attempt
             this.files = this.files.filter(
                 (file) => file.testName !== test.title
@@ -287,9 +285,13 @@ module.exports = class AllureReporter {
         this.steps.forEach((step) => {
             step.info.stage = Stage.FINISHED;
             if (step.info.steps.length) {
-                step.info.status = step.info.steps.some(step => step.status === Status.FAILED) ? Status.FAILED : Status.PASSED
+                step.info.status = step.info.steps.some(
+                    (step) => step.status === Status.FAILED
+                )
+                    ? Status.FAILED
+                    : Status.PASSED;
             } else {
-                step.info.status = status
+                step.info.status = status;
             }
             step.endStep();
         });
@@ -477,7 +479,7 @@ module.exports = class AllureReporter {
             command.step = {
                 info: {},
                 stepResult: {},
-                endStep() { }
+                endStep() {}
             };
         } else {
             const executable = this.cyCommandExecutable(command);
@@ -625,13 +627,19 @@ module.exports = class AllureReporter {
             .reverse()
             .forEach((command) => {
                 !command.finished &&
-                    this.cyCommandEnd(command.commandLog, state === Status.FAILED);
+                    this.cyCommandEnd(
+                        command.commandLog,
+                        state === Status.FAILED
+                    );
             });
         this.currentChainer = null;
     }
 
     cyCommandEndStep(step, log, commandStatus) {
-        const passed = log && log.err ? false : commandStatus || log.state !== Status.FAILED
+        const passed =
+            log && log.err
+                ? false
+                : commandStatus || log.state !== Status.FAILED;
 
         step.info.stage = Stage.FINISHED;
 
@@ -646,13 +654,13 @@ module.exports = class AllureReporter {
         const messages = {
             xhr: () =>
                 `${
-                (log.consoleProps.Stubbed === 'Yes' ? 'STUBBED ' : '') +
-                log.consoleProps.Method
+                    (log.consoleProps.Stubbed === 'Yes' ? 'STUBBED ' : '') +
+                    log.consoleProps.Method
                 } ${log.consoleProps.URL}`,
             step: () => `${log.displayName}${log.message.replace(/\*/g, '')}`,
             stub: () =>
                 `${log.name} [ function: ${log.functionName} ] ${
-                log.alias ? `as ${log.alias}` : ''
+                    log.alias ? `as ${log.alias}` : ''
                 }`,
             route: () => `${log.name} ${log.method} ${log.url}`,
             default: () =>

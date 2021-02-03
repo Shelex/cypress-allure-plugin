@@ -1,0 +1,17 @@
+# Node stuff:
+node_modules
+*.log
+
+# OS Stuff:
+.DS_Store
+.npm
+
+# Dev stuff:
+.vscode
+.github
+cypress
+.eslintrc.json
+.gitignore
+CODE_OF_CONDUCT.md
+CONTRIBUTING.md
+cypress.json
