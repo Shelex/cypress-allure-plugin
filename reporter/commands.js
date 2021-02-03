@@ -156,6 +156,11 @@ Cypress.Commands.add('tag', { prevSubject: true }, (allure, tag) => {
     cy.wrap(allure, { log: false });
 });
 
+Cypress.Commands.add('testID', {prevSubject: true}, (allure, id) => {
+    allure.label('AS_ID', id);
+    cy.wrap(allure, { log: false });
+})
+
 Cypress.Commands.add(
     'writeEnvironmentInfo',
     { prevSubject: true },

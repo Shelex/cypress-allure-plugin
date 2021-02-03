@@ -151,6 +151,10 @@ declare global {
              */
             tag(tag: string): Allure;
             /**
+             * Add test case ID from Allure TestOps to link automated test
+             */
+            testID(id: string): Allure
+            /**
              * Attach environmental info
              * @param info - <key, value> format
              */
