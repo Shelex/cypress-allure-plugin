@@ -202,6 +202,7 @@ Scenario: Here is scenario
 
 Allure API available:
 
+-   testID(id: string)
 -   epic(epic: string)
 -   feature(feature: string)
 -   story(story: string)

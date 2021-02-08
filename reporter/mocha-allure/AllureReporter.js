@@ -209,8 +209,14 @@ module.exports = class AllureReporter {
                                         ? 'issuePrefix'
                                         : 'tmsPrefix'
                                 );
+                                const pattern =
+                                    urlPrefix && urlPrefix.includes('*')
+                                        ? urlPrefix
+                                        : `${urlPrefix}*`;
                                 currentTest.addLink(
-                                    urlPrefix ? `${urlPrefix}${url}` : url,
+                                    urlPrefix && pattern
+                                        ? pattern.replace(/\*/g, url)
+                                        : url,
                                     name,
                                     command
                                 );
