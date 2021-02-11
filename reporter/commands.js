@@ -4,187 +4,53 @@ Cypress.Commands.add('allure', () => {
     });
 });
 
-Cypress.Commands.add(
-    'parameter',
-    { prevSubject: true },
-    (allure, name, value) => {
-        allure.parameter(name, value);
+const childCommands = {
+    parameter: (allure, name, value) => allure.parameter(name, value),
+    testParameter: (allure, name, value) => allure.testParameter(name, value),
+    severity: (allure, level) => allure.severity(level),
+    testAttachment: (allure, name, content, type) =>
+        allure.testAttachment(name, content, type),
+    owner: (allure, name) => allure.owner(name),
+    attachment: (allure, name, content, type) =>
+        allure.attachment(name, content, type),
+    fileAttachment: (allure, name, path, type) =>
+        allure.fileAttachment(name, path, type),
+    step: (allure, name, isParent = true) => allure.step(name, isParent),
+    logStep: (allure, name) => allure.step(name, false),
+    startStep: (allure, name) => allure.stepStart(name),
+    endStep: (allure) => allure.stepEnd(),
+    epic: (allure, name) => allure.epic(name),
+    feature: (allure, name) => allure.feature(name),
+    story: (allure, story) => allure.story(story),
+    suite: (allure, name) => allure.suite(name),
+    label: (allure, name, value) => allure.label(name, value),
+    link: (allure, url, name, type) => allure.link(url, name, type),
+    issue: (allure, name, url) => {
+        const issuePrefix = Cypress.env('issuePrefix');
+        allure.issue(name, issuePrefix ? `${issuePrefix}${url}` : url);
+    },
+    tms: (allure, name, url) => {
+        const tmsPrefix = Cypress.env('tmsPrefix');
+        const pattern =
+            tmsPrefix && tmsPrefix.includes('*') ? tmsPrefix : `${tmsPrefix}*`;
+        allure.tms(name, tmsPrefix ? pattern.replace(/\*/g, url) : url);
+    },
+    description: (allure, markdown) => allure.description(markdown),
+    descriptionHtml: (allure, html) => allure.descriptionHtml(html),
+    testDescription: (allure, markdown) => allure.testDescription(markdown),
+    testDescriptionHtml: (allure, html) => allure.testDescriptionHtml(html),
+    tag: (allure, tag) => allure.tag(tag),
+    testID: (allure, id) => allure.label('AS_ID', id),
+    writeEnvironmentInfo: (allure, info) => allure.writeEnvironmentInfo(info),
+    writeExecutorInfo: (allure, info) => allure.writeExecutorInfo(info),
+    writeCategoriesDefinitions: (allure, categories) =>
+        allure.writeCategoriesDefinitions(categories)
+};
+
+for (const command in childCommands) {
+    Cypress.Commands.add(command, { prevSubject: true }, (...args) => {
+        const [allure] = args;
+        childCommands[command](...args);
         cy.wrap(allure, { log: false });
-    }
-);
-
-Cypress.Commands.add(
-    'testParameter',
-    { prevSubject: true },
-    (allure, name, value) => {
-        allure.testParameter(name, value);
-        cy.wrap(allure, { log: false });
-    }
-);
-
-Cypress.Commands.add('severity', { prevSubject: true }, (allure, level) => {
-    allure.severity(level);
-    cy.wrap(allure, { log: false });
-});
-
-Cypress.Commands.add(
-    'testAttachment',
-    { prevSubject: true },
-    (allure, name, content, type) => {
-        allure.testAttachment(name, content, type);
-        cy.wrap(allure, { log: false });
-    }
-);
-
-Cypress.Commands.add('owner', { prevSubject: true }, (allure, name) => {
-    allure.owner(name);
-    cy.wrap(allure, { log: false });
-});
-
-Cypress.Commands.add(
-    'attachment',
-    { prevSubject: true },
-    (allure, name, content, type) => {
-        allure.attachment(name, content, type);
-        cy.wrap(allure, { log: false });
-    }
-);
-
-Cypress.Commands.add(
-    'fileAttachment',
-    { prevSubject: true },
-    (allure, name, path, type) => {
-        allure.fileAttachment(name, path, type);
-        cy.wrap(allure, { log: false });
-    }
-);
-
-Cypress.Commands.add(
-    'step',
-    { prevSubject: true },
-    (allure, name, isParent = true) => {
-        allure.step(name, isParent);
-        cy.wrap(allure, { log: false });
-    }
-);
-
-Cypress.Commands.add('startStep', { prevSubject: true }, (allure, name) => {
-    allure.stepStart(name);
-    cy.wrap(allure, { log: false });
-});
-
-Cypress.Commands.add('endStep', { prevSubject: true }, (allure) => {
-    allure.stepEnd();
-    cy.wrap(allure, { log: false });
-});
-
-Cypress.Commands.add('epic', { prevSubject: true }, (allure, name) => {
-    allure.epic(name);
-    cy.wrap(allure, { log: false });
-});
-Cypress.Commands.add('feature', { prevSubject: true }, (allure, name) => {
-    allure.feature(name);
-    cy.wrap(allure, { log: false });
-});
-Cypress.Commands.add('story', { prevSubject: true }, (allure, story) => {
-    allure.story(story);
-    cy.wrap(allure, { log: false });
-});
-Cypress.Commands.add('suite', { prevSubject: true }, (allure, name) => {
-    allure.suite(name);
-    cy.wrap(allure, { log: false });
-});
-
-Cypress.Commands.add('label', { prevSubject: true }, (allure, name, value) => {
-    allure.label(name, value);
-    cy.wrap(allure, { log: false });
-});
-
-Cypress.Commands.add(
-    'link',
-    { prevSubject: true },
-    (allure, url, name, type) => {
-        allure.link(url, name, type);
-        cy.wrap(allure, { log: false });
-    }
-);
-Cypress.Commands.add('issue', { prevSubject: true }, (allure, name, url) => {
-    const issuePrefix = Cypress.env('issuePrefix');
-    allure.issue(name, issuePrefix ? `${issuePrefix}${url}` : url);
-    cy.wrap(allure, { log: false });
-});
-Cypress.Commands.add('tms', { prevSubject: true }, (allure, name, url) => {
-    const tmsPrefix = Cypress.env('tmsPrefix');
-    const pattern =
-        tmsPrefix && tmsPrefix.includes('*') ? tmsPrefix : `${tmsPrefix}*`;
-    allure.tms(name, tmsPrefix ? pattern.replace(/\*/g, url) : url);
-    cy.wrap(allure, { log: false });
-});
-Cypress.Commands.add(
-    'description',
-    { prevSubject: true },
-    (allure, markdown) => {
-        allure.description(markdown);
-        cy.wrap(allure, { log: false });
-    }
-);
-Cypress.Commands.add(
-    'descriptionHtml',
-    { prevSubject: true },
-    (allure, html) => {
-        allure.descriptionHtml(html);
-        cy.wrap(allure, { log: false });
-    }
-);
-Cypress.Commands.add(
-    'testDescription',
-    { prevSubject: true },
-    (allure, markdown) => {
-        allure.testDescription(markdown);
-        cy.wrap(allure, { log: false });
-    }
-);
-Cypress.Commands.add(
-    'testDescriptionHtml',
-    { prevSubject: true },
-    (allure, html) => {
-        allure.testDescriptionHtml(html);
-        cy.wrap(allure, { log: false });
-    }
-);
-Cypress.Commands.add('tag', { prevSubject: true }, (allure, tag) => {
-    allure.tag(tag);
-    cy.wrap(allure, { log: false });
-});
-
-Cypress.Commands.add('testID', { prevSubject: true }, (allure, id) => {
-    allure.label('AS_ID', id);
-    cy.wrap(allure, { log: false });
-});
-
-Cypress.Commands.add(
-    'writeEnvironmentInfo',
-    { prevSubject: true },
-    (allure, info) => {
-        allure.writeEnvironmentInfo(info);
-        cy.wrap(allure, { log: false });
-    }
-);
-
-Cypress.Commands.add(
-    'writeExecutorInfo',
-    { prevSubject: true },
-    (allure, info) => {
-        allure.writeExecutorInfo(info);
-        cy.wrap(allure, { log: false });
-    }
-);
-
-Cypress.Commands.add(
-    'writeCategoriesDefinitions',
-    { prevSubject: true },
-    (allure, categories) => {
-        allure.writeCategoriesDefinitions(categories);
-        cy.wrap(allure, { log: false });
-    }
-);
+    });
+}

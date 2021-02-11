@@ -227,6 +227,7 @@ Allure API available:
 -   startStep(name: string)
 -   endStep()
 -   step(name: string, isParent: boolean)
+-   logStep(name: string)
 
 ## VS Code for cypress + cucumber
 
