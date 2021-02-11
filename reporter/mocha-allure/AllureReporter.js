@@ -7,6 +7,7 @@ const { LabelName, Stage, Status } = require('allure-js-commons');
 const { createHash } = require('crypto');
 const AllureInterface = require('./AllureInterface');
 const { tagToLabel, tagToLink } = require('../gherkinToLabel');
+const { languageLabel } = require('../languageLabel');
 const stubbedAllure = require('../stubbedAllure');
 const callbacks = ['then', 'spread', 'each', 'within'];
 
@@ -122,7 +123,7 @@ module.exports = class AllureReporter {
         }
     }
 
-    startCase(test, clearFilesForPreviousAttempt) {
+    startCase(test, config) {
         if (this.currentSuite === null) {
             throw new Error('No active suite');
         }
@@ -145,11 +146,17 @@ module.exports = class AllureReporter {
             .digest('hex');
         this.currentTest.stage = Stage.RUNNING;
 
-        if (clearFilesForPreviousAttempt && test._currentRetry > 0) {
+        if (config.clearFilesForPreviousAttempt && test._currentRetry > 0) {
             // remove screenshots from previous attempt
             this.files = this.files.filter(
                 (file) => file.testName !== test.title
             );
+        }
+
+        if (config.addAnalyticLabels) {
+            this.currentTest.addLabel(LabelName.FRAMEWORK, 'Cypress');
+            const language = languageLabel(test);
+            language && this.currentTest.addLabel(LabelName.LANGUAGE, language);
         }
 
         if (test.parent) {
