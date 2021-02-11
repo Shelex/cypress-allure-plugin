@@ -12,7 +12,8 @@ const availableLabels = [
     'severity',
     'tag',
     'owner',
-    'package'
+    'package',
+    'AS_ID'
 ];
 const labelPattern = `@(${availableLabels.join('|')})\\("(.*?)"\\)`;
 const linkPattern = `@(issue|tms)\\("(.*?)","(.*?)"\\)`;

@@ -20,22 +20,26 @@ const {
 } = require('allure-js-commons');
 const AllureReporter = require('./mocha-allure/AllureReporter');
 const stubbedAllure = require('./stubbedAllure');
-const allureEnabled = Cypress.env('allure') === true;
-const shouldLogCypress = Cypress.env('allureLogCypress') !== false;
-const allureDebug = Cypress.env('allureDebug') === true;
-const omitPreviousAttemptScreenshots =
-    Cypress.env('allureOmitPreviousAttemptScreenshots') === true;
 
+const env = Cypress.env();
+
+const config = {
+    allureEnabled: env.allure,
+    customResultsPath: env.allureResultsPath,
+    shouldLogCypress: env.allureLogCypress !== false,
+    allureDebug: env.allureDebug,
+    clearFilesForPreviousAttempt: env.allureOmitPreviousAttemptScreenshots,
+    addAnalyticLabels: env.allureAddAnalyticLabels
+};
 class CypressAllureReporter {
     constructor() {
         this.reporter = new AllureReporter(
             new AllureRuntime({
-                resultsDir:
-                    Cypress.env('allureResultsPath') || 'allure-results',
+                resultsDir: config.customResultsPath || 'allure-results',
                 writer: new InMemoryAllureWriter()
             }),
             {
-                logCypress: shouldLogCypress
+                logCypress: config.shouldLogCypress
             }
         );
 
@@ -52,7 +56,7 @@ class CypressAllureReporter {
                  */
                 const isGlobal = suite.title === '';
                 this.reporter.endSuite(isGlobal);
-                allureEnabled &&
+                config.allureEnabled &&
                     isGlobal &&
                     cy
                         .now(
@@ -65,10 +69,10 @@ class CypressAllureReporter {
                             { log: false }
                         )
                         // eslint-disable-next-line no-console
-                        .catch((e) => allureDebug && console.error(e));
+                        .catch((e) => config.allureDebug && console.error(e));
             })
             .on(EVENT_TEST_BEGIN, (test) => {
-                this.reporter.startCase(test, omitPreviousAttemptScreenshots);
+                this.reporter.startCase(test, config);
             })
             .on(EVENT_TEST_FAIL, (test, err) => {
                 this.reporter.failTestCase(test, err);
@@ -91,20 +95,21 @@ class CypressAllureReporter {
             });
 
         Cypress.on('command:enqueued', (command) => {
-            shouldLogCypress && this.reporter.cyCommandEnqueue(command);
+            config.shouldLogCypress && this.reporter.cyCommandEnqueue(command);
         });
 
         Cypress.on('command:start', (command) => {
-            shouldLogCypress &&
+            config.shouldLogCypress &&
                 this.reporter.cyCommandStart(command.attributes);
         });
 
         Cypress.on('command:end', (command) => {
-            shouldLogCypress && this.reporter.cyCommandEnd(command.attributes);
+            config.shouldLogCypress &&
+                this.reporter.cyCommandEnd(command.attributes);
         });
 
         Cypress.on('fail', (err) => {
-            shouldLogCypress && this.reporter.cyCommandsFinish();
+            config.shouldLogCypress && this.reporter.cyCommandsFinish();
             // add video to failed test case:
             if (Cypress.config().video && this.reporter.currentTest) {
                 this.reporter.currentTest.addAttachment(
@@ -121,11 +126,13 @@ class CypressAllureReporter {
     }
 }
 
-Cypress.Allure = allureEnabled ? new CypressAllureReporter() : stubbedAllure;
+Cypress.Allure = config.allureEnabled
+    ? new CypressAllureReporter()
+    : stubbedAllure;
 
 Cypress.Screenshot.defaults({
     onAfterScreenshot(_, details) {
-        if (allureEnabled) {
+        if (config.allureEnabled) {
             Cypress.Allure.reporter.files.push({
                 name: details.name || `${details.specName}:${details.takenAt}`,
                 path: details.path,

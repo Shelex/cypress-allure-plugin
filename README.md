@@ -93,7 +93,8 @@ Plugin is customizable via Cypress environment variables:
 | `tmsPrefix`                            | just a prefix substring or pattern with `*` for links from allure API in tests to test management system  | ``               |
 | `issuePrefix`                          | prefix for links from allure API in tests to bug tracking system     | ``               |
 | `allureLogCypress`                     | log cypress chainer (commands) and display them as steps in report   | true             |
-| `allureOmitPreviousAttemptScreenshots` | omit screenshots attached in previous attempts when retries are used | false            |
+| `allureOmitPreviousAttemptScreenshots` | omit screenshots attached in previous attempts when retries are used | false            |  
+| `allureAddAnalyticLabels` | add framework and language labels to tests (used for allure analytics only) | false            |  
 
 This options could be passed:
 
