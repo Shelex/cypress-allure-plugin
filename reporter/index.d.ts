@@ -210,6 +210,11 @@ declare global {
              */
             step(name: string, isParent: boolean): Allure;
             /**
+             * Log step, alias for `step(name, false)`
+             * @param name - step name
+             */
+            logStep(name: string): Allure;
+            /**
              * Start allure step with specified name
              * @param name - name of step to create
              */

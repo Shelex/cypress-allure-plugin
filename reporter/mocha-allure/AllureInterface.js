@@ -35,9 +35,14 @@ Allure.prototype.step = function (name, isParent = true) {
 
     const allureStep = item.startStep(name);
     if (isParent) {
+        // finish previous parent step
+        this.reporter.parentStep &&
+            automaticallyEndStep(this, this.reporter.parentStep);
         this.reporter.parentStep = allureStep;
         this.reporter.pushStep(allureStep);
     } else {
+        // finish previous step
+        this.stepEnd();
         allureStep.stepResult.stage = Stage.FINISHED;
         allureStep.stepResult.status = Status.PASSED;
         this.reporter.pushStep(allureStep);
@@ -72,11 +77,7 @@ Allure.prototype.stepEnd = function () {
     // just find the last user created step and finish it
     const step = this.reporter.popStep();
     if (step) {
-        step.stepResult.stage = Stage.FINISHED;
-        step.stepResult.status =
-            (this.currentTest && this.currentTest.info.status) || Status.PASSED;
-
-        step.endStep();
+        automaticallyEndStep(this, step);
     }
 };
 
@@ -91,6 +92,21 @@ Allure.prototype.testDescription = function (markdown) {
 Allure.prototype.testDescriptionHtml = function (html) {
     this.currentTest.descriptionHtml = html;
 };
+
+const automaticallyEndStep = (runtime, step) => {
+    if (!step) {
+        return;
+    }
+    const status = getStatus(runtime);
+    step.stepResult.stage = Stage.FINISHED;
+    step.stepResult.status = status;
+    step.endStep();
+};
+
+const getStatus = (runtime) =>
+    (runtime.currentTest && runtime.currentTest.info.status) ||
+    (runtime.currentHook && runtime.currentHook.info.status) ||
+    Status.PASSED;
 
 module.exports = class AllureInterface {
     constructor(reporter, runtime) {

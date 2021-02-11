@@ -31,6 +31,7 @@ const stubbedAllure = {
     attachment: () => {},
     testAttachment: () => {},
     step: () => {},
+    logStep: () => {},
     startStep: () => {},
     stepStart: () => {},
     stepEnd: () => {},
