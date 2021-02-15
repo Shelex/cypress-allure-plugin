@@ -252,8 +252,8 @@ Please take into account, that in case spec files have same name, cypress is try
 Commands are producing allure steps automatically based on cypress events and are trying to represent how code and custom commands are executed with nested structure.  
 Moreover, steps functionality could be expanded with:
 
--   `cy.allure().step('name')` - will create step "name" for current test. This step will be finished when next step is created or test is finished.
--   `cy.allure().step('name', false)` - will create step "name" for current parent step (like previous one, without passing `false` as second argument) or current hook/test. Will be finished when next step is created or test finished.
+-   `cy.allure().step('name')` - will create step "name" for current test. This step will be finished when next such step is created or test is finished.
+-   `cy.allure().step('name', false)` OR `cy.allure().logStep('name')` - will create step "name" for current parent step/hook/test. Will be finished when next step is created or test finished.
 -   `cy.allure().startStep('name')` - will create step "name" for current cypress command step / current step / current parent step / current hook or test. Is automatically finished on fail event or test end, but I would recommend to explicitly mention `cy.allure().endStep()` which will finish last created step.
 
 ## Testing

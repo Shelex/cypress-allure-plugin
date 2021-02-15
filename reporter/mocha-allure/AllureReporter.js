@@ -535,7 +535,14 @@ module.exports = class AllureReporter {
                 command.commandLog.logs.push(command.commandLog.logs.shift());
 
                 command.commandLog.logs.forEach((entry, index) => {
-                    const log = entry.toJSON();
+                    let log;
+
+                    // try...catch for handling case when Cypress.log has error in consoleProps function
+                    try {
+                        log = entry.toJSON();
+                    } catch (e) {
+                        return;
+                    }
 
                     // for main log (which we set last) we should finish command step
                     if (index === command.commandLog.logs.length - 1) {

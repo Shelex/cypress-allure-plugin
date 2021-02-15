@@ -4,7 +4,7 @@ const getFile = (test) =>
         ? test.file
         : test && test.parent && getFile(test.parent);
 
-export const languageLabel = (test) => {
+const languageLabel = (test) => {
     const file = getFile(test);
     const ext = file && file.split('.').pop();
 
@@ -16,3 +16,5 @@ export const languageLabel = (test) => {
 
     return language[ext] || ext;
 };
+
+module.exports = { languageLabel };
