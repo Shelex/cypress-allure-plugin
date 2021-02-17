@@ -56,20 +56,26 @@ class CypressAllureReporter {
                  */
                 const isGlobal = suite.title === '';
                 this.reporter.endSuite(isGlobal);
-                config.allureEnabled &&
-                    isGlobal &&
-                    cy
-                        .now(
-                            'task',
-                            'writeAllureResults',
-                            {
-                                results: this.reporter.runtime.config,
-                                files: this.reporter.files
-                            },
-                            { log: false }
-                        )
-                        // eslint-disable-next-line no-console
-                        .catch((e) => config.allureDebug && console.error(e));
+
+                try {
+                    config &&
+                        config.allureEnabled &&
+                        isGlobal &&
+                        cy
+                            .now(
+                                'task',
+                                'writeAllureResults',
+                                {
+                                    results: this.reporter.runtime.config,
+                                    files: this.reporter.files
+                                },
+                                { log: false }
+                            )
+                            // eslint-disable-next-line no-console
+                            .catch((e) => config.allureDebug && console.log(e));
+                } catch (e) {
+                    // happens when cy.task could not be executed due to fired outside of it
+                }
             })
             .on(EVENT_TEST_BEGIN, (test) => {
                 this.reporter.startCase(test, config);

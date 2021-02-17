@@ -146,14 +146,18 @@ module.exports = class AllureReporter {
             .digest('hex');
         this.currentTest.stage = Stage.RUNNING;
 
-        if (config.clearFilesForPreviousAttempt && test._currentRetry > 0) {
+        if (
+            config &&
+            config.clearFilesForPreviousAttempt &&
+            test._currentRetry > 0
+        ) {
             // remove screenshots from previous attempt
             this.files = this.files.filter(
                 (file) => file.testName !== test.title
             );
         }
 
-        if (config.addAnalyticLabels) {
+        if (config && config.addAnalyticLabels) {
             this.currentTest.addLabel(LabelName.FRAMEWORK, 'Cypress');
             const language = languageLabel(test);
             language && this.currentTest.addLabel(LabelName.LANGUAGE, language);
