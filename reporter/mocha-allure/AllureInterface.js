@@ -104,8 +104,9 @@ const automaticallyEndStep = (runtime, step) => {
 };
 
 const getStatus = (runtime) =>
-    (runtime.currentTest && runtime.currentTest.info.status) ||
-    (runtime.currentHook && runtime.currentHook.info.status) ||
+    (!runtime.currentHook &&
+        runtime.currentTest &&
+        runtime.currentTest.info.status) ||
     Status.PASSED;
 
 module.exports = class AllureInterface {
