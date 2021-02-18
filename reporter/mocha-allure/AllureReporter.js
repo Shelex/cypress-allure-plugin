@@ -80,7 +80,7 @@ module.exports = class AllureReporter {
         return (
             (cyTest && cyTest.title) ||
             (this.currentTest && this.currentTest.info.name) ||
-            previousTestName
+            this.previousTestName
         );
     }
 
