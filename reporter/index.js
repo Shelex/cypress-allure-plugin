@@ -25,7 +25,7 @@ const env = Cypress.env();
 
 const config = {
     allureEnabled: env.allure,
-    customResultsPath: env.allureResultsPath,
+    resultsPath: env.allureResultsPath || 'allure-results',
     shouldLogCypress: env.allureLogCypress !== false,
     allureDebug: env.allureDebug,
     clearFilesForPreviousAttempt: env.allureOmitPreviousAttemptScreenshots,
@@ -35,7 +35,7 @@ class CypressAllureReporter {
     constructor() {
         this.reporter = new AllureReporter(
             new AllureRuntime({
-                resultsDir: config.customResultsPath || 'allure-results',
+                resultsDir: config.resultsPath,
                 writer: new InMemoryAllureWriter()
             }),
             {
@@ -118,13 +118,15 @@ class CypressAllureReporter {
             config.shouldLogCypress && this.reporter.cyCommandsFinish();
             // add video to failed test case:
             if (Cypress.config().video && this.reporter.currentTest) {
+                const videosFolderForAllure = Cypress.config()
+                    .videosFolder.split(config.resultsPath)
+                    .pop();
+                const fileName = `${Cypress.spec.name}.mp4`;
+
                 this.reporter.currentTest.addAttachment(
-                    `${Cypress.spec.name}.mp4`,
+                    fileName,
                     'video/mp4',
-                    path.join(
-                        Cypress.config().videosFolder,
-                        `${Cypress.spec.name}.mp4`
-                    )
+                    path.join(videosFolderForAllure, fileName)
                 );
             }
             throw err;
