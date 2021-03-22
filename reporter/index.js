@@ -81,6 +81,20 @@ class CypressAllureReporter {
                 this.reporter.startCase(test, config);
             })
             .on(EVENT_TEST_FAIL, (test, err) => {
+                // add video to failed test case:
+                if (Cypress.config().video && this.reporter.currentTest) {
+                    const videosFolderForAllure = Cypress.config()
+                        .videosFolder.split(config.resultsPath)
+                        .pop();
+                    const fileName = `${Cypress.spec.name}.mp4`;
+
+                    this.reporter.currentTest.addAttachment(
+                        fileName,
+                        'video/mp4',
+                        path.join(videosFolderForAllure, fileName)
+                    );
+                }
+
                 this.reporter.failTestCase(test, err);
             })
             .on(EVENT_TEST_PASS, (test) => {
@@ -112,24 +126,6 @@ class CypressAllureReporter {
         Cypress.on('command:end', (command) => {
             config.shouldLogCypress &&
                 this.reporter.cyCommandEnd(command.attributes);
-        });
-
-        Cypress.on('fail', (err) => {
-            config.shouldLogCypress && this.reporter.cyCommandsFinish();
-            // add video to failed test case:
-            if (Cypress.config().video && this.reporter.currentTest) {
-                const videosFolderForAllure = Cypress.config()
-                    .videosFolder.split(config.resultsPath)
-                    .pop();
-                const fileName = `${Cypress.spec.name}.mp4`;
-
-                this.reporter.currentTest.addAttachment(
-                    fileName,
-                    'video/mp4',
-                    path.join(videosFolderForAllure, fileName)
-                );
-            }
-            throw err;
         });
     }
 }
