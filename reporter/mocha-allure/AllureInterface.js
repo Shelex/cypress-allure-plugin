@@ -82,15 +82,40 @@ Allure.prototype.stepEnd = function () {
 };
 
 Allure.prototype.testParameter = function (name, value) {
-    this.currentTest.addParameter(name, value);
+    this.reporter.currentTest.addParameter(name, value);
 };
 
 Allure.prototype.testDescription = function (markdown) {
-    this.currentTest.description = markdown;
+    this.reporter.currentTest.description = markdown;
 };
 
 Allure.prototype.testDescriptionHtml = function (html) {
-    this.currentTest.descriptionHtml = html;
+    this.reporter.currentTest.descriptionHtml = html;
+};
+
+Allure.prototype.label = function (name, value) {
+    if (this.reporter.currentTest) {
+        const labelIndex = (name) =>
+            this.reporter.currentTest.info.labels.findIndex(
+                (label) => label.name === name
+            );
+
+        // by default allure not overwrite label value
+        // so there is separate handling for existing labels
+        if (labelIndex(name) === -1) {
+            this.reporter.currentTest.addLabel(name, value);
+        } else {
+            this.reporter.currentTest.info.labels[labelIndex(name)] = {
+                name,
+                value
+            };
+        }
+    } else {
+        this.reporter.labelStorage.push({
+            name,
+            value
+        });
+    }
 };
 
 const automaticallyEndStep = (runtime, step) => {
