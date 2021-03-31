@@ -10,9 +10,9 @@
 
 ## Installation
 
--   [Allure reporter](https://docs.qameta.io/allure/#_get_started): [java package](https://github.com/allure-framework/allure2#download) or [allure-commandline npm package](https://www.npmjs.com/package/allure-commandline).
+-   [Allure binary](https://docs.qameta.io/allure/#_get_started): [directly from allure2](https://github.com/allure-framework/allure2#download) or [allure-commandline npm package](https://www.npmjs.com/package/allure-commandline).
 
--   [Java 8](https://www.oracle.com/java/technologies/javase-jdk8-downloads.html)
+-   [Java 8](https://www.oracle.com/java/technologies/javase-jdk8-downloads.html) (required to run allure binary)
 
 -   There is no need to set this plugin as reporter in Cypress or use any other allure reporters. Just download:
 
@@ -30,7 +30,7 @@
 
 ## Setup
 
--   Connect plugin in `cypress/plugins/index.js` in order to add Allure writer task:
+-   Connect plugin in `cypress/plugins/index.js`. Take into account that Cypress generate plugins file with `module.exports` on the first initialization but you should have only one export section. In order to add Allure writer task just replace it or add writer task somewhere before returning config:
 
     -   as only plugin:
 
@@ -43,7 +43,7 @@
     };
     ```
 
-    -   if you have webpack or other preprocessors please set allure writer last:
+    -   if you have webpack or other preprocessors please set allure writer before returning "config":
 
     ```js
     module.exports = (on, config) => {
@@ -148,7 +148,7 @@ See [cypress-allure-plugin-example](https://github.com/Shelex/cypress-allure-plu
 For complete history (allure can display 20 build results ) with links to older reports and links to CI builds check [cypress-allure-historical-example](https://github.com/Shelex/cypress-allure-historical-example) with basic and straightforward idea how to achieve it.
 
 There are also existing solutions that may help you prepare your report infrastructure:
-
+-   [Allure docker service](https://github.com/fescobar/allure-docker-service) - highly customizable feature-rich container  
 -   [Allure Server](https://github.com/kochetkov-ma/allure-server) - self-hosted portal with your reports
 -   [allure-reports-portal](https://github.com/pumano/allure-reports-portal) - another portal which allows to gather reports for multiple projects in single ui
 -   [Github Action](https://github.com/simple-elf/allure-report-action) - report generation + better implementation for historic reports described above
@@ -264,11 +264,11 @@ Moreover, steps functionality could be expanded with:
 
 ## Credits
 
-A lot of respect to [Sergey Korol](serhii.s.korol@gmail.com) who made [Allure-mocha](https://github.com/allure-framework/allure-js/tree/master/packages/allure-mocha) reporter. Major part of interaction from mocha to allure is based on that solution technically and ideologically.
+A lot of respect to [Sergey Korol](serhii.s.korol@gmail.com) who made [Allure-mocha](https://github.com/allure-framework/allure-js/tree/master/packages/allure-mocha) reporter. Base integration with Cypress internal mocha runner is based on that solution.
 
 ## License
 
-Copyright 2020 Oleksandr Shevtsov <ovr.shevtsov@gmail.com>.  
+Copyright 2020-2021 Oleksandr Shevtsov <ovr.shevtsov@gmail.com>.  
 This project is licensed under the Apache 2.0 License.
 
 [npm-url]: https://npmjs.com/package/@shelex/cypress-allure-plugin

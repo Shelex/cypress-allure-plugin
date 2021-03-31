@@ -17,6 +17,7 @@ module.exports = class AllureReporter {
         this.steps = [];
         this.commands = [];
         this.files = [];
+        this.labelStorage = [];
         this.currentChainer = null;
         this.runningTest = null;
         this.previousTestName = null;
@@ -73,6 +74,11 @@ module.exports = class AllureReporter {
             this.previousTestName = this.runningTest.info.name;
         }
         this.runningTest = test;
+        // in case labels were defined outside of test
+        // we could attach them from storage
+        if (this.runningTest) {
+            this.runningTest.info.labels.push(...this.labelStorage);
+        }
     }
 
     get testNameForAttachment() {
@@ -121,6 +127,8 @@ module.exports = class AllureReporter {
             this.currentSuite.endGroup();
             this.popSuite();
         }
+        // restrict label storage to single suite scope
+        this.labelStorage = [];
     }
 
     startCase(test, config) {
