@@ -3,8 +3,8 @@
  * Need to investigate if some should be on suite/currentExecutable
  */
 const availableLabels = [
-    'suite',
     'parentSuite',
+    'suite',
     'subSuite',
     'epic',
     'feature',
@@ -12,11 +12,10 @@ const availableLabels = [
     'severity',
     'tag',
     'owner',
-    'package',
     'AS_ID'
 ];
 const labelPattern = `@(${availableLabels.join('|')})\\("(.*?)"\\)`;
-const linkPattern = `@(issue|tms)\\("(.*?)","(.*?)"\\)`;
+const linkPattern = `@(issue|tms|link)\\("(.*?)","(.*?)"\\)`;
 
 module.exports = {
     tagToLabel: new RegExp(labelPattern),

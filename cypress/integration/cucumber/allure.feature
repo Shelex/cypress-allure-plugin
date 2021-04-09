@@ -7,6 +7,7 @@ Feature: AllureAPI
 
 @issue("jira","tmsLink")
 @tms("tms","tmsLink")
+@link("example","https://example.com")
 @severity("minor")
 @tagForTest
 Scenario: Cucumber tags should work

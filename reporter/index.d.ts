@@ -74,10 +74,20 @@ declare global {
              */
             story(story: string): Allure;
             /**
+             * add parent Suite
+             * @param name
+             */
+            parentSuite(name: string): Allure;
+            /**
              * add Suite
              * @param name
              */
-            suite(name: string): Allure;
+             suite(name: string): Allure;
+             /**
+             * add child Suite
+             * @param name
+             */
+            subSuite(name: string): Allure;
             /**
              * Add Label
              * @param name
@@ -125,16 +135,6 @@ declare global {
              * @param html
              */
             descriptionHtml(html: string): Allure;
-            /**
-             * Add test description in markdown format for test
-             * @param markdown
-             */
-            testDescription(markdown: string): Allure;
-            /**
-             * Add test description in html format for test
-             * @param html
-             */
-            testDescriptionHtml(html: string): Allure;
             /**
              * Add test owner
              * @param owner

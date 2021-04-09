@@ -189,13 +189,18 @@ cy.allure()
 3. Using Cypress-cucumber-preprocessor with cucumber tags:
 
 ```feature
+@AS_ID("id_of_test_for_testops")
+@parentSuite("someParentSuite")
+@suite("someSuite")
 @subSuite("someSubSuite")
-@feature("nice")
 @epic("thisisepic")
+@feature("nice")
 @story("cool")
 @severity("critical")
 @owner("IAMOwner")
-@issue("jira","PJD:1234")
+@issue("jira","JIRA-1234")
+@tms("tms","TC-1234")
+@link("other","url")
 @someOtherTagsWillBeAddedAlso
 Scenario: Here is scenario
 ...
@@ -207,7 +212,9 @@ Allure API available:
 -   epic(epic: string)
 -   feature(feature: string)
 -   story(story: string)
+-   parentSuite(name: string)
 -   suite(name: string)
+-   subSuite(name:string)
 -   label(name: LabelName, value: string)
 -   parameter(name: string, value: string)
 -   testParameter(name: string, value: string)
@@ -215,9 +222,7 @@ Allure API available:
 -   issue(name: string, url: string)
 -   tms(name: string, url: string)
 -   description(markdown: string)
--   testDescription(markdown: string)
 -   descriptionHtml(html: string)
--   testDescriptionHtml(html: string)
 -   owner(owner: string)
 -   severity(severity: Severity)
 -   tag(tag: string)

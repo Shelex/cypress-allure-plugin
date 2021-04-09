@@ -21,25 +21,26 @@ const {
 const AllureReporter = require('./mocha-allure/AllureReporter');
 const stubbedAllure = require('./stubbedAllure');
 
-const env = Cypress.env();
+const { env } = Cypress;
 
 const config = {
-    allureEnabled: env.allure,
-    resultsPath: env.allureResultsPath || 'allure-results',
-    shouldLogCypress: env.allureLogCypress !== false,
-    allureDebug: env.allureDebug,
-    clearFilesForPreviousAttempt: env.allureOmitPreviousAttemptScreenshots,
-    addAnalyticLabels: env.allureAddAnalyticLabels
+    allureEnabled: () => env().allure,
+    resultsPath: () => env().allureResultsPath || 'allure-results',
+    shouldLogCypress: () => env().allureLogCypress !== false,
+    allureDebug: () => env().allureDebug,
+    clearFilesForPreviousAttempt: () =>
+        env().allureOmitPreviousAttemptScreenshots,
+    addAnalyticLabels: () => env().allureAddAnalyticLabels
 };
 class CypressAllureReporter {
     constructor() {
         this.reporter = new AllureReporter(
             new AllureRuntime({
-                resultsDir: config.resultsPath,
+                resultsDir: config.resultsPath(),
                 writer: new InMemoryAllureWriter()
             }),
             {
-                logCypress: config.shouldLogCypress
+                logCypress: config.shouldLogCypress()
             }
         );
 
@@ -84,7 +85,7 @@ class CypressAllureReporter {
                 // add video to failed test case:
                 if (Cypress.config().video && this.reporter.currentTest) {
                     const videosFolderForAllure = Cypress.config()
-                        .videosFolder.split(config.resultsPath)
+                        .videosFolder.split(config.resultsPath())
                         .pop();
                     const fileName = `${Cypress.spec.name}.mp4`;
 
@@ -115,28 +116,29 @@ class CypressAllureReporter {
             });
 
         Cypress.on('command:enqueued', (command) => {
-            config.shouldLogCypress && this.reporter.cyCommandEnqueue(command);
+            config.shouldLogCypress() &&
+                this.reporter.cyCommandEnqueue(command);
         });
 
         Cypress.on('command:start', (command) => {
-            config.shouldLogCypress &&
+            config.shouldLogCypress() &&
                 this.reporter.cyCommandStart(command.attributes);
         });
 
         Cypress.on('command:end', (command) => {
-            config.shouldLogCypress &&
+            config.shouldLogCypress() &&
                 this.reporter.cyCommandEnd(command.attributes);
         });
     }
 }
 
-Cypress.Allure = config.allureEnabled
+Cypress.Allure = config.allureEnabled()
     ? new CypressAllureReporter()
     : stubbedAllure;
 
 Cypress.Screenshot.defaults({
     onAfterScreenshot(_, details) {
-        if (config.allureEnabled) {
+        if (config.allureEnabled()) {
             Cypress.Allure.reporter.files.push({
                 name: details.name || `${details.specName}:${details.takenAt}`,
                 path: details.path,

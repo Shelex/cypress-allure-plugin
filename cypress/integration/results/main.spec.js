@@ -122,7 +122,8 @@ const expectedLinks = (mode, type) =>
           ]
         : [
               { name: 'jira', url: 'issuePrefix-tmsLink', type: 'issue' },
-              { name: 'tms', url: 'tmsPrefix-tmsLink', type: 'tms' }
+              { name: 'tms', url: 'tmsPrefix-tmsLink', type: 'tms' },
+              { name: 'example', url: 'https://example.com', type: 'link' }
           ];
 
 describe('Cucumber specific', () => {

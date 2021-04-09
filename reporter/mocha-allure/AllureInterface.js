@@ -81,16 +81,12 @@ Allure.prototype.stepEnd = function () {
     }
 };
 
+Allure.prototype.parameter = function (name, value) {
+    this.reporter.currentExecutable.addParameter(name, value);
+};
+
 Allure.prototype.testParameter = function (name, value) {
     this.reporter.currentTest.addParameter(name, value);
-};
-
-Allure.prototype.testDescription = function (markdown) {
-    this.reporter.currentTest.description = markdown;
-};
-
-Allure.prototype.testDescriptionHtml = function (html) {
-    this.reporter.currentTest.descriptionHtml = html;
 };
 
 Allure.prototype.label = function (name, value) {
@@ -138,7 +134,7 @@ module.exports = class AllureInterface {
     constructor(reporter, runtime) {
         this.__proto__ = new Allure(runtime);
         this.reporter = reporter;
-        this.currentTest = reporter.currentTest;
+        this.currentTest = this.reporter.currentTest;
         this.currentExecutable = this.reporter.currentExecutable;
         this.currentHook = this.reporter.currentHook;
     }

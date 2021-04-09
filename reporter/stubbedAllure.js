@@ -11,10 +11,13 @@ module.exports = {
 };
 
 const stubbedAllure = {
+    testID: () => {},
     epic: () => {},
     feature: () => {},
     story: () => {},
+    parentSuite: () => {},
     suite: () => {},
+    subSuite: () => {},
     label: () => {},
     parameter: () => {},
     link: () => {},
@@ -37,7 +40,5 @@ const stubbedAllure = {
     stepEnd: () => {},
     endStep: () => {},
     fileAttachment: () => {},
-    testDescription: () => {},
-    testDescriptionHtml: () => {},
     testParameter: () => {}
 };
