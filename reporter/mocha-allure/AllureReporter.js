@@ -4,7 +4,7 @@
  */
 
 const { LabelName, Stage, Status } = require('allure-js-commons');
-var crypto = require("crypto-js");
+var crypto = require('crypto-js');
 const AllureInterface = require('./AllureInterface');
 const { tagToLabel, tagToLink } = require('../gherkinToLabel');
 const { languageLabel } = require('../languageLabel');
@@ -149,7 +149,9 @@ module.exports = class AllureReporter {
         this.commands = [];
         this.currentTest = this.currentSuite.startTest(test.title);
         this.currentTest.fullName = test.title;
-        this.currentTest.historyId = crypto.MD5(test.fullTitle()).toString(crypto.enc.Hex)
+        this.currentTest.historyId = crypto
+            .MD5(test.fullTitle())
+            .toString(crypto.enc.Hex);
         this.currentTest.stage = Stage.RUNNING;
 
         if (
