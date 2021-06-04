@@ -1,9 +1,6 @@
 // TODO prepare tests for chainer parsing
 
 before(() => {
-    Cypress.Cookies.defaults({
-        whitelist: 'session'
-    });
     cy.log(`------ SETTING MAGIC NUMBER ----> 42`);
     cy.setCookie('session', '42');
     Cypress.env('session', 42);
@@ -13,7 +10,9 @@ describe('Cypress commands steps', () => {
     it('should produce allure steps for cypress chainer commands', () => {
         cy.log('before command');
         cy.allure().startStep('step before "this is custom"');
-        cy.thisiscustom('customname');
+        cy.thisiscustom('customname').then(() => {
+            cy.allure().testName('new name');
+        });
         cy.allure().endStep();
         cy.allure()
             .startStep('step nested 1')

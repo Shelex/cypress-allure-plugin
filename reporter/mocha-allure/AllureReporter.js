@@ -346,7 +346,7 @@ module.exports = class AllureReporter {
     }
 
     startHook(hook) {
-        if (!this.currentSuite) {
+        if (!this.currentSuite || isEmpty(hook)) {
             return;
         }
         /**
@@ -367,7 +367,7 @@ module.exports = class AllureReporter {
     }
 
     endHook(hook, failed = false) {
-        if (!this.currentSuite) {
+        if (!this.currentSuite || isEmpty(hook)) {
             return;
         }
         // should define results property for all or each hook
@@ -730,3 +730,5 @@ module.exports = class AllureReporter {
         return executable.startStep(message());
     }
 };
+
+const isEmpty = (hook) => hook && hook.body === 'function () {}';

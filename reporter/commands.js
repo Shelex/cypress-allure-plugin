@@ -7,6 +7,7 @@ Cypress.Commands.add('allure', () => {
 const childCommands = {
     parameter: (allure, name, value) => allure.parameter(name, value),
     testParameter: (allure, name, value) => allure.testParameter(name, value),
+    testName: (allure, name) => allure.testName(name),
     severity: (allure, level) => allure.severity(level),
     testAttachment: (allure, name, content, type) =>
         allure.testAttachment(name, content, type),

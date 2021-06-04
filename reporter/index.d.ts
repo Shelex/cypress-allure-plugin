@@ -155,6 +155,12 @@ declare global {
              */
             testID(id: string): Allure
             /**
+             * Overwrite test name for report. 
+             * Will be applied when results are stored to allure-results folder
+             * @param name
+             */
+             testName(name: string): Allure
+            /**
              * Attach environmental info
              * @param info - <key, value> format
              */

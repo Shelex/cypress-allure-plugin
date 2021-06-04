@@ -69,10 +69,11 @@ function allureWriter(on, config) {
                     tests.forEach((test) => {
                         const fileName = `${test.uuid}-result.json`;
                         const testResultPath = path.join(resultsDir, fileName);
+                        const testResult = overwriteTestNameMaybe(test);
                         !fs.existsSync(testResultPath) &&
                             fs.writeFileSync(
                                 testResultPath,
-                                JSON.stringify(test)
+                                JSON.stringify(testResult)
                             );
                     });
                 if (attachments) {
@@ -115,6 +116,18 @@ const writeInfoFile = (fileName, data, resultsDir) => {
                 }
             );
     }
+};
+
+const overwriteTestNameMaybe = (test) => {
+    const overrideIndex = test.parameters.findIndex(
+        (p) => p.name === 'OverwriteTestName'
+    );
+    if (overrideIndex !== -1) {
+        test.name = test.parameters[overrideIndex].value;
+        test.fullName = test.parameters[overrideIndex].value;
+        test.parameters.splice(overrideIndex, 1);
+    }
+    return test;
 };
 
 module.exports = allureWriter;

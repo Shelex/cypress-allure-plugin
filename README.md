@@ -114,9 +114,15 @@ This options could be passed:
     ```
 
 -   via `command line`:
+as [Cypress environment variables](https://docs.cypress.io/guides/guides/environment-variables#Option-4-env) are used please take into account that cli should have only one argument `--env` or `-e`, otherwise values will not be passed
 
-    ```js
+    ```bash
     yarn cypress run --env allure=true,allureResultsPath=someFolder/results
+
+    yarn cypress run --env TAGS='@smoke',allure=true
+
+    # for windows:
+    yarn cypress run --env  "TAGS=@smoke","allure=true"
     ```
 
 -   via `Cypress environment variables`:
@@ -218,6 +224,7 @@ Allure API available:
 -   label(name: LabelName, value: string)
 -   parameter(name: string, value: string)
 -   testParameter(name: string, value: string)
+-   testName(name: string)
 -   link(url: string, name?: string, type?: LinkType)
 -   issue(name: string, url: string)
 -   tms(name: string, url: string)

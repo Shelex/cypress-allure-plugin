@@ -148,3 +148,6 @@ Cypress.Screenshot.defaults({
         }
     }
 });
+
+// need empty after hook to prohibit cypress stop the runner when there are skipped tests in the end
+after(() => {});
