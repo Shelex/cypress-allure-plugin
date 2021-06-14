@@ -36,6 +36,7 @@
 
     ```js
     const allureWriter = require('@shelex/cypress-allure-plugin/writer');
+    // import * as allureWriter from "@shelex/cypress-allure-plugin/writer";
 
     module.exports = (on, config) => {
         allureWriter(on, config);
@@ -158,6 +159,7 @@ There are also existing solutions that may help you prepare your report infrastr
 -   [Allure docker service](https://github.com/fescobar/allure-docker-service) - highly customizable feature-rich container  
 -   [Allure Server](https://github.com/kochetkov-ma/allure-server) - self-hosted portal with your reports
 -   [allure-reports-portal](https://github.com/pumano/allure-reports-portal) - another portal which allows to gather reports for multiple projects in single ui
+-   [allure-static-booster](https://gitlab.com/seitar/allure-static-booster/-/tree/master/) - solution for generating self-hosted Allure report on GitLab pages including the tables with results, pipeline links and navigation between the different Allure reports.  
 -   [Github Action](https://github.com/simple-elf/allure-report-action) - report generation + better implementation for historic reports described above
 -   [Allure TestOps](https://docs.qameta.io/allure-testops/) - Allure portal for those who want more than report
 
