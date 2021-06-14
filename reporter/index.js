@@ -30,7 +30,8 @@ const config = {
     allureDebug: () => env().allureDebug,
     clearFilesForPreviousAttempt: () =>
         env().allureOmitPreviousAttemptScreenshots,
-    addAnalyticLabels: () => env().allureAddAnalyticLabels
+    addAnalyticLabels: () => env().allureAddAnalyticLabels,
+    addVideoOnPass: () => env().allureAddVideoOnPass
 };
 class CypressAllureReporter {
     constructor() {
@@ -82,20 +83,6 @@ class CypressAllureReporter {
                 this.reporter.startCase(test, config);
             })
             .on(EVENT_TEST_FAIL, (test, err) => {
-                // add video to failed test case:
-                if (Cypress.config().video && this.reporter.currentTest) {
-                    const videosFolderForAllure = Cypress.config()
-                        .videosFolder.split(config.resultsPath())
-                        .pop();
-                    const fileName = `${Cypress.spec.name}.mp4`;
-
-                    this.reporter.currentTest.addAttachment(
-                        fileName,
-                        'video/mp4',
-                        path.join(videosFolderForAllure, fileName)
-                    );
-                }
-
                 this.reporter.failTestCase(test, err);
             })
             .on(EVENT_TEST_PASS, (test) => {
@@ -104,7 +91,23 @@ class CypressAllureReporter {
             .on(EVENT_TEST_PENDING, (test) => {
                 this.reporter.pendingTestCase(test);
             })
-            .on(EVENT_TEST_END, () => {
+            .on(EVENT_TEST_END, (test) => {
+                if (Cypress.config().video && this.reporter.currentTest) {
+                    // add video to failed test case or for passed in case addVideoOnPass is true
+                    if (test.state !== 'passed' || config.addVideoOnPass) {
+                        const videosFolderForAllure = Cypress.config()
+                            .videosFolder.split(config.resultsPath())
+                            .pop();
+                        const fileName = `${Cypress.spec.name}.mp4`;
+
+                        this.reporter.currentTest.addAttachment(
+                            fileName,
+                            'video/mp4',
+                            path.join(videosFolderForAllure, fileName)
+                        );
+                    }
+                }
+
                 this.reporter.handleCucumberTags();
                 this.reporter.endTest();
             })
