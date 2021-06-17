@@ -367,7 +367,7 @@ module.exports = class AllureReporter {
     }
 
     endHook(hook, failed = false) {
-        if (!this.currentSuite || isEmpty(hook)) {
+        if (!this.currentSuite || !this.currentHook || isEmpty(hook)) {
             return;
         }
         // should define results property for all or each hook
@@ -418,9 +418,6 @@ module.exports = class AllureReporter {
 
     endTest() {
         this.currentTest && this.currentTest.endTest();
-        if (this.currentTest.status === Status.SKIPPED) {
-            this.currentTest = null;
-        }
     }
 
     cyCommandExecutable(command) {
