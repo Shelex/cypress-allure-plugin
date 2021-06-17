@@ -137,12 +137,17 @@ module.exports = class AllureReporter {
         }
 
         /**
-         * for skipped test firstly comes pending event
+         * skipped test sometimes initially receives pending event
          * where test will be created
          * and then comes start test event followed by end test
          * so start for skipped test should be omitted
+         * when current test is already skipped with same name
          */
-        if (this.currentTest && this.currentTest.info.status === 'skipped') {
+        if (
+            this.currentTest &&
+            this.currentTest.info.status === 'skipped' &&
+            this.currentTest.info.name === test.title
+        ) {
             return;
         }
 
