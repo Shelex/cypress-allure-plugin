@@ -17,7 +17,7 @@ const {
     AllureRuntime,
     InMemoryAllureWriter,
     ContentType
-} = require('allure-js-commons');
+} = require('@shelex/allure-js-commons-browser');
 const AllureReporter = require('./mocha-allure/AllureReporter');
 const stubbedAllure = require('./stubbedAllure');
 

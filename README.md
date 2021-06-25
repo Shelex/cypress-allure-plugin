@@ -87,16 +87,16 @@
 
 Plugin is customizable via Cypress environment variables:
 
-| env variable name                      | description                                                          | default          |
-| :------------------------------------- | :------------------------------------------------------------------- | :--------------- |
-| `allure`                               | enable Allure plugin                                                 | false            |
-| `allureResultsPath `                   | customize path to allure results folder                              | `allure-results` |
-| `tmsPrefix`                            | just a prefix substring or pattern with `*` for links from allure API in tests to test management system  | ``               |
-| `issuePrefix`                          | prefix for links from allure API in tests to bug tracking system     | ``               |
-| `allureLogCypress`                     | log cypress chainer (commands) and display them as steps in report   | true             |
-| `allureOmitPreviousAttemptScreenshots` | omit screenshots attached in previous attempts when retries are used | false            |  
-| `allureAddAnalyticLabels` | add framework and language labels to tests (used for allure analytics only) | false            |  
-| `allureAddVideoOnPass` | attach video to report for passed tests (used for allure analytics only) | false            |  
+| env variable name                      | description                                                                                              | default          |
+| :------------------------------------- | :------------------------------------------------------------------------------------------------------- | :--------------- |
+| `allure`                               | enable Allure plugin                                                                                     | false            |
+| `allureResultsPath `                   | customize path to allure results folder                                                                  | `allure-results` |
+| `tmsPrefix`                            | just a prefix substring or pattern with `*` for links from allure API in tests to test management system | ``               |
+| `issuePrefix`                          | prefix for links from allure API in tests to bug tracking system                                         | ``               |
+| `allureLogCypress`                     | log cypress chainer (commands) and display them as steps in report                                       | true             |
+| `allureOmitPreviousAttemptScreenshots` | omit screenshots attached in previous attempts when retries are used                                     | false            |
+| `allureAddAnalyticLabels`              | add framework and language labels to tests (used for allure analytics only)                              | false            |
+| `allureAddVideoOnPass`                 | attach video to report for passed tests (used for allure analytics only)                                 | false            |
 
 This options could be passed:
 
@@ -116,16 +116,16 @@ This options could be passed:
     ```
 
 -   via `command line`:
-as [Cypress environment variables](https://docs.cypress.io/guides/guides/environment-variables#Option-4-env) are used please take into account that cli should have only one argument `--env` or `-e`, otherwise values will not be passed
+    as [Cypress environment variables](https://docs.cypress.io/guides/guides/environment-variables#Option-4-env) are used please take into account that cli should have only one argument `--env` or `-e`, otherwise values will not be passed
 
-    ```bash
-    yarn cypress run --env allure=true,allureResultsPath=someFolder/results
+        ```bash
+        yarn cypress run --env allure=true,allureResultsPath=someFolder/results
 
-    yarn cypress run --env TAGS='@smoke',allure=true
+        yarn cypress run --env TAGS='@smoke',allure=true
 
-    # for windows:
-    yarn cypress run --env  "TAGS=@smoke","allure=true"
-    ```
+        # for windows:
+        yarn cypress run --env  "TAGS=@smoke","allure=true"
+        ```
 
 -   via `Cypress environment variables`:
     ```js
@@ -156,10 +156,11 @@ See [cypress-allure-plugin-example](https://github.com/Shelex/cypress-allure-plu
 For complete history (allure can display 20 build results ) with links to older reports and links to CI builds check [cypress-allure-historical-example](https://github.com/Shelex/cypress-allure-historical-example) with basic and straightforward idea how to achieve it.
 
 There are also existing solutions that may help you prepare your report infrastructure:
--   [Allure docker service](https://github.com/fescobar/allure-docker-service) - highly customizable feature-rich container  
+
+-   [Allure docker service](https://github.com/fescobar/allure-docker-service) - highly customizable feature-rich container
 -   [Allure Server](https://github.com/kochetkov-ma/allure-server) - self-hosted portal with your reports
 -   [allure-reports-portal](https://github.com/pumano/allure-reports-portal) - another portal which allows to gather reports for multiple projects in single ui
--   [allure-static-booster](https://gitlab.com/seitar/allure-static-booster/-/tree/master/) - solution for generating self-hosted Allure report on GitLab pages including the tables with results, pipeline links and navigation between the different Allure reports.  
+-   [allure-static-booster](https://gitlab.com/seitar/allure-static-booster/-/tree/master/) - solution for generating self-hosted Allure report on GitLab pages including the tables with results, pipeline links and navigation between the different Allure reports.
 -   [Github Action](https://github.com/simple-elf/allure-report-action) - report generation + better implementation for historic reports described above
 -   [Allure TestOps](https://docs.qameta.io/allure-testops/) - Allure portal for those who want more than report
 

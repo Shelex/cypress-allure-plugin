@@ -3,7 +3,11 @@
  * Allure-mocha reporter: "https://github.com/allure-framework/allure-js/tree/master/packages/allure-mocha"
  */
 
-const { LabelName, Stage, Status } = require('allure-js-commons');
+const {
+    LabelName,
+    Stage,
+    Status
+} = require('@shelex/allure-js-commons-browser');
 var crypto = require('crypto-js');
 const AllureInterface = require('./AllureInterface');
 const { tagToLabel, tagToLink } = require('../gherkinToLabel');
