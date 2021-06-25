@@ -118,3 +118,4 @@ Fixes: #123
 ```
 
 A tool like [Commitizen](https://github.com/commitizen/cz-cli) can be used to help with formatting commit messages.
+
