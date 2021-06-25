@@ -3,7 +3,7 @@
  * Allure-mocha reporter: "https://github.com/allure-framework/allure-js/tree/master/packages/allure-mocha"
  */
 
-const { Allure, Status, Stage } = require('allure-js-commons');
+const { Allure, Status, Stage } = require('@shelex/allure-js-commons-browser');
 
 Allure.prototype.attachment = function (name, content, type) {
     const fileName = this.reporter.writeAttachment(content, type);

@@ -1037,6 +1037,13 @@
     lodash "^4.17.4"
     read-pkg-up "^7.0.0"
 
+"@shelex/allure-js-commons-browser@1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@shelex/allure-js-commons-browser/-/allure-js-commons-browser-1.2.0.tgz#16e8752e100860a3ecd5bb2581113f131e27cf39"
+  integrity sha512-BlRjExO+Y/Y0OMwEUhyCinf6rkcqTVPeAC7W5QENTXrvhu6CKXqUlhSTM+GUu4tOSlNSwdyvSI+fiMjCV1TI5g==
+  dependencies:
+    uuid "8.3.0"
+
 "@tootallnate/once@1":
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@tootallnate/once/-/once-1.1.2.tgz#ccb91445360179a04e7fe6aff78c00ffc1eeaf82"
@@ -1213,15 +1220,6 @@ ajv@^7.0.2:
     json-schema-traverse "^1.0.0"
     require-from-string "^2.0.2"
     uri-js "^4.2.2"
-
-allure-js-commons@^2.0.0-beta.6:
-  version "2.0.0-beta.7"
-  resolved "https://registry.yarnpkg.com/allure-js-commons/-/allure-js-commons-2.0.0-beta.7.tgz#1a81ca53a67df5d0ad5a26b161bfcd8094c03c82"
-  integrity sha512-mTHr1RntyvxXXaqdj94DqtanVUozKXQVNOhuKwqOvbPHKRUd6DIeW0WjPXCTag4NE/jx/FO/MVPErYutbGwOUA==
-  dependencies:
-    mkdirp "^0.5.1"
-    properties "^1.2.1"
-    uuid "^7.0.2"
 
 ansi-align@^2.0.0:
   version "2.0.0"
@@ -6558,11 +6556,6 @@ promzard@^0.3.0:
   dependencies:
     read "1"
 
-properties@^1.2.1:
-  version "1.2.1"
-  resolved "https://registry.yarnpkg.com/properties/-/properties-1.2.1.tgz#0ee97a7fc020b1a2a55b8659eda4aa8d869094bd"
-  integrity sha1-Dul6f8AgsaKlW4ZZ7aSqjYaQlL0=
-
 proto-list@~1.2.1:
   version "1.2.4"
   resolved "https://registry.yarnpkg.com/proto-list/-/proto-list-1.2.4.tgz#212d5bfe1318306a420f6402b8e26ff39647a849"
@@ -8350,6 +8343,11 @@ util@~0.10.1:
   dependencies:
     inherits "2.0.3"
 
+uuid@8.3.0:
+  version "8.3.0"
+  resolved "https://registry.yarnpkg.com/uuid/-/uuid-8.3.0.tgz#ab738085ca22dc9a8c92725e459b1d507df5d6ea"
+  integrity sha512-fX6Z5o4m6XsXBdli9g7DtWgAx+osMsRRZFKma1mIUsLCz6vRvv+pz5VNbyu9UEDzpMWulZfvpgb/cmDXVulYFQ==
+
 uuid@8.3.2:
   version "8.3.2"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-8.3.2.tgz#80d5b5ced271bb9af6c445f21a1a04c606cefbe2"
@@ -8359,11 +8357,6 @@ uuid@^3.3.2, uuid@^3.3.3:
   version "3.4.0"
   resolved "https://registry.yarnpkg.com/uuid/-/uuid-3.4.0.tgz#b23e4358afa8a202fe7a100af1f5f883f02007ee"
   integrity sha512-HjSDRw6gZE5JMggctHBcjVak08+KEVhSIiDzFnT9S9aegmp85S/bReBVTb4QTFaRNptJ9kuYaNhnbNEOkbKb/A==
-
-uuid@^7.0.2:
-  version "7.0.3"
-  resolved "https://registry.yarnpkg.com/uuid/-/uuid-7.0.3.tgz#c5c9f2c8cf25dc0a372c4df1441c41f5bd0c680b"
-  integrity sha512-DPSke0pXhTZgoF/d+WSt2QaKMCFSfx7QegxEWT+JOuHF5aWrKEn0G+ztjuJg/gG8/ItK+rbPCD/yNv8yyih6Cg==
 
 v8-compile-cache@^2.0.3:
   version "2.2.0"

@@ -1,4 +1,4 @@
-import { Category, ExecutorInfo } from 'allure-js-commons';
+import { Category, ExecutorInfo } from '@shelex/allure-js-commons-browser';
 
 type LabelName =
     | 'AS_ID'
@@ -82,8 +82,8 @@ declare global {
              * add Suite
              * @param name
              */
-             suite(name: string): Allure;
-             /**
+            suite(name: string): Allure;
+            /**
              * add child Suite
              * @param name
              */
@@ -153,13 +153,13 @@ declare global {
             /**
              * Add test case ID from Allure TestOps to link automated test
              */
-            testID(id: string): Allure
+            testID(id: string): Allure;
             /**
-             * Overwrite test name for report. 
+             * Overwrite test name for report.
              * Will be applied when results are stored to allure-results folder
              * @param name
              */
-             testName(name: string): Allure
+            testName(name: string): Allure;
             /**
              * Attach environmental info
              * @param info - <key, value> format
