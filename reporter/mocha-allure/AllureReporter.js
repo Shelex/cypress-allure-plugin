@@ -8,7 +8,7 @@ const {
     Stage,
     Status
 } = require('@shelex/allure-js-commons-browser');
-var crypto = require('crypto-js');
+const crypto = require('crypto-js');
 const AllureInterface = require('./AllureInterface');
 const { tagToLabel, tagToLink } = require('../gherkinToLabel');
 const { languageLabel } = require('../languageLabel');

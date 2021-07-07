@@ -1,6 +1,7 @@
 const path = require('path');
 const fs = require('fs');
 const uuid = require('uuid');
+const crypto = require('crypto-js');
 
 function allureWriter(on, config) {
     // pass allure config from Cypress.env to process.env
@@ -123,8 +124,10 @@ const overwriteTestNameMaybe = (test) => {
         (p) => p.name === 'OverwriteTestName'
     );
     if (overrideIndex !== -1) {
-        test.name = test.parameters[overrideIndex].value;
-        test.fullName = test.parameters[overrideIndex].value;
+        const name = test.parameters[overrideIndex].value;
+        test.name = name;
+        test.fullName = name;
+        test.historyId = crypto.MD5(name).toString(crypto.enc.Hex);
         test.parameters.splice(overrideIndex, 1);
     }
     return test;
