@@ -96,7 +96,7 @@ Plugin is customizable via Cypress environment variables:
 | `allureLogCypress`                     | log cypress chainer (commands) and display them as steps in report                                       | true             |
 | `allureOmitPreviousAttemptScreenshots` | omit screenshots attached in previous attempts when retries are used                                     | false            |
 | `allureAddAnalyticLabels`              | add framework and language labels to tests (used for allure analytics only)                              | false            |
-| `allureAddVideoOnPass`                 | attach video to report for passed tests (used for allure analytics only)                                 | false            |
+| `allureAddVideoOnPass`                 | attach video to report for passed tests                                                                  | false            |
 
 This options could be passed:
 
