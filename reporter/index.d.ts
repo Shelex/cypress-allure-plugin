@@ -188,6 +188,7 @@ declare global {
             ): Allure;
             /**
              * Add attachment for current test
+             * In case no test - it will use hook as fallback
              * (Screenshots are attached automatically)
              * @param name
              * @param content

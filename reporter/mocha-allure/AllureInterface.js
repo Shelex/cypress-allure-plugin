@@ -12,7 +12,8 @@ Allure.prototype.attachment = function (name, content, type) {
 
 Allure.prototype.testAttachment = function (name, content, type) {
     const fileName = this.reporter.writeAttachment(content, type);
-    this.currentTest.addAttachment(name, type, fileName);
+    const executable = this.currentTest || this.currentHook;
+    executable.addAttachment(name, type, fileName);
 };
 
 Allure.prototype.fileAttachment = function (name, path, type) {
