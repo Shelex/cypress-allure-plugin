@@ -30,7 +30,7 @@ Allure.prototype.writeExecutorInfo = function (info) {
 
 Allure.prototype.step = function (name, isParent = true) {
     const item = isParent
-        ? this.currentTest
+        ? this.currentTest || this.currentHook
         : this.reporter.parentStep || this.currentHook || this.currentTest;
 
     const allureStep = item.startStep(name);
@@ -56,11 +56,7 @@ Allure.prototype.stepStart = function (name) {
         .find((c) => !c.finished && c.step && c.step.info.name);
 
     // define fallback allure executable
-    const previousExecutable =
-        this.reporter.currentStep ||
-        this.reporter.parentStep ||
-        this.currentHook ||
-        this.currentTest;
+    const previousExecutable = this.currentExecutable;
 
     // in case chaner step is newer then allure fallback executable - use chainer step for creating new
     const executable =
