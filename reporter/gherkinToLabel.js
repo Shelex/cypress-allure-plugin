@@ -15,7 +15,7 @@ const availableLabels = [
     'AS_ID'
 ];
 const labelPattern = `@(${availableLabels.join('|')})\\("(.*?)"\\)`;
-const linkPattern = `@(issue|tms|link)\\("(.*?)","(.*?)"\\)`;
+const linkPattern = `@(issue|tms|link)\\("(.*?)",?"?(.*?)?"?\\)`;
 
 module.exports = {
     tagToLabel: new RegExp(labelPattern),

@@ -246,7 +246,9 @@ module.exports = class AllureReporter {
                         .filter(function ({ name }) {
                             const match = tagToLink.exec(name);
                             if (match) {
-                                const [, command, name, url] = match;
+                                const [, command, name, matchUrl] = match;
+
+                                const url = matchUrl || name;
 
                                 const prefixBy = {
                                     issue: Cypress.env('issuePrefix'),
