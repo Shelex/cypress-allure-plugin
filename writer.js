@@ -38,7 +38,12 @@ function allureWriter(on, config) {
 
                             if (fs.existsSync(allureFilePath)) {
                                 const testsForAttachment = tests.filter(
-                                    (t) => t.name === file.testName
+                                    (t) =>
+                                        t.name === file.testName ||
+                                        t.name ===
+                                            `"before all" hook for "${file.testName}"` ||
+                                        t.name ===
+                                            `"after all" hook for "${file.testName}"`
                                 );
 
                                 testsForAttachment.forEach((test) => {

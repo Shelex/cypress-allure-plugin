@@ -61,7 +61,7 @@ class CypressAllureReporter {
 
                 try {
                     config &&
-                        config.allureEnabled &&
+                        config.allureEnabled() &&
                         isGlobal &&
                         cy
                             .now(
@@ -74,7 +74,9 @@ class CypressAllureReporter {
                                 { log: false }
                             )
                             // eslint-disable-next-line no-console
-                            .catch((e) => config.allureDebug && console.log(e));
+                            .catch(
+                                (e) => config.allureDebug() && console.log(e)
+                            );
                 } catch (e) {
                     // happens when cy.task could not be executed due to fired outside of it
                 }
@@ -84,6 +86,7 @@ class CypressAllureReporter {
             })
             .on(EVENT_TEST_FAIL, (test, err) => {
                 this.reporter.failTestCase(test, err);
+                attachVideo(this.reporter, test, 'failed');
             })
             .on(EVENT_TEST_PASS, (test) => {
                 this.reporter.passTestCase(test);
@@ -92,21 +95,7 @@ class CypressAllureReporter {
                 this.reporter.pendingTestCase(test);
             })
             .on(EVENT_TEST_END, (test) => {
-                if (Cypress.config().video && this.reporter.currentTest) {
-                    // add video to failed test case or for passed in case addVideoOnPass is true
-                    if (test.state !== 'passed' || config.addVideoOnPass) {
-                        const videosFolderForAllure = Cypress.config()
-                            .videosFolder.split(config.resultsPath())
-                            .pop();
-                        const fileName = `${Cypress.spec.name}.mp4`;
-
-                        this.reporter.currentTest.addAttachment(
-                            fileName,
-                            'video/mp4',
-                            path.join(videosFolderForAllure, fileName)
-                        );
-                    }
-                }
+                attachVideo(this.reporter, test, 'finished');
 
                 this.reporter.handleCucumberTags();
                 this.reporter.endTest();
@@ -151,6 +140,38 @@ Cypress.Screenshot.defaults({
         }
     }
 });
+
+const attachVideo = (reporter, test, status) => {
+    const shouldAttach =
+        status === 'failed'
+            ? true
+            : test.state !== 'failed' && config.addVideoOnPass();
+
+    if (Cypress.config().video && reporter.currentTest) {
+        // add video to failed test case or for passed in case addVideoOnPass is true
+        if (shouldAttach) {
+            const videosFolderForAllure = Cypress.config()
+                .videosFolder.split(config.resultsPath())
+                .pop();
+            const fileName = `${Cypress.spec.name}.mp4`;
+
+            // avoid duplicating videos, especially for after all hook when test is passed
+            if (
+                reporter.currentTest.info.attachments.some(
+                    (attachment) => attachment.name === fileName
+                )
+            ) {
+                return;
+            }
+
+            reporter.currentTest.addAttachment(
+                fileName,
+                'video/mp4',
+                path.join(videosFolderForAllure, fileName)
+            );
+        }
+    }
+};
 
 // need empty after hook to prohibit cypress stop the runner when there are skipped tests in the end
 after(() => {});
