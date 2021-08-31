@@ -229,9 +229,10 @@ module.exports = class AllureReporter {
                                 const [, command, value] = match;
                                 // feature and suite should be overwritten to avoid duplicates
                                 if (['feature', 'suite'].includes(command)) {
-                                    const index = currentTest.info.labels.findIndex(
-                                        (label) => label.name === command
-                                    );
+                                    const index =
+                                        currentTest.info.labels.findIndex(
+                                            (label) => label.name === command
+                                        );
                                     currentTest.info.labels[index] = {
                                         name: command,
                                         value: value
@@ -585,9 +586,8 @@ module.exports = class AllureReporter {
                     if (index === command.commandLog.logs.length - 1) {
                         // in case "then" command has some logging - create step for that
                         if (callbacks.includes(command.name)) {
-                            const executable = this.cyCommandExecutable(
-                                command
-                            );
+                            const executable =
+                                this.cyCommandExecutable(command);
 
                             const step = this.cyStartStepForLog(
                                 executable,
