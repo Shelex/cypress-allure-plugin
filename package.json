@@ -15,7 +15,8 @@
     },
     "files": [
         "reporter",
-        "writer.js"
+        "writer.js",
+        "writer.d.ts"
     ],
     "bugs": "https://github.com/Shelex/cypress-allure-plugin/issues",
     "publishConfig": {
