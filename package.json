@@ -38,21 +38,20 @@
     },
     "dependencies": {
         "@shelex/allure-js-commons-browser": "1.2.0",
-        "crypto-js": "3.3.0",
+        "crypto-js": "4.1.1",
         "uuid": "8.3.2"
     },
     "devDependencies": {
-        "@types/fs-extra": "^8.1.0",
-        "@types/mocha": "^7.0.2",
+        "@types/mocha": "7.0.2",
         "cypress": "7.5.0",
-        "cypress-cucumber-preprocessor": "^2.3.1",
-        "eslint": "^7.19.0",
-        "eslint-config-prettier": "^7.2.0",
-        "eslint-plugin-chai-friendly": "^0.6.0",
-        "eslint-plugin-cypress": "^2.11.2",
-        "eslint-plugin-prettier": "^3.3.1",
-        "prettier": "^2.2.1",
-        "semantic-release": "^17.1.1"
+        "cypress-cucumber-preprocessor": "2.3.1",
+        "eslint": "7.32.0",
+        "eslint-config-prettier": "8.3.0",
+        "eslint-plugin-chai-friendly": "0.7.2",
+        "eslint-plugin-cypress": "2.11.3",
+        "eslint-plugin-prettier": "4.0.0",
+        "prettier": "2.3.2",
+        "semantic-release": "17.4.7"
     },
     "cypress-cucumber-preprocessor": {
         "nonGlobalStepDefinitions": true
