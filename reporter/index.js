@@ -27,6 +27,7 @@ const config = {
     allureEnabled: () => env().allure,
     resultsPath: () => env().allureResultsPath || 'allure-results',
     shouldLogCypress: () => env().allureLogCypress !== false,
+    shouldAttachRequests: () => env().allureAttachRequest,
     allureDebug: () => env().allureDebug,
     clearFilesForPreviousAttempt: () =>
         env().allureOmitPreviousAttemptScreenshots,
@@ -41,7 +42,8 @@ class CypressAllureReporter {
                 writer: new InMemoryAllureWriter()
             }),
             {
-                logCypress: config.shouldLogCypress()
+                logCypress: config.shouldLogCypress(),
+                attachRequests: config.shouldAttachRequests()
             }
         );
 
@@ -97,6 +99,7 @@ class CypressAllureReporter {
             .on(EVENT_TEST_END, (test) => {
                 attachVideo(this.reporter, test, 'finished');
 
+                this.reporter.populateGherkinLinksFromExampleTable();
                 this.reporter.handleCucumberTags();
                 this.reporter.endTest();
             })
@@ -150,9 +153,20 @@ const attachVideo = (reporter, test, status) => {
     if (Cypress.config().video && reporter.currentTest) {
         // add video to failed test case or for passed in case addVideoOnPass is true
         if (shouldAttach) {
-            const videosFolderForAllure = Cypress.config()
+            const absoluteVideoPath = Cypress.config()
                 .videosFolder.split(config.resultsPath())
                 .pop();
+
+            const relativeVideoPath = path.isAbsolute(absoluteVideoPath)
+                ? path.join(
+                      '..',
+                      path.relative(
+                          Cypress.config().fileServerFolder,
+                          absoluteVideoPath
+                      )
+                  )
+                : absoluteVideoPath;
+
             const fileName = `${Cypress.spec.name}.mp4`;
 
             // avoid duplicating videos, especially for after all hook when test is passed
@@ -167,7 +181,7 @@ const attachVideo = (reporter, test, status) => {
             reporter.currentTest.addAttachment(
                 fileName,
                 'video/mp4',
-                path.join(videosFolderForAllure, fileName)
+                path.join(relativeVideoPath, fileName)
             );
         }
     }

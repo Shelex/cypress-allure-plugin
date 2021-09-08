@@ -10,7 +10,7 @@ const {
 } = require('@shelex/allure-js-commons-browser');
 const crypto = require('crypto-js');
 const AllureInterface = require('./AllureInterface');
-const { tagToLabel, tagToLink } = require('../gherkinToLabel');
+const { tagToLabel, tagToLink, exampleNumber } = require('../gherkinToLabel');
 const { languageLabel } = require('../languageLabel');
 const stubbedAllure = require('../stubbedAllure');
 const callbacks = ['then', 'spread', 'each', 'within'];
@@ -22,6 +22,7 @@ module.exports = class AllureReporter {
         this.commands = [];
         this.files = [];
         this.labelStorage = [];
+        this.gherkinExamplesStorage = [];
         this.currentChainer = null;
         this.runningTest = null;
         this.previousTestName = null;
@@ -29,6 +30,7 @@ module.exports = class AllureReporter {
         this.currentHook = null;
         this.parentStep = null;
         this.logCypress = options.logCypress || false;
+        this.attachRequests = options.attachRequests || false;
     }
 
     /**
@@ -201,6 +203,71 @@ module.exports = class AllureReporter {
                         LabelName.SUB_SUITE,
                         subSuites.join(' > ')
                     );
+                }
+            }
+        }
+    }
+
+    populateGherkinLinksFromExampleTable() {
+        if (globalThis && globalThis.testState) {
+            const { testState } = globalThis;
+
+            if (testState.currentScenario.keyword === 'Scenario Outline') {
+                const scenario = testState.currentScenario;
+
+                !this.gherkinExamplesStorage.length &&
+                    this.gherkinExamplesStorage.push(...scenario.examples);
+
+                const example =
+                    this.gherkinExamplesStorage.length &&
+                    this.gherkinExamplesStorage.pop();
+
+                if (example) {
+                    const findCellIndex = (type) =>
+                        example.tableHeader.cells.findIndex(
+                            (cell) => cell.value === type
+                        );
+
+                    const tmsCellIndex = findCellIndex('tms');
+                    const issueCellIndex = findCellIndex('issue');
+
+                    const exampleRowNumber = parseInt(
+                        exampleNumber.exec(scenario.name).pop()
+                    );
+
+                    if (!exampleRowNumber) {
+                        return;
+                    }
+
+                    const exampleRowIndex = exampleRowNumber - 1;
+
+                    const findTableCellValue = (headerIndex) =>
+                        example.tableBody[exampleRowIndex].cells[headerIndex]
+                            .value;
+
+                    const addScenarioTag = (type, value) => {
+                        const current =
+                            globalThis.testState.runScenarios[scenario.name];
+
+                        globalThis.testState.runScenarios[scenario.name].tags =
+                            [
+                                ...current.tags,
+                                {
+                                    type: 'Tag',
+                                    name: `@${type}("${value}")`
+                                }
+                            ];
+                    };
+
+                    if (tmsCellIndex !== -1) {
+                        const tmsId = findTableCellValue(tmsCellIndex);
+                        addScenarioTag('tms', tmsId);
+                    }
+
+                    if (issueCellIndex !== -1) {
+                        const issueId = findTableCellValue(issueCellIndex);
+                        addScenarioTag('issue', issueId);
+                    }
                 }
             }
         }
@@ -693,6 +760,39 @@ module.exports = class AllureReporter {
     }
 
     cyCommandEndStep(step, log, commandStatus) {
+        if (log.name === 'request' && step.info.name.startsWith('request')) {
+            if (log.renderProps && log.renderProps.message) {
+                step.info.name = log.renderProps.message;
+            }
+
+            if (this.attachRequests && log.consoleProps) {
+                const request = Cypress._.last(log.consoleProps.Requests);
+                const response = log.consoleProps.Yielded;
+
+                const attach = (step, name, content) => {
+                    if (!content) {
+                        return;
+                    }
+                    const isText = typeof content === 'string';
+                    const fileType = isText ? 'text/plain' : 'application/json';
+                    const fileName = this.writeAttachment(
+                        isText ? content : JSON.stringify(content, null, 2),
+                        fileType
+                    );
+                    step.addAttachment(name, fileType, fileName);
+                };
+
+                if (request) {
+                    attach(step, 'requestHeaders', request['Request Headers']);
+                    attach(step, 'request', request['Request Body']);
+                }
+                if (response) {
+                    attach(step, 'responseHeaders', response.headers);
+                    attach(step, 'response', response.body);
+                }
+            }
+        }
+
         const passed =
             log && log.err
                 ? false

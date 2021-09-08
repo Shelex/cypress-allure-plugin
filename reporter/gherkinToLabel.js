@@ -16,8 +16,10 @@ const availableLabels = [
 ];
 const labelPattern = `@(${availableLabels.join('|')})\\("(.*?)"\\)`;
 const linkPattern = `@(issue|tms|link)\\("(.*?)",?"?(.*?)?"?\\)`;
+const exampleNumber = `(?:example #)(\\d)`;
 
 module.exports = {
     tagToLabel: new RegExp(labelPattern),
-    tagToLink: new RegExp(linkPattern)
+    tagToLink: new RegExp(linkPattern),
+    exampleNumber: new RegExp(exampleNumber)
 };

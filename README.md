@@ -94,6 +94,7 @@ Plugin is customizable via Cypress environment variables:
 | `tmsPrefix`                            | just a prefix substring or pattern with `*` for links from allure API in tests to test management system | ``               |
 | `issuePrefix`                          | prefix for links from allure API in tests to bug tracking system                                         | ``               |
 | `allureLogCypress`                     | log cypress chainer (commands) and display them as steps in report                                       | true             |
+| `allureAttachRequests`                 | attach `cy.request` headers, body, response headers, respose body to step automatically                  | false            |
 | `allureOmitPreviousAttemptScreenshots` | omit screenshots attached in previous attempts when retries are used                                     | false            |
 | `allureAddAnalyticLabels`              | add framework and language labels to tests (used for allure analytics only)                              | false            |
 | `allureAddVideoOnPass`                 | attach video to report for passed tests                                                                  | false            |
@@ -245,6 +246,23 @@ Allure API available:
 -   step(name: string, isParent: boolean)
 -   logStep(name: string)
 
+## Gherkin and tms or issue links
+
+It is posible to pass tms link or issue link with tags `tms("ABC-111")` and `issue("ABC-222")`.
+However, that will not work well with Scenario Outlines which may have different examples being linked to different tasks or test cases in tms.
+So, plugin will also parse your scenario outlines with examples and in case header in table will be `tms` or `issue` - it will add it as link to report.
+
+```gherkin
+    Scenario Outline: Some scenario
+        Given User want to link test <number> to tms
+        When User creates examples table with tms and issue headers
+        Then Links will be added to allure
+        Examples:
+            | tms    | issue   | number |
+            | TEST-1 | JIRA-11 | 1      |
+            | TEST-2 | JIRA-22 | 2      |
+```
+
 ## VS Code for cypress + cucumber
 
 In case you are using VS Code and [Cypress Helper](https://marketplace.visualstudio.com/items?itemName=Shelex.vscode-cy-helper) extension, it has configuration for allure cucumber tags autocompletion available:
@@ -259,9 +277,20 @@ In case you are using VS Code and [Cypress Helper](https://marketplace.visualstu
 
 ## Screenshots and Videos
 
-Screenshots are attached automatically, for other type of content feel free to use `testAttachment` (for current test), `attachment` (for current executable), `fileAttachment` (for existing file).  
-Videos are attached for failed tests only from path specified in cypress config `videosFolder` and in case you have not passed video=false to Cypress configuration. However videos will be linked by absolute path, so a trick to solve it is to set `"videosFolder": "allure-results"` (or value from your custom env variable 'allureResultsPath') in cypress.json or configuration options.
-Please take into account, that in case spec files have same name, cypress is trying to create subfolders in videos folder, and it is not handled from plugin unfortunately, so video may not have correct path in such edge case.
+Screenshots are attached automatically, for other type of content feel free to use `testAttachment` (for current test), `attachment` (for current executable), `fileAttachment` (for existing file).
+
+Videos are attached for failed tests only from path specified in cypress config `videosFolder` and in case you have not passed `video=false` to Cypress configuration.
+In case you want to attach videos for passed tests please use `allureAddVideoOnPass=true` env variable.
+
+Videos are quite tricky as Cypress has no events which we can use to catch event with video name as it is processed when test runner itself (cy) has closed.
+As a workaround we can add video link before even video is saved and then we have two options:
+
+1. `videosFolder` is set as `allure-results` (or custom value you can pass as `allureResultsPath`) in cypress.json or configuration options.
+   in this case video is written directly in allure-results and will be linked by name.
+2. `videosFolder` is outside `allure-results`
+   relative path from `allure-report` to `videosFolder` will be added.
+
+Please take into account, that in case spec files have same name, cypress is creating subfolders in videos folder, and it is not handled from plugin unfortunately, so video may not have correct path in such edge case.
 
 ## Cypress commands
 
