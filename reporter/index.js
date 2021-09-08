@@ -27,7 +27,7 @@ const config = {
     allureEnabled: () => env().allure,
     resultsPath: () => env().allureResultsPath || 'allure-results',
     shouldLogCypress: () => env().allureLogCypress !== false,
-    shouldAttachRequests: () => env().allureAttachRequest,
+    shouldAttachRequests: () => env().allureAttachRequests,
     allureDebug: () => env().allureDebug,
     clearFilesForPreviousAttempt: () =>
         env().allureOmitPreviousAttemptScreenshots,
