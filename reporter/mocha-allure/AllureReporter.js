@@ -760,23 +760,47 @@ module.exports = class AllureReporter {
     }
 
     cyCommandEndStep(step, log, commandStatus) {
-        if (log.name === 'request' && step.info.name.startsWith('request')) {
+        if (
+            // check for requests
+            log.name === 'request' ||
+            // or for then commands which have requests being logged in command log
+            (log.name === 'then' &&
+                log.consoleProps &&
+                log.consoleProps.Request)
+        ) {
             if (log.renderProps && log.renderProps.message) {
                 step.info.name = log.renderProps.message;
             }
 
             if (this.attachRequests && log.consoleProps) {
-                const request = Cypress._.last(log.consoleProps.Requests);
+                const request =
+                    log.consoleProps.Request ||
+                    Cypress._.last(log.consoleProps.Requests);
                 const response = log.consoleProps.Yielded;
 
                 const attach = (step, name, content) => {
                     if (!content) {
                         return;
                     }
-                    const isText = typeof content === 'string';
-                    const fileType = isText ? 'text/plain' : 'application/json';
+
+                    let jsonContent;
+
+                    try {
+                        jsonContent =
+                            typeof content === 'string'
+                                ? JSON.parse(content)
+                                : content;
+                    } catch (e) {
+                        // content is not json
+                    }
+
+                    const fileType = jsonContent
+                        ? 'application/json'
+                        : 'text/plain';
                     const fileName = this.writeAttachment(
-                        isText ? content : JSON.stringify(content, null, 2),
+                        jsonContent
+                            ? JSON.stringify(jsonContent, null, 2)
+                            : content,
                         fileType
                     );
                     step.addAttachment(name, fileType, fileName);
