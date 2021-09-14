@@ -159,8 +159,8 @@ const parseAllureProperties = (env) => {
 
     const propertyToCypressEnv = new Map([
         ['allure.results.directory', 'allureResultsPath'],
-        ['allure.link.issue.pattern', 'tmsPrefix'],
-        ['allure.link.tms.pattern', 'issuePrefix'],
+        ['allure.link.issue.pattern', 'issuePrefix'],
+        ['allure.link.tms.pattern', 'tmsPrefix'],
         ['allure.cypress.log.commands', 'allureLogCypress'],
         ['allure.cypress.log.requests', 'allureAttachRequests'],
         [
