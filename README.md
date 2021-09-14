@@ -129,8 +129,22 @@ This options could be passed:
         ```
 
 -   via `Cypress environment variables`:
+
     ```js
     Cypress.env('issuePrefix', 'url_to_bug_tracker');
+    ```
+
+-   via `allure.properties` file (but you still need to enable allure by passing `allure=true` to cypress env variables):
+
+    ```bash
+    allure.results.directory=custom_dir
+    allure.link.issue.pattern=https://example.com/task_
+    allure.link.tms.pattern=https://example.com/test_case_
+    allure.cypress.log.commands=true
+    allure.cypress.log.requests=true
+    allure.omit.previous.attempt.screenshot=true
+    allure.analytics=false
+    allure.video.passed=false
     ```
 
 ## Execution

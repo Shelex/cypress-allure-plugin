@@ -11,6 +11,8 @@ function allureWriter(on, config) {
     process.env.allureResultsPath =
         config.env.allureResultsPath || 'allure-results';
 
+    parseAllureProperties(config.env);
+
     on('task', {
         writeAllureResults: ({ results, files }) => {
             const { resultsDir, writer } = results;
@@ -122,6 +124,65 @@ const writeInfoFile = (fileName, data, resultsDir) => {
                 }
             );
     }
+};
+
+const parseAllureProperties = (env) => {
+    const allurePropertiesPath = 'allure.properties';
+
+    if (!fs.existsSync(allurePropertiesPath)) {
+        return null;
+    }
+
+    const propertiesContent = fs.readFileSync(allurePropertiesPath, {
+        encoding: 'utf-8'
+    });
+
+    if (!propertiesContent) {
+        return null;
+    }
+
+    const properties = propertiesContent
+        .split('\n')
+        .reduce((properties, record) => {
+            if (!record) {
+                return properties;
+            }
+
+            const [key, value] = record.split('=');
+            if (!key) {
+                return properties;
+            }
+
+            properties[key] = toBooleanMaybe(value);
+            return properties;
+        }, {});
+
+    const propertyToCypressEnv = new Map([
+        ['allure.results.directory', 'allureResultsPath'],
+        ['allure.link.issue.pattern', 'tmsPrefix'],
+        ['allure.link.tms.pattern', 'issuePrefix'],
+        ['allure.cypress.log.commands', 'allureLogCypress'],
+        ['allure.cypress.log.requests', 'allureAttachRequests'],
+        [
+            'allure.omit.previous.attempt.screenshot',
+            'allureOmitPreviousAttemptScreenshots'
+        ],
+        ['allure.analytics', 'allureAddAnalyticLabels'],
+        ['allure.video.passed', 'allureAddVideoOnPass']
+    ]);
+
+    propertyToCypressEnv.forEach((envName, name) => {
+        if (typeof properties[name] !== 'undefined') {
+            env[envName] = properties[name];
+        }
+    });
+};
+
+const toBooleanMaybe = (str) => {
+    if (str === 'true' || str === 'false') {
+        return str === 'true';
+    }
+    return str;
 };
 
 const overwriteTestNameMaybe = (test) => {
