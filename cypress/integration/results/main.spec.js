@@ -93,7 +93,8 @@ const expectedLabels = (mode, type) =>
               { name: 'severity', value: 'critical' },
               { name: 'story', value: `${type} api should work` },
               { name: 'suite', value: 'Allure API Context' },
-              { name: 'tag', value: 'customTag' }
+              { name: 'tag', value: 'customTag' },
+              { name: 'tag', value: 'customTag2' }
           ]
         : [
               { name: 'suite', value: 'AllureAPI' },

@@ -49,9 +49,9 @@
         "eslint": "7.32.0",
         "eslint-config-prettier": "8.3.0",
         "eslint-plugin-chai-friendly": "0.7.2",
-        "eslint-plugin-cypress": "2.11.3",
+        "eslint-plugin-cypress": "2.12.1",
         "eslint-plugin-prettier": "4.0.0",
-        "prettier": "2.3.2",
+        "prettier": "2.4.1",
         "semantic-release": "17.4.7"
     },
     "cypress-cucumber-preprocessor": {

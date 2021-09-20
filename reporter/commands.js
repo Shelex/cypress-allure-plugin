@@ -40,7 +40,7 @@ const childCommands = {
     },
     description: (allure, markdown) => allure.description(markdown),
     descriptionHtml: (allure, html) => allure.descriptionHtml(html),
-    tag: (allure, tag) => allure.tag(tag),
+    tag: (allure, ...tags) => allure.tag(...tags),
     testID: (allure, id) => allure.label('AS_ID', id),
     writeEnvironmentInfo: (allure, info) => allure.writeEnvironmentInfo(info),
     writeExecutorInfo: (allure, info) => allure.writeExecutorInfo(info),

@@ -149,7 +149,7 @@ declare global {
              * Add tag
              * @param tag
              */
-            tag(tag: string): Allure;
+            tag(...tags: string[]): Allure;
             /**
              * Add test case ID from Allure TestOps to link automated test
              */

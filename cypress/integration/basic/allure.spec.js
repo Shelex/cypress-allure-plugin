@@ -25,7 +25,7 @@ describe('Allure API Context', () => {
         allure.label('parentSuite', 'Allure API Parent Suite');
         allure.issue('bug', 'issueUrl');
         allure.tms('test case', 'tmsUrl');
-        allure.tag('customTag');
+        allure.tag('customTag', 'customTag2');
     });
 
     it('should work in chainer mode', () => {
@@ -42,7 +42,7 @@ describe('Allure API Context', () => {
             .label('parentSuite', 'Allure API Parent Suite')
             .issue('bug', 'issueUrl')
             .tms('test case', 'tmsUrl')
-            .tag('customTag');
+            .tag('customTag', 'customTag2');
     });
 
     it('should attach screenshot for failed test', () => {

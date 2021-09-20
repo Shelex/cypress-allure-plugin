@@ -208,7 +208,7 @@ cy.allure()
     .epic('This is epic')
     .issue('google', 'https://google.com')
     .parameter('name', 'value')
-    .tag('this is nice tag');
+    .tag('this is nice tag', 'as well as this');
 ```
 
 3. Using Cypress-cucumber-preprocessor with cucumber tags:
@@ -251,7 +251,7 @@ Allure API available:
 -   descriptionHtml(html: string)
 -   owner(owner: string)
 -   severity(severity: Severity)
--   tag(tag: string)
+-   tag(tags: ...string)
 -   attachment(name: string, content: Buffer | string, type: ContentType)
 -   testAttachment(name: string, content: Buffer | string, type: ContentType)
 -   fileAttachment(name: string, path: string, type: ContentType)
