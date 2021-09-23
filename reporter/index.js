@@ -37,11 +37,11 @@ const shouldEnableGherkinLogging = () => {
 
     // inherit logCypress in case directly set
     if (isLogCypressDefined && !isLogGherkinDefined) {
-        return logCypress;
+        return logCypress !== false;
     }
 
     // use env var
-    return logGherkin;
+    return logGherkin !== false;
 };
 
 const config = {
