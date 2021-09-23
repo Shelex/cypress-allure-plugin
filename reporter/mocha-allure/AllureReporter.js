@@ -30,6 +30,7 @@ module.exports = class AllureReporter {
         this.currentHook = null;
         this.parentStep = null;
         this.logCypress = options.logCypress || false;
+        this.logGherkinSteps = options.logGherkinSteps || false;
         this.attachRequests = options.attachRequests || false;
     }
 
@@ -440,6 +441,9 @@ module.exports = class AllureReporter {
                 : parent.addAfter();
             this.currentHook = allureHook;
         } else {
+            if (!this.logCypress) {
+                return;
+            }
             const step = this.currentTest.startStep(hook.title);
             this.currentHook = step;
         }
@@ -548,6 +552,20 @@ module.exports = class AllureReporter {
             return;
         }
 
+        // handle case when nothing should be logged
+        if (!this.logCypress && !this.logGherkinSteps) {
+            return;
+        }
+
+        // handle case when should log gherkin steps but not cy commands
+        if (
+            this.logGherkinSteps &&
+            !this.logCypress &&
+            !attributeIsGherkinStep(attributes)
+        ) {
+            return;
+        }
+
         // prepare chainer command object with specific information to process it with events
         const command = {
             id: attributes.chainerId,
@@ -602,9 +620,19 @@ module.exports = class AllureReporter {
         } else {
             const executable = this.cyCommandExecutable(command);
 
+            const displayArg = (arg) => {
+                if (typeof arg === 'function') {
+                    return 'function';
+                }
+                if (typeof arg === 'object') {
+                    return JSON.stringify(arg, null, 2);
+                }
+                return arg;
+            };
+
             const commandArgs =
                 attributes.args.length &&
-                attributes.args.map((a) => `"${String(a)}"`).join('; ');
+                attributes.args.map((arg) => `"${displayArg(arg)}"`).join('; ');
 
             const step = executable.startStep(
                 `${command.name}${commandArgs ? ` (${commandArgs})` : ''}`
@@ -655,6 +683,13 @@ module.exports = class AllureReporter {
                         if (callbacks.includes(command.name)) {
                             const executable =
                                 this.cyCommandExecutable(command);
+
+                            if (
+                                !this.logGherkinSteps &&
+                                attributeIsGherkinStep(attributes)
+                            ) {
+                                return;
+                            }
 
                             const step = this.cyStartStepForLog(
                                 executable,
@@ -859,8 +894,41 @@ module.exports = class AllureReporter {
             executable = this.currentTest;
         }
 
-        return executable.startStep(message());
+        const newStep = executable.startStep(message());
+
+        // parse docString for gherkin steps
+        if (
+            log.name === 'step' &&
+            log.consoleProps &&
+            log.consoleProps.step &&
+            log.consoleProps.step.argument &&
+            log.consoleProps.step.argument.content
+        ) {
+            newStep.addParameter(
+                log.consoleProps.step.argument.type,
+                log.consoleProps.step.argument.content
+            );
+        }
+
+        // add expected and actual for asserts
+        if (log.name === 'assert') {
+            const displayValue = (value) =>
+                typeof value === 'object'
+                    ? JSON.stringify(value, null, 2)
+                    : value;
+            log.actual &&
+                newStep.addParameter('actual', displayValue(log.actual));
+            log.expected &&
+                newStep.addParameter('expected', displayValue(log.expected));
+        }
+
+        return newStep;
     }
 };
+
+const attributeIsGherkinStep = (attribute) =>
+    attribute.args &&
+    attribute.args.length === 1 &&
+    attribute.args[0].toString().includes('state.onStartStep');
 
 const isEmpty = (hook) => hook && hook.body === 'function () {}';

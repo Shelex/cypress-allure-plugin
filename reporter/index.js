@@ -23,17 +23,43 @@ const stubbedAllure = require('./stubbedAllure');
 
 const { env } = Cypress;
 
+const shouldEnableGherkinLogging = () => {
+    const logCypress = env().allureLogCypress;
+    const logGherkin = env().allureLogGherkin;
+
+    const isLogCypressDefined = typeof (logCypress !== 'undefined');
+    const isLogGherkinDefined = typeof (logGherkin !== 'undefined');
+
+    // enable by default
+    if (!isLogCypressDefined && !isLogGherkinDefined) {
+        return true;
+    }
+
+    // inherit logCypress in case directly set
+    if (isLogCypressDefined && !isLogGherkinDefined) {
+        return logCypress;
+    }
+
+    // use env var
+    return logGherkin;
+};
+
 const config = {
     allureEnabled: () => env().allure,
     resultsPath: () => env().allureResultsPath || 'allure-results',
     shouldLogCypress: () => env().allureLogCypress !== false,
     shouldAttachRequests: () => env().allureAttachRequests,
+    shouldLogGherkinSteps: () => shouldEnableGherkinLogging(),
     allureDebug: () => env().allureDebug,
     clearFilesForPreviousAttempt: () =>
         env().allureOmitPreviousAttemptScreenshots,
     addAnalyticLabels: () => env().allureAddAnalyticLabels,
     addVideoOnPass: () => env().allureAddVideoOnPass
 };
+
+const shouldListenToCyCommandEvents = () =>
+    config.shouldLogCypress() || config.shouldLogGherkinSteps();
+
 class CypressAllureReporter {
     constructor() {
         this.reporter = new AllureReporter(
@@ -43,6 +69,7 @@ class CypressAllureReporter {
             }),
             {
                 logCypress: config.shouldLogCypress(),
+                logGherkinSteps: config.shouldLogGherkinSteps(),
                 attachRequests: config.shouldAttachRequests()
             }
         );
@@ -111,17 +138,17 @@ class CypressAllureReporter {
             });
 
         Cypress.on('command:enqueued', (command) => {
-            config.shouldLogCypress() &&
+            shouldListenToCyCommandEvents() &&
                 this.reporter.cyCommandEnqueue(command);
         });
 
         Cypress.on('command:start', (command) => {
-            config.shouldLogCypress() &&
+            shouldListenToCyCommandEvents() &&
                 this.reporter.cyCommandStart(command.attributes);
         });
 
         Cypress.on('command:end', (command) => {
-            config.shouldLogCypress() &&
+            shouldListenToCyCommandEvents() &&
                 this.reporter.cyCommandEnd(command.attributes);
         });
     }

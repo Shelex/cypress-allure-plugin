@@ -163,6 +163,7 @@ const parseAllureProperties = (env) => {
         ['allure.link.tms.pattern', 'tmsPrefix'],
         ['allure.cypress.log.commands', 'allureLogCypress'],
         ['allure.cypress.log.requests', 'allureAttachRequests'],
+        ['allure.cypress.log.gherkin', 'allureLogGherkin'],
         [
             'allure.omit.previous.attempt.screenshot',
             'allureOmitPreviousAttemptScreenshots'

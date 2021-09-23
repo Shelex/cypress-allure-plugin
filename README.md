@@ -87,17 +87,18 @@
 
 Plugin is customizable via Cypress environment variables:
 
-| env variable name                      | description                                                                                              | default          |
-| :------------------------------------- | :------------------------------------------------------------------------------------------------------- | :--------------- |
-| `allure`                               | enable Allure plugin                                                                                     | false            |
-| `allureResultsPath `                   | customize path to allure results folder                                                                  | `allure-results` |
-| `tmsPrefix`                            | just a prefix substring or pattern with `*` for links from allure API in tests to test management system | ``               |
-| `issuePrefix`                          | prefix for links from allure API in tests to bug tracking system                                         | ``               |
-| `allureLogCypress`                     | log cypress chainer (commands) and display them as steps in report                                       | true             |
-| `allureAttachRequests`                 | attach `cy.request` headers, body, response headers, respose body to step automatically                  | false            |
-| `allureOmitPreviousAttemptScreenshots` | omit screenshots attached in previous attempts when retries are used                                     | false            |
-| `allureAddAnalyticLabels`              | add framework and language labels to tests (used for allure analytics only)                              | false            |
-| `allureAddVideoOnPass`                 | attach video to report for passed tests                                                                  | false            |
+| env variable name                      | description                                                                                              | default                                                     |
+| :------------------------------------- | :------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------- |
+| `allure`                               | enable Allure plugin                                                                                     | false                                                       |
+| `allureResultsPath `                   | customize path to allure results folder                                                                  | `allure-results`                                            |
+| `tmsPrefix`                            | just a prefix substring or pattern with `*` for links from allure API in tests to test management system | ``                                                          |
+| `issuePrefix`                          | prefix for links from allure API in tests to bug tracking system                                         | ``                                                          |
+| `allureLogCypress`                     | log cypress chainer (commands) and display them as steps in report                                       | true                                                        |
+| `allureLogGherkin`                     | log gherkin steps from cucumber-preprocessor                                                             | inherits `allureLogCypress` value if not specified directly |
+| `allureAttachRequests`                 | attach `cy.request` headers, body, response headers, respose body to step automatically                  | false                                                       |
+| `allureOmitPreviousAttemptScreenshots` | omit screenshots attached in previous attempts when retries are used                                     | false                                                       |
+| `allureAddAnalyticLabels`              | add framework and language labels to tests (used for allure analytics only)                              | false                                                       |
+| `allureAddVideoOnPass`                 | attach video to report for passed tests                                                                  | false                                                       |
 
 This options could be passed:
 
@@ -142,6 +143,7 @@ This options could be passed:
     allure.link.tms.pattern=https://example.com/test_case_
     allure.cypress.log.commands=true
     allure.cypress.log.requests=true
+    allure.cypress.log.gherkin=true
     allure.omit.previous.attempt.screenshot=true
     allure.analytics=false
     allure.video.passed=false
