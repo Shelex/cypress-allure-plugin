@@ -444,7 +444,14 @@ module.exports = class AllureReporter {
             if (!this.logCypress) {
                 return;
             }
-            const step = this.currentTest.startStep(hook.title);
+            const customHookName = hook.title.replace(
+                /\"(before|after) each\" hook:? */g,
+                ''
+            );
+
+            const step = this.currentTest.startStep(
+                customHookName || hook.title
+            );
             this.currentHook = step;
         }
     }
