@@ -629,11 +629,20 @@ module.exports = class AllureReporter {
 
             const displayArg = (arg) => {
                 if (typeof arg === 'function') {
-                    return 'function';
+                    return '[function]';
                 }
                 if (typeof arg === 'object') {
-                    return JSON.stringify(arg, null, 2);
+                    if (
+                        arg.constructor.toString().includes('HTML') &&
+                        arg.constructor.toString().includes('Element') &&
+                        arg.constructor.toString().includes('The jQuery object')
+                    ) {
+                        return '[Object]';
+                    }
+
+                    return JSON.stringify(arg, getCircularReplacer(), 2);
                 }
+
                 return arg;
             };
 
@@ -859,6 +868,10 @@ module.exports = class AllureReporter {
             }
         }
 
+        if (step.info.name && log.name && log.message) {
+            step.info.name = `${log.name} ${log.message}`;
+        }
+
         const passed =
             log && log.err
                 ? false
@@ -921,7 +934,7 @@ module.exports = class AllureReporter {
         if (log.name === 'assert') {
             const displayValue = (value) =>
                 typeof value === 'object'
-                    ? JSON.stringify(value, null, 2)
+                    ? JSON.stringify(value, getCircularReplacer(), 2)
                     : value;
             log.actual &&
                 newStep.addParameter('actual', displayValue(log.actual));
@@ -939,3 +952,16 @@ const attributeIsGherkinStep = (attribute) =>
     attribute.args[0].toString().includes('state.onStartStep');
 
 const isEmpty = (hook) => hook && hook.body === 'function () {}';
+
+const getCircularReplacer = () => {
+    const seen = new WeakSet();
+    return (key, value) => {
+        if (typeof value === 'object' && value !== null) {
+            if (seen.has(value)) {
+                return;
+            }
+            seen.add(value);
+        }
+        return value;
+    };
+};
