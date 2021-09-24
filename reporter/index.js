@@ -53,6 +53,7 @@ const config = {
     allureDebug: () => env().allureDebug,
     clearFilesForPreviousAttempt: () =>
         env().allureOmitPreviousAttemptScreenshots,
+    clearSkipped: () => env().allureClearSkippedTests === true,
     addAnalyticLabels: () => env().allureAddAnalyticLabels,
     addVideoOnPass: () => env().allureAddVideoOnPass
 };
@@ -98,7 +99,8 @@ class CypressAllureReporter {
                                 'writeAllureResults',
                                 {
                                     results: this.reporter.runtime.config,
-                                    files: this.reporter.files
+                                    files: this.reporter.files,
+                                    clearSkipped: config.clearSkipped()
                                 },
                                 { log: false }
                             )

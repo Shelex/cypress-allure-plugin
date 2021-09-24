@@ -14,7 +14,7 @@ function allureWriter(on, config) {
     parseAllureProperties(config.env);
 
     on('task', {
-        writeAllureResults: ({ results, files }) => {
+        writeAllureResults: ({ results, files, clearSkipped }) => {
             const { resultsDir, writer } = results;
             const {
                 groups,
@@ -61,6 +61,20 @@ function allureWriter(on, config) {
                 groups &&
                     groups.forEach((group) => {
                         if (group.children.length) {
+                            if (clearSkipped) {
+                                // clear skipped tests from suite
+                                group.children = group.children.filter(
+                                    (testId) =>
+                                        tests.find(
+                                            (test) => test.uuid === testId
+                                        ).status !== 'skipped'
+                                );
+                                // skip suite if no tests assigned
+                                if (!group.children.length) {
+                                    return;
+                                }
+                            }
+
                             const fileName = `${group.uuid}-container.json`;
                             const groupResultPath = path.join(
                                 resultsDir,
@@ -84,6 +98,10 @@ function allureWriter(on, config) {
                     });
                 tests &&
                     tests.forEach((test) => {
+                        if (clearSkipped && test.status === 'skipped') {
+                            return;
+                        }
+
                         const fileName = `${test.uuid}-result.json`;
                         const testResultPath = path.join(resultsDir, fileName);
                         const testResult = overwriteTestNameMaybe(test);
