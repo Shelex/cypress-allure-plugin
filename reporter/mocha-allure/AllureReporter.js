@@ -868,7 +868,13 @@ module.exports = class AllureReporter {
             }
         }
 
-        if (step.info.name && log.name && log.message) {
+        const logNameNoOverride = ['request', 'step'];
+        if (
+            step.info.name &&
+            log.name &&
+            log.message &&
+            !logNameNoOverride.includes(log.name)
+        ) {
             step.info.name = `${log.name} ${log.message}`;
         }
 

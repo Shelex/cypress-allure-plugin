@@ -10,6 +10,8 @@ describe('Allure results', () => {
     ['basic', 'cucumber'].forEach((mode) => {
         it(`should contain suite results for ${mode}`, () => {
             const { suites, tests } = result[mode];
+            console.log(mode);
+            console.log(result[mode]);
             expect(suites).to.have.length(1);
             expect(suites[0].children).to.have.length(mode === 'basic' ? 4 : 1);
             expect(
@@ -21,14 +23,14 @@ describe('Allure results', () => {
 
         it(`should contain before all and after all hooks for ${mode}`, () => {
             const [suite] = result[mode].suites;
-            expect(suite.befores).to.have.length(mode === 'basic' ? 1 : 2);
+            expect(suite.befores).to.have.length(1);
             expect(
                 suite.befores.every(
                     (hook) =>
                         hook.status === 'passed' && hook.stage === 'finished'
                 )
             ).to.be.eq(true, 'before all hooks attached');
-            expect(suite.afters).to.have.length(mode === 'basic' ? 1 : 2);
+            expect(suite.afters).to.have.length(1);
             expect(
                 suite.afters.every(
                     (hook) =>
@@ -57,9 +59,9 @@ describe('Allure results', () => {
                     (hook) =>
                         hook.steps.length === 1 &&
                         hook.steps[0].name ===
-                            `log ("This will run ${hook.name
+                            `log This will run ${hook.name
                                 .replace(' each" hook', '')
-                                .substring(1)} every scenario")`
+                                .substring(1)} every scenario`
                 )
             ).to.be.eq(true, 'step attached');
         });
@@ -145,19 +147,19 @@ describe('Cucumber specific', () => {
         const expectedSteps = [
             {
                 name: 'Given I have allure tags set for Feature',
-                child: 'log ("child command for given")'
+                child: 'log child command for given'
             },
             {
                 name: 'When I run any test',
-                child: 'log ("child command for when")'
+                child: 'log child command for when'
             },
             {
                 name: 'Then I should see allure api working properly',
-                child: 'log ("child command for allure api "then" step")'
+                child: 'log child command for allure api "then" step'
             },
             {
                 name: 'And Tags from test should overwrite tags from feature',
-                child: 'log ("child command for tags overwriting "then" step")'
+                child: 'log child command for tags overwriting "then" step'
             }
         ];
 
@@ -307,7 +309,7 @@ describe('Basic specific', () => {
                 const [childStep] = step.steps;
                 verifyStep(childStep);
                 expect(childStep.name).to.be.eq(
-                    `log ("child command for ${order} step")`
+                    `log child command for ${order} step`
                 );
             }
         });
