@@ -64,10 +64,14 @@ function allureWriter(on, config) {
                             if (clearSkipped) {
                                 // clear skipped tests from suite
                                 group.children = group.children.filter(
-                                    (testId) =>
-                                        tests.find(
+                                    (testId) => {
+                                        const test = tests.find(
                                             (test) => test.uuid === testId
-                                        ).status !== 'skipped'
+                                        );
+                                        return (
+                                            test && test.status !== 'skipped'
+                                        );
+                                    }
                                 );
                                 // skip suite if no tests assigned
                                 if (!group.children.length) {
