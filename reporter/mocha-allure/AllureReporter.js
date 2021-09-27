@@ -963,6 +963,7 @@ module.exports = class AllureReporter {
 const attributeIsGherkinStep = (attribute) =>
     attribute.args &&
     attribute.args.length === 1 &&
+    attribute.args[0] &&
     attribute.args[0].toString &&
     attribute.args[0].toString === 'function' &&
     attribute.args[0].toString().includes('state.onStartStep');
