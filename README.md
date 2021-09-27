@@ -168,6 +168,10 @@ npx cypress run --env allure=true
 Cypress.Allure.reporter.runtime.writer;
 ```
 
+## Debugging
+
+Execute `localStorage.debug = 'allure-plugin'` in DevTools console to see additional debug output.
+
 ## Examples
 
 See [cypress-allure-plugin-example](https://github.com/Shelex/cypress-allure-plugin-example) project, which is already configured to use this plugin, hosting report as github page and run by github action. It has configuration for basic allure history saving (just having numbers and statuses in trends and history).  

@@ -1,3 +1,5 @@
+const logger = require('./debug');
+
 Cypress.Commands.add('allure', () => {
     cy.wrap(Cypress.Allure.reporter.getInterface(), {
         log: false
@@ -51,6 +53,11 @@ const childCommands = {
 for (const command in childCommands) {
     Cypress.Commands.add(command, { prevSubject: true }, (...args) => {
         const [allure] = args;
+        logger(
+            `[commands] starting command "%s" with args: %O`,
+            command,
+            args.slice(1)
+        );
         childCommands[command](...args);
         cy.wrap(allure, { log: false });
     });
