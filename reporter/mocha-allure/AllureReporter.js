@@ -633,9 +633,13 @@ module.exports = class AllureReporter {
                 }
                 if (typeof arg === 'object') {
                     if (
-                        arg.constructor.toString().includes('HTML') &&
-                        arg.constructor.toString().includes('Element') &&
-                        arg.constructor.toString().includes('The jQuery object')
+                        arg &&
+                        arg.constructor &&
+                        ((arg.constructor.toString().includes('HTML') &&
+                            arg.constructor.toString().includes('Element')) ||
+                            arg.constructor
+                                .toString()
+                                .includes('The jQuery object'))
                     ) {
                         return '[Object]';
                     }
