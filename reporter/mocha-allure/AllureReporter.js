@@ -635,6 +635,7 @@ module.exports = class AllureReporter {
                     if (
                         arg &&
                         arg.constructor &&
+                        arg.constructor.toString &&
                         typeof arg.constructor.toString === 'function' &&
                         ((arg.constructor.toString().includes('HTML') &&
                             arg.constructor.toString().includes('Element')) ||
@@ -962,6 +963,7 @@ module.exports = class AllureReporter {
 const attributeIsGherkinStep = (attribute) =>
     attribute.args &&
     attribute.args.length === 1 &&
+    attribute.args[0].toString &&
     attribute.args[0].toString === 'function' &&
     attribute.args[0].toString().includes('state.onStartStep');
 
