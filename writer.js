@@ -86,12 +86,18 @@ function allureWriter(on, config) {
                             );
 
                             // remove empty set up and tear down global hooks
-                            group.befores = group.befores.filter(
-                                (before) => before.steps.length
-                            );
-                            group.afters = group.afters.filter(
-                                (after) => after.steps.length
-                            );
+                            group.befores =
+                                (group.befores &&
+                                    group.befores.filter(
+                                        (before) => before.steps.length
+                                    )) ||
+                                [];
+                            group.afters =
+                                (group.afters &&
+                                    group.afters.filter(
+                                        (after) => after.steps.length
+                                    )) ||
+                                [];
 
                             !fs.existsSync(groupResultPath) &&
                                 fs.writeFileSync(

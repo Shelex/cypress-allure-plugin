@@ -635,6 +635,7 @@ module.exports = class AllureReporter {
                     if (
                         arg &&
                         arg.constructor &&
+                        typeof arg.constructor.toString === 'function' &&
                         ((arg.constructor.toString().includes('HTML') &&
                             arg.constructor.toString().includes('Element')) ||
                             arg.constructor
@@ -874,6 +875,8 @@ module.exports = class AllureReporter {
 
         const logNameNoOverride = ['request', 'step'];
         if (
+            step &&
+            step.info &&
             step.info.name &&
             log.name &&
             log.message &&
@@ -959,6 +962,7 @@ module.exports = class AllureReporter {
 const attributeIsGherkinStep = (attribute) =>
     attribute.args &&
     attribute.args.length === 1 &&
+    attribute.args[0].toString === 'function' &&
     attribute.args[0].toString().includes('state.onStartStep');
 
 const isEmpty = (hook) => hook && hook.body === 'function () {}';
