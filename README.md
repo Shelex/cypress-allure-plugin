@@ -170,7 +170,10 @@ Cypress.Allure.reporter.runtime.writer;
 
 ## Debugging
 
-Execute `localStorage.debug = 'allure-plugin'` in DevTools console to see additional debug output.
+-   In-browser logs
+    execute `localStorage.debug = 'allure-plugin*'` in DevTools console
+-   Writer task
+    add `DEBUG=allure-plugin*` before cypress run\open command
 
 ## Examples
 

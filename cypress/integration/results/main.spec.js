@@ -10,8 +10,6 @@ describe('Allure results', () => {
     ['basic', 'cucumber'].forEach((mode) => {
         it(`should contain suite results for ${mode}`, () => {
             const { suites, tests } = result[mode];
-            console.log(mode);
-            console.log(result[mode]);
             expect(suites).to.have.length(1);
             expect(suites[0].children).to.have.length(mode === 'basic' ? 4 : 1);
             expect(

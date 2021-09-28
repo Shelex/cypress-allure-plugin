@@ -53,11 +53,7 @@ const childCommands = {
 for (const command in childCommands) {
     Cypress.Commands.add(command, { prevSubject: true }, (...args) => {
         const [allure] = args;
-        logger(
-            `[commands] starting command "%s" with args: %O`,
-            command,
-            args.slice(1)
-        );
+        logger.command(`"%s" with args: %O`, command, args.slice(1));
         childCommands[command](...args);
         cy.wrap(allure, { log: false });
     });

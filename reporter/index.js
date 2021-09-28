@@ -25,11 +25,11 @@ const logger = require('./debug');
 const { env } = Cypress;
 
 const shouldEnableGherkinLogging = () => {
-    const logCypress = env().allureLogCypress;
-    const logGherkin = env().allureLogGherkin;
+    const logCypress = env('allureLogCypress');
+    const logGherkin = env('allureLogGherkin');
 
-    const isLogCypressDefined = typeof (logCypress !== 'undefined');
-    const isLogGherkinDefined = typeof (logGherkin !== 'undefined');
+    const isLogCypressDefined = typeof logCypress !== 'undefined';
+    const isLogGherkinDefined = typeof logGherkin !== 'undefined';
 
     // enable by default
     if (!isLogCypressDefined && !isLogGherkinDefined) {
@@ -38,7 +38,7 @@ const shouldEnableGherkinLogging = () => {
 
     // inherit logCypress in case directly set
     if (isLogCypressDefined && !isLogGherkinDefined) {
-        return logCypress !== false;
+        return logCypress;
     }
 
     // use env var
@@ -46,17 +46,16 @@ const shouldEnableGherkinLogging = () => {
 };
 
 const config = {
-    allureEnabled: () => env().allure,
-    resultsPath: () => env().allureResultsPath || 'allure-results',
-    shouldLogCypress: () => env().allureLogCypress !== false,
-    shouldAttachRequests: () => env().allureAttachRequests,
+    allureEnabled: () => env('allure'),
+    resultsPath: () => env('allureResultsPath') || 'allure-results',
+    shouldLogCypress: () => env('allureLogCypress') !== false,
+    shouldAttachRequests: () => env('allureAttachRequests'),
     shouldLogGherkinSteps: () => shouldEnableGherkinLogging(),
-    allureDebug: () => env().allureDebug,
     clearFilesForPreviousAttempt: () =>
-        env().allureOmitPreviousAttemptScreenshots,
-    clearSkipped: () => env().allureClearSkippedTests === true,
-    addAnalyticLabels: () => env().allureAddAnalyticLabels,
-    addVideoOnPass: () => env().allureAddVideoOnPass
+        env('allureOmitPreviousAttemptScreenshots'),
+    clearSkipped: () => env('allureClearSkippedTests') === true,
+    addAnalyticLabels: () => env('allureAddAnalyticLabels'),
+    addVideoOnPass: () => env('allureAddVideoOnPass')
 };
 
 const shouldListenToCyCommandEvents = () =>
@@ -64,7 +63,10 @@ const shouldListenToCyCommandEvents = () =>
 
 class CypressAllureReporter {
     constructor() {
-        logger(`creating allure reporter instance, cypress env: %O`, env());
+        logger.allure(
+            `creating allure reporter instance, cypress env: %O`,
+            env()
+        );
         this.reporter = new AllureReporter(
             new AllureRuntime({
                 resultsDir: config.resultsPath(),
@@ -80,11 +82,11 @@ class CypressAllureReporter {
         Cypress.mocha
             .getRunner()
             .on(EVENT_SUITE_BEGIN, (suite) => {
-                logger(`[mocha] EVENT_SUITE_BEGIN: %s %O`, suite.title, suite);
+                logger.mocha(`EVENT_SUITE_BEGIN: %s %O`, suite.title, suite);
                 this.reporter.startSuite(suite.fullTitle());
             })
             .on(EVENT_SUITE_END, (suite) => {
-                logger(`[mocha] EVENT_SUITE_END: %s %O`, suite.title, suite);
+                logger.mocha(`EVENT_SUITE_END: %s %O`, suite.title, suite);
                 /**
                  * only global cypress file suite end
                  * should be triggered from here
@@ -107,37 +109,37 @@ class CypressAllureReporter {
                         )
                             // eslint-disable-next-line no-console
                             .catch((e) =>
-                                logger(
+                                logger.allure(
                                     `failed to execute task to write allure results: %O`,
                                     e
                                 )
                             );
-                        logger(`writing allure results`);
+                        logger.allure(`writing allure results`);
                     } catch (e) {
                         // happens when cy.task could not be executed due to fired outside of it
-                        logger(`failed to write allure results: %O`, e);
+                        logger.allure(`failed to write allure results: %O`, e);
                     }
                 }
             })
             .on(EVENT_TEST_BEGIN, (test) => {
-                logger(`[mocha] EVENT_TEST_BEGIN: %s %O`, test.title, test);
+                logger.mocha(`EVENT_TEST_BEGIN: %s %O`, test.title, test);
                 this.reporter.startCase(test, config);
             })
             .on(EVENT_TEST_FAIL, (test, err) => {
-                logger(`[mocha] EVENT_TEST_FAIL: %s %O`, test.title, test);
+                logger.mocha(`EVENT_TEST_FAIL: %s %O`, test.title, test);
                 this.reporter.failTestCase(test, err);
                 attachVideo(this.reporter, test, 'failed');
             })
             .on(EVENT_TEST_PASS, (test) => {
-                logger(`[mocha] EVENT_TEST_PASS: %s %O`, test.title, test);
+                logger.mocha(`EVENT_TEST_PASS: %s %O`, test.title, test);
                 this.reporter.passTestCase(test);
             })
             .on(EVENT_TEST_PENDING, (test) => {
-                logger(`[mocha] EVENT_TEST_PENDING: %s %O`, test.title, test);
+                logger.mocha(`EVENT_TEST_PENDING: %s %O`, test.title, test);
                 this.reporter.pendingTestCase(test);
             })
             .on(EVENT_TEST_END, (test) => {
-                logger(`[mocha] EVENT_TEST_END: %s %O`, test.title, test);
+                logger.mocha(`EVENT_TEST_END: %s %O`, test.title, test);
                 attachVideo(this.reporter, test, 'finished');
 
                 this.reporter.populateGherkinLinksFromExampleTable();
@@ -145,31 +147,31 @@ class CypressAllureReporter {
                 this.reporter.endTest();
             })
             .on(EVENT_HOOK_BEGIN, (hook) => {
-                logger(`[mocha] EVENT_HOOK_BEGIN: %s %O`, hook.title, hook);
+                logger.mocha(`EVENT_HOOK_BEGIN: %s %O`, hook.title, hook);
                 this.reporter.startHook(hook);
             })
             .on(EVENT_HOOK_END, (hook) => {
-                logger(`[mocha] EVENT_HOOK_END: %s %O`, hook.title, hook);
+                logger.mocha(`EVENT_HOOK_END: %s %O`, hook.title, hook);
                 this.reporter.endHook(hook);
             });
 
         Cypress.on('command:enqueued', (command) => {
             if (shouldListenToCyCommandEvents()) {
-                logger(`[cypress] command:enqueued %O`, command);
+                logger.cy(`command:enqueued %O`, command);
                 this.reporter.cyCommandEnqueue(command);
             }
         });
 
         Cypress.on('command:start', (command) => {
             if (shouldListenToCyCommandEvents()) {
-                logger(`[cypress] command:start %O`, command);
+                logger.cy(`command:start %O`, command);
                 this.reporter.cyCommandStart(command.attributes);
             }
         });
 
         Cypress.on('command:end', (command) => {
             if (shouldListenToCyCommandEvents()) {
-                logger(`[cypress] command:end %O`, command);
+                logger.cy(`command:end %O`, command);
                 this.reporter.cyCommandEnd(command.attributes);
             }
         });
@@ -182,9 +184,9 @@ Cypress.Allure = config.allureEnabled()
 
 Cypress.Screenshot.defaults({
     onAfterScreenshot(_, details) {
-        logger(`[cypress] onAfterScreenshot: %O`, details);
+        logger.cy(`onAfterScreenshot: %O`, details);
         if (config.allureEnabled()) {
-            logger(`[cypress] allure enabled, attaching screenshot`);
+            logger.allure(`allure enabled, attaching screenshot`);
             Cypress.Allure.reporter.files.push({
                 name: details.name || `${details.specName}:${details.takenAt}`,
                 path: details.path,
@@ -201,7 +203,7 @@ const attachVideo = (reporter, test, status) => {
             ? true
             : test.state !== 'failed' && config.addVideoOnPass();
 
-    logger(`[allure] check video attachment`);
+    logger.allure(`check video attachment`);
 
     if (Cypress.config().video && reporter.currentTest) {
         // add video to failed test case or for passed in case addVideoOnPass is true
@@ -231,8 +233,8 @@ const attachVideo = (reporter, test, status) => {
                 return;
             }
 
-            logger(
-                `[allure] attaching video %s`,
+            logger.allure(
+                `attaching video %s`,
                 path.join(relativeVideoPath, fileName)
             );
 

@@ -2,6 +2,7 @@ const path = require('path');
 const fs = require('fs');
 const uuid = require('uuid');
 const crypto = require('crypto-js');
+const logger = require('./reporter/debug');
 
 function allureWriter(on, config) {
     // pass allure config from Cypress.env to process.env
@@ -16,6 +17,10 @@ function allureWriter(on, config) {
     on('task', {
         writeAllureResults: ({ results, files, clearSkipped }) => {
             const { resultsDir, writer } = results;
+            logger.writer(
+                'starting writing allure results to "%s"',
+                resultsDir
+            );
             const {
                 groups,
                 tests,
@@ -35,6 +40,11 @@ function allureWriter(on, config) {
                                 resultsDir,
                                 `${uuid.v4()}-attachment${ext}`
                             );
+                            logger.writer(
+                                'copy attachment "%s" to "%s"',
+                                file.path,
+                                allureFilePath
+                            );
 
                             fs.copyFileSync(file.path, allureFilePath);
 
@@ -49,6 +59,11 @@ function allureWriter(on, config) {
                                 );
 
                                 testsForAttachment.forEach((test) => {
+                                    logger.writer(
+                                        'attach "%s" to test "%s"',
+                                        path.basename(allureFilePath),
+                                        test.name
+                                    );
                                     test.attachments.push({
                                         name: file.name,
                                         type: file.type,
@@ -62,7 +77,10 @@ function allureWriter(on, config) {
                     groups.forEach((group) => {
                         if (group.children.length) {
                             if (clearSkipped) {
-                                // clear skipped tests from suite
+                                logger.writer(
+                                    'clearing skipped tests enabled, removing tests from suite %s',
+                                    group.name
+                                );
                                 group.children = group.children.filter(
                                     (testId) => {
                                         const test = tests.find(
@@ -73,8 +91,10 @@ function allureWriter(on, config) {
                                         );
                                     }
                                 );
-                                // skip suite if no tests assigned
                                 if (!group.children.length) {
+                                    logger.writer(
+                                        'skip suite as it has no tests remained'
+                                    );
                                     return;
                                 }
                             }
@@ -82,6 +102,12 @@ function allureWriter(on, config) {
                             const fileName = `${group.uuid}-container.json`;
                             const groupResultPath = path.join(
                                 resultsDir,
+                                fileName
+                            );
+
+                            logger.writer(
+                                'write suite "%s" to file "%s"',
+                                group.name,
                                 fileName
                             );
 
@@ -109,10 +135,16 @@ function allureWriter(on, config) {
                 tests &&
                     tests.forEach((test) => {
                         if (clearSkipped && test.status === 'skipped') {
+                            logger.writer('skipping test "%s"', test.name);
                             return;
                         }
 
                         const fileName = `${test.uuid}-result.json`;
+                        logger.writer(
+                            'write test "%s" to file "%s"',
+                            test.name,
+                            fileName
+                        );
                         const testResultPath = path.join(resultsDir, fileName);
                         const testResult = overwriteTestNameMaybe(test);
                         !fs.existsSync(testResultPath) &&
@@ -124,6 +156,13 @@ function allureWriter(on, config) {
                 if (attachments) {
                     for (let [name, content] of Object.entries(attachments)) {
                         const attachmentPath = path.join(resultsDir, name);
+
+                        logger.writer(
+                            'write attachment "%s" to "%s"',
+                            name,
+                            attachmentPath
+                        );
+
                         !fs.existsSync(attachmentPath) &&
                             fs.writeFileSync(attachmentPath, content, {
                                 encoding: 'binary'
@@ -133,10 +172,12 @@ function allureWriter(on, config) {
                 writeInfoFile('categories.json', categories, resultsDir);
                 writeInfoFile('executor.json', executorInfo, resultsDir);
                 writeInfoFile('environment.properties', envInfo, resultsDir);
+                logger.writer('finished writing allure results');
             } catch (e) {
                 process.stdout.write(
                     `error while writing allure results: ${e}`
                 );
+                logger.writer('failed to write allure results: %O', e);
             } finally {
                 return null;
             }
@@ -146,6 +187,7 @@ function allureWriter(on, config) {
 
 const writeInfoFile = (fileName, data, resultsDir) => {
     if (data) {
+        logger.writer('write file "%s"', fileName);
         const isEnvProps = fileName === 'environment.properties';
         isEnvProps &&
             (data = Object.keys(data)
@@ -229,6 +271,7 @@ const overwriteTestNameMaybe = (test) => {
     );
     if (overrideIndex !== -1) {
         const name = test.parameters[overrideIndex].value;
+        logger.writer('overwriting test "%s" name to "%s"', test.name, name);
         test.name = name;
         test.fullName = name;
         test.historyId = crypto.MD5(name).toString(crypto.enc.Hex);

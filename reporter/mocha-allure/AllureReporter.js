@@ -119,35 +119,35 @@ module.exports = class AllureReporter {
                  * but if previous suite is not global
                  * it should be finished, and new one created
                  */
-                logger(`[allure] finish previous suite %O`, this.currentSuite);
+                logger.allure(`finish previous suite %O`, this.currentSuite);
                 this.endSuite(true);
             }
         }
         const scope = this.currentSuite || this.runtime;
         const suite = scope.startGroup(suiteName || 'Global');
-        logger(`[allure] start suite %O`, suite);
+        logger.allure(`start suite %O`, suite);
         this.pushSuite(suite);
     }
 
     endSuite(isGlobal = false) {
         if (this.currentSuite && isGlobal) {
             this.cyCommandsFinish(Status.PASSED);
-            logger(`[allure] finished cypress commands`);
+            logger.allure(`finished cypress commands`);
             this.finishAllSteps(Status.PASSED);
-            logger(`[allure] finished steps`);
+            logger.allure(`finished steps`);
             this.currentStep !== null && this.currentStep.endStep();
             this.currentSuite.endGroup();
             this.popSuite();
-            logger(`[allure] finished suite`);
+            logger.allure(`finished suite`);
         }
         // restrict label storage to single suite scope
         this.labelStorage = [];
     }
 
     startCase(test, config) {
-        logger(`[allure] starting case %s %O`, test.title, test);
+        logger.allure(`starting case %s %O`, test.title, test);
         if (this.currentSuite === null) {
-            logger(`[allure] no active suite available`);
+            logger.allure(`no active suite available`);
             throw new Error('No active suite');
         }
 
@@ -163,7 +163,7 @@ module.exports = class AllureReporter {
             this.currentTest.info.status === 'skipped' &&
             this.currentTest.info.name === test.title
         ) {
-            logger(`[allure] skipped test already exists`);
+            logger.allure(`skipped test already exists`);
             return;
         }
 
@@ -180,7 +180,7 @@ module.exports = class AllureReporter {
             config.clearFilesForPreviousAttempt() &&
             test._currentRetry > 0
         ) {
-            logger(`[allure] clearing screenshots from previous retries`);
+            logger.allure(`clearing screenshots from previous retries`);
             // remove screenshots from previous attempt
             this.files = this.files.filter(
                 (file) => file.testName !== test.title
@@ -188,7 +188,7 @@ module.exports = class AllureReporter {
         }
 
         if (config && config.addAnalyticLabels()) {
-            logger(`[allure] adding analytic labels`);
+            logger.allure(`adding analytic labels`);
             this.currentTest.addLabel(LabelName.FRAMEWORK, 'Cypress');
             const language = languageLabel(test);
             language && this.currentTest.addLabel(LabelName.LANGUAGE, language);
@@ -225,7 +225,7 @@ module.exports = class AllureReporter {
             const { testState } = globalThis;
 
             if (testState.currentScenario.keyword === 'Scenario Outline') {
-                logger(`[allure] populating gherkin links from examples table`);
+                logger.allure(`populating gherkin links from examples table`);
                 const scenario = testState.currentScenario;
 
                 !this.gherkinExamplesStorage.length &&
@@ -274,13 +274,13 @@ module.exports = class AllureReporter {
 
                     if (tmsCellIndex !== -1) {
                         const tmsId = findTableCellValue(tmsCellIndex);
-                        logger(`[allure] found tms link: %s`, issueId);
+                        logger.allure(`found tms link: %s`, issueId);
                         addScenarioTag('tms', tmsId);
                     }
 
                     if (issueCellIndex !== -1) {
                         const issueId = findTableCellValue(issueCellIndex);
-                        logger(`[allure] found issue link: %s`, issueId);
+                        logger.allure(`found issue link: %s`, issueId);
                         addScenarioTag('issue', issueId);
                     }
                 }
@@ -291,7 +291,7 @@ module.exports = class AllureReporter {
     // accept cucumber tags from cypress-cucumber-preprocessor as commands
     handleCucumberTags() {
         if (globalThis && globalThis.testState) {
-            logger(`[allure] parsing gherkin tags`);
+            logger.allure(`parsing gherkin tags`);
             const { testState } = globalThis;
             const { currentTest } = this;
 
@@ -303,7 +303,7 @@ module.exports = class AllureReporter {
              * to not be overwritten by feature tags
              */
             ['feature', 'currentScenario'].forEach(function (type) {
-                logger(`[allure] tags for %s`, type);
+                logger.allure(`tags for %s`, type);
                 testState[type] &&
                     testState[type].tags
                         // check for labels
@@ -366,38 +366,38 @@ module.exports = class AllureReporter {
 
     passTestCase(test) {
         if (this.currentTest === null) {
-            logger(`[allure] not found allure test, created new`);
+            logger.allure(`not found allure test, created new`);
             this.startCase(test);
         }
         this.updateTest(Status.PASSED);
-        logger(`[allure] set passed for test: %s %O`, test.title, test);
+        logger.allure(`set passed for test: %s %O`, test.title, test);
     }
 
     pendingTestCase(test) {
         this.startCase(test);
         this.updateTest(Status.SKIPPED, { message: 'Test ignored' });
-        logger(
-            `[allure] created new test and set to pending: %s %O`,
+        logger.allure(
+            `created new test and set to pending: %s %O`,
             test.title,
             test
         );
     }
 
     failTestCase(test, error) {
-        logger(
-            `[allure] received test failed event: %s, %O, %O`,
+        logger.allure(
+            `received test failed event: %s, %O, %O`,
             test.title,
             test,
             error
         );
         if (this.currentTest === null) {
-            logger(`[allure] not found test, created new`);
+            logger.allure(`not found test, created new`);
             this.startCase(test);
         } else {
             const latestStatus = this.currentTest.status;
             // if test already has a failed state, we should not overwrite it
             if (latestStatus && latestStatus !== Status.PASSED) {
-                logger(`[allure] test already has failed status`);
+                logger.allure(`test already has failed status`);
                 return;
             }
         }
@@ -409,7 +409,7 @@ module.exports = class AllureReporter {
          * in case error comes from hook
          */
         if (test.type === 'hook') {
-            logger(`[allure] test error origin is hook`);
+            logger.allure(`test error origin is hook`);
             this.endHook(test, true);
             /**
              * in case of before all cypress creates new test
@@ -418,8 +418,8 @@ module.exports = class AllureReporter {
              */
 
             if (test.hookName && test.hookName === 'before all') {
-                logger(
-                    `[allure] finishing test as no events received for failed test in before all hook`
+                logger.allure(
+                    `finishing test as no events received for failed test in before all hook`
                 );
                 this.endTest();
             }
@@ -461,9 +461,9 @@ module.exports = class AllureReporter {
     }
 
     startHook(hook) {
-        logger(`[allure] starting hook %s`, hook.title);
+        logger.allure(`starting hook %s`, hook.title);
         if (!this.currentSuite || isEmpty(hook)) {
-            logger(`[allure] no suite or hook is empty function`);
+            logger.allure(`no suite or hook is empty function`);
             return;
         }
         /**
@@ -494,9 +494,9 @@ module.exports = class AllureReporter {
     }
 
     endHook(hook, failed = false) {
-        logger(`[allure] finishing hook %s`, hook.title);
+        logger.allure(`finishing hook %s`, hook.title);
         if (!this.currentSuite || !this.currentHook || isEmpty(hook)) {
-            logger(`[allure] no suite or no hook or hook is empty function`);
+            logger.allure(`no suite or no hook or hook is empty function`);
             return;
         }
         // should define results property for all or each hook
@@ -546,7 +546,7 @@ module.exports = class AllureReporter {
     }
 
     endTest() {
-        logger(`[allure] finishing current test`);
+        logger.allure(`finishing current test`);
         this.currentTest && this.currentTest.endTest();
     }
 
@@ -576,11 +576,7 @@ module.exports = class AllureReporter {
     }
 
     cyCommandEnqueue(attributes) {
-        logger(
-            `[allure:cy] cyCommandEnqueue: %s %O`,
-            attributes.name,
-            attributes
-        );
+        logger.cy(`cyCommandEnqueue: %s %O`, attributes.name, attributes);
         // skipped are:
         // assertions, as they don't receive command:start and command:end events and are hardly trackable
         // allure custom command used for interacting with allure api
@@ -601,13 +597,13 @@ module.exports = class AllureReporter {
         };
 
         if (commandShouldBeSkipped(attributes)) {
-            logger(`[allure:cy] command should be skipped`);
+            logger.cy(`command should be skipped`);
             return;
         }
 
         // handle case when nothing should be logged
         if (!this.logCypress && !this.logGherkinSteps) {
-            logger(`[allure:cy] logging cy commands is disabled`);
+            logger.cy(`logging cy commands is disabled`);
             return;
         }
 
@@ -617,7 +613,7 @@ module.exports = class AllureReporter {
             !this.logCypress &&
             !attributeIsGherkinStep(attributes)
         ) {
-            logger(`[allure:cy] is not a gherkin step`);
+            logger.cy(`is not a gherkin step`);
             return;
         }
 
@@ -635,7 +631,7 @@ module.exports = class AllureReporter {
         };
 
         this.commands.push(command);
-        logger(`[allure:cy] tracking command: %O`, command);
+        logger.cy(`tracking command: %O`, command);
 
         // in case command in enqueued while there was active chainer - treat it as parent
         // so this command should be added as child to track if we should finish parent command step
@@ -645,16 +641,12 @@ module.exports = class AllureReporter {
             );
             // set new child from start as command queue works as LIFO (last in - first out) approach
             parent && parent.children.unshift(command.id);
-            logger(`[allure:cy] added as child of command: %O`, parent);
+            logger.cy(`added as child of command: %O`, parent);
         }
     }
 
     cyCommandStart(attributes) {
-        logger(
-            `[allure:cy] cyCommandStart: %s %O`,
-            attributes.name,
-            attributes
-        );
+        logger.cy(`cyCommandStart: %s %O`, attributes.name, attributes);
         // check if we have enqueued command
         const command = this.commands.find(
             (command) =>
@@ -665,11 +657,11 @@ module.exports = class AllureReporter {
         );
 
         if (!command) {
-            logger(`[allure:cy] command not available`);
+            logger.cy(`command not available`);
             return;
         }
 
-        logger(`[allure:cy] tracked info about command: %O`, command);
+        logger.cy(`tracked info about command: %O`, command);
 
         command.commandLog = attributes;
 
@@ -686,7 +678,7 @@ module.exports = class AllureReporter {
             const executable = this.cyCommandExecutable(command);
 
             const displayArg = (arg) => {
-                logger(`checking argument %O and provide to step`, arg);
+                logger.cy(`checking argument %O and provide to step`, arg);
                 if (typeof arg === 'function') {
                     return '[function]';
                 }
@@ -719,11 +711,7 @@ module.exports = class AllureReporter {
                 `${command.name}${commandArgs ? ` (${commandArgs})` : ''}`
             );
 
-            logger(
-                `[allure:cy] started allure step %s %O`,
-                step.info.name,
-                step
-            );
+            logger.cy(`started allure step %s %O`, step.info.name, step);
 
             command.step = step;
         }
@@ -731,7 +719,7 @@ module.exports = class AllureReporter {
     }
 
     cyCommandEnd(attributes, failed = false) {
-        logger(`[allure:cy] cyCommandEnd: %s %O`, attributes.name, attributes);
+        logger.cy(`cyCommandEnd: %s %O`, attributes.name, attributes);
         // check if we have enqueued command
         const command = this.commands.find(
             (command) =>
@@ -742,20 +730,20 @@ module.exports = class AllureReporter {
         );
 
         if (!command) {
-            logger(`[allure:cy] command not available`);
+            logger.cy(`command not available`);
             return;
         }
 
-        logger(`[allure:cy] tracked info about command: %O`, command);
+        logger.cy(`tracked info about command: %O`, command);
         this.currentChainer = null;
 
         // in case no children enqueued - finish this step
         if (!command.children.length || failed) {
-            logger(`[allure:cy] no children enqueued left, finishing step`);
+            logger.cy(`no children enqueued left, finishing step`);
             // check if command has some entries for command log
             if (command.commandLog.logs.length) {
-                logger(
-                    `[allure:cy] found command log entries %O`,
+                logger.cy(
+                    `found command log entries %O`,
                     command.commandLog.logs
                 );
                 // set first command log (which refers to current command) as last
@@ -770,18 +758,18 @@ module.exports = class AllureReporter {
                     try {
                         log = entry.toJSON();
                     } catch (e) {
-                        logger(
-                            `[allure:cy] could not call toJSON for command log entry #%d, %O`,
+                        logger.cy(
+                            `could not call toJSON for command log entry #%d, %O`,
                             index,
                             entry
                         );
                         return;
                     }
-                    logger(`[allure:cy] checking entry #%d, %O`, index, log);
+                    logger.cy(`checking entry #%d, %O`, index, log);
 
                     // for main log (which we set last) we should finish command step
                     if (index === command.commandLog.logs.length - 1) {
-                        logger(`[allure:cy] last entry, finishing step`);
+                        logger.cy(`last entry, finishing step`);
                         // in case "then" command has some logging - create step for that
                         if (callbacks.includes(command.name)) {
                             const executable =
@@ -798,16 +786,13 @@ module.exports = class AllureReporter {
                                 executable,
                                 log
                             );
-                            logger(
-                                `[allure:cy] creating step for then's %O`,
-                                step
-                            );
+                            logger.cy(`creating step for then's %O`, step);
 
                             command.step = step;
 
                             if (log.name === 'step') {
-                                logger(
-                                    `[allure:cy] found gherkin step, finishing all current steps`
+                                logger.cy(
+                                    `found gherkin step, finishing all current steps`
                                 );
                                 this.finishAllSteps(
                                     command.passed
@@ -835,8 +820,8 @@ module.exports = class AllureReporter {
                         });
 
                         const step = this.cyStartStepForLog(executable, log);
-                        logger(
-                            `[allure:cy] attaching command log entries as allure steps %O`,
+                        logger.cy(
+                            `attaching command log entries as allure steps %O`,
                             step
                         );
 
@@ -846,8 +831,8 @@ module.exports = class AllureReporter {
                     }
                 });
             } else {
-                logger(
-                    `[allure:cy] no command log entries, finish step %O`,
+                logger.cy(
+                    `no command log entries, finish step %O`,
                     command.step
                 );
                 this.cyCommandEndStep(
@@ -877,13 +862,13 @@ module.exports = class AllureReporter {
                 return;
             }
 
-            logger(`[allure:cy] command has parent, %O`, parent);
+            logger.cy(`command has parent, %O`, parent);
 
             const childIndex = parent.children.indexOf(child.id);
 
             // if found child - remove it from parent
             if (childIndex > -1) {
-                logger(`[allure:cy] removing child from parent %O`, parent);
+                logger.cy(`removing child from parent %O`, parent);
                 parent.children.splice(childIndex, 1);
                 // update status of parent in case any of children failed
                 if (!child.passed || failed) {
@@ -893,8 +878,8 @@ module.exports = class AllureReporter {
 
             // finish parent step when no children left or when test is failed
             if (!parent.children.length || failed) {
-                logger(
-                    `[allure:cy] finish parent step as no other children left %O`,
+                logger.cy(
+                    `finish parent step as no other children left %O`,
                     parent
                 );
                 !parent.passed && (failed = true);
@@ -987,11 +972,7 @@ module.exports = class AllureReporter {
             !logNameNoOverride.includes(log.name)
         ) {
             step.info.name = `${log.name} ${log.message}`;
-            logger(
-                `[allure:cy] changing step name to "%s" %O`,
-                step.info.name,
-                step
-            );
+            logger.cy(`changing step name to "%s" %O`, step.info.name, step);
         }
 
         const passed =
@@ -1008,7 +989,7 @@ module.exports = class AllureReporter {
     }
 
     cyStartStepForLog(executable, log) {
-        logger(`[allure:cy] creating step for command log entry %O`, log);
+        logger.cy(`creating step for command log entry %O`, log);
         // define step name based on cypress log name or messages
         const messages = {
             xhr: () =>
@@ -1060,7 +1041,7 @@ module.exports = class AllureReporter {
                     ? JSON.stringify(value, getCircularReplacer(), 2)
                     : value;
 
-            logger(
+            logger.cy(
                 '[allure:cy] adding actual and expected as a parameter %O',
                 log
             );
