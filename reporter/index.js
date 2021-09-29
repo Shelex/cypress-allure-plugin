@@ -31,18 +31,12 @@ const shouldEnableGherkinLogging = () => {
     const isLogCypressDefined = typeof logCypress !== 'undefined';
     const isLogGherkinDefined = typeof logGherkin !== 'undefined';
 
-    // enable by default
-    if (!isLogCypressDefined && !isLogGherkinDefined) {
-        return true;
-    }
-
-    // inherit logCypress in case directly set
-    if (isLogCypressDefined && !isLogGherkinDefined) {
-        return logCypress;
-    }
-
-    // use env var
-    return logGherkin !== false;
+    return isLogGherkinDefined
+        ? logGherkin
+        : // in case logGherkin is not defined use logCypress value or true by default
+        isLogCypressDefined
+        ? logCypress
+        : true;
 };
 
 const config = {
