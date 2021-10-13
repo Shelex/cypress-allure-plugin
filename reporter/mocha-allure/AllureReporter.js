@@ -393,14 +393,8 @@ module.exports = class AllureReporter {
         if (this.currentTest === null) {
             logger.allure(`not found test, created new`);
             this.startCase(test);
-        } else {
-            const latestStatus = this.currentTest.status;
-            // if test already has a failed state, we should not overwrite it
-            if (latestStatus && latestStatus !== Status.PASSED) {
-                logger.allure(`test already has failed status`);
-                return;
-            }
         }
+
         this.updateTest(Status.FAILED, {
             message: error.message,
             trace: error.stack
@@ -535,7 +529,8 @@ module.exports = class AllureReporter {
         if (this.currentTest === null) {
             throw new Error('finishing test while no test is running');
         }
-        this.logCypress && this.cyCommandsFinish(status);
+        (this.logCypress || this.logGherkinSteps) &&
+            this.cyCommandsFinish(status);
         this.finishAllSteps(status);
         this.parentStep = null;
 
@@ -548,6 +543,25 @@ module.exports = class AllureReporter {
     endTest() {
         logger.allure(`finishing current test`);
         this.currentTest && this.currentTest.endTest();
+    }
+
+    cyCommandShouldBeLogged(attributes) {
+        // handle case when nothing should be logged
+        if (!this.logCypress && !this.logGherkinSteps) {
+            logger.cy(`logging cy commands is disabled`);
+            return false;
+        }
+
+        // handle case when should log gherkin steps but not cy commands
+        if (
+            this.logGherkinSteps &&
+            !this.logCypress &&
+            !attributeIsGherkinStep(attributes)
+        ) {
+            logger.cy(`is not a gherkin step`);
+            return false;
+        }
+        return true;
     }
 
     cyCommandExecutable(command) {
@@ -598,22 +612,6 @@ module.exports = class AllureReporter {
 
         if (commandShouldBeSkipped(attributes)) {
             logger.cy(`command should be skipped`);
-            return;
-        }
-
-        // handle case when nothing should be logged
-        if (!this.logCypress && !this.logGherkinSteps) {
-            logger.cy(`logging cy commands is disabled`);
-            return;
-        }
-
-        // handle case when should log gherkin steps but not cy commands
-        if (
-            this.logGherkinSteps &&
-            !this.logCypress &&
-            !attributeIsGherkinStep(attributes)
-        ) {
-            logger.cy(`is not a gherkin step`);
             return;
         }
 
@@ -707,13 +705,17 @@ module.exports = class AllureReporter {
                 attributes.args.length &&
                 attributes.args.map((arg) => `"${displayArg(arg)}"`).join('; ');
 
-            const step = executable.startStep(
-                `${command.name}${commandArgs ? ` (${commandArgs})` : ''}`
-            );
+            const step =
+                this.cyCommandShouldBeLogged(attributes) &&
+                executable.startStep(
+                    `${command.name}${commandArgs ? ` (${commandArgs})` : ''}`
+                );
 
-            logger.cy(`started allure step %s %O`, step.info.name, step);
+            if (step) {
+                logger.cy(`started allure step %s %O`, step.info.name, step);
 
-            command.step = step;
+                command.step = step;
+            }
         }
         this.currentChainer = attributes;
     }
@@ -1060,8 +1062,8 @@ const attributeIsGherkinStep = (attribute) =>
     attribute.args &&
     attribute.args.length === 1 &&
     attribute.args[0] &&
+    typeof attribute.args[0] === 'function' &&
     attribute.args[0].toString &&
-    attribute.args[0].toString === 'function' &&
     attribute.args[0].toString().includes('state.onStartStep');
 
 const isEmpty = (hook) => hook && hook.body === 'function () {}';
