@@ -53,7 +53,7 @@
         "eslint-plugin-cypress": "2.12.1",
         "eslint-plugin-prettier": "4.0.0",
         "prettier": "2.4.1",
-        "semantic-release": "18.0.0"
+        "semantic-release": "17.4.7"
     },
     "cypress-cucumber-preprocessor": {
         "nonGlobalStepDefinitions": true
