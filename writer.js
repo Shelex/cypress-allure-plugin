@@ -125,11 +125,10 @@ function allureWriter(on, config) {
                                     )) ||
                                 [];
 
-                            !fs.existsSync(groupResultPath) &&
-                                fs.writeFileSync(
-                                    groupResultPath,
-                                    JSON.stringify(group)
-                                );
+                            fs.writeFileSync(
+                                groupResultPath,
+                                JSON.stringify(group)
+                            );
                         }
                     });
                 tests &&
@@ -147,11 +146,10 @@ function allureWriter(on, config) {
                         );
                         const testResultPath = path.join(resultsDir, fileName);
                         const testResult = overwriteTestNameMaybe(test);
-                        !fs.existsSync(testResultPath) &&
-                            fs.writeFileSync(
-                                testResultPath,
-                                JSON.stringify(testResult)
-                            );
+                        fs.writeFileSync(
+                            testResultPath,
+                            JSON.stringify(testResult)
+                        );
                     });
                 if (attachments) {
                     for (let [name, content] of Object.entries(attachments)) {
@@ -199,7 +197,9 @@ const writeInfoFile = (fileName, data, resultsDir) => {
                 filePath,
                 isEnvProps ? data : JSON.stringify(data),
                 {
-                    encoding: 'binary'
+                    encoding: 'binary',
+                    // if file exist use appending for env props, other files will be truncated
+                    flag: isEnvProps ? 'as' : 'w'
                 }
             );
     }

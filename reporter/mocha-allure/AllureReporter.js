@@ -136,6 +136,9 @@ module.exports = class AllureReporter {
             this.finishAllSteps(Status.PASSED);
             logger.allure(`finished steps`);
             this.currentStep !== null && this.currentStep.endStep();
+            this.currentTest &&
+                this.currentTest.testResult.stage !== Stage.FINISHED &&
+                this.endTest();
             this.currentSuite.endGroup();
             this.popSuite();
             logger.allure(`finished suite`);
@@ -415,7 +418,28 @@ module.exports = class AllureReporter {
                 logger.allure(
                     `finishing test as no events received for failed test in before all hook`
                 );
-                this.endTest();
+
+                // mark failed tests as broken due to before all hook failure
+                if (test.parent && test.parent.tests) {
+                    test.parent.tests.forEach((test, index) => {
+                        logger.allure(
+                            `found cancelled test due to before all hook: %O`,
+                            test
+                        );
+                        if (index === 0) {
+                            this.currentTest.info.name = test.title;
+                        } else {
+                            this.startCase(test);
+                        }
+                        this.updateTest(Status.BROKEN, {
+                            message: error.message,
+                            trace: error.stack
+                        });
+                        this.endTest();
+                    });
+                } else {
+                    this.endTest();
+                }
             }
         }
     }
@@ -533,6 +557,13 @@ module.exports = class AllureReporter {
             this.cyCommandsFinish(status);
         this.finishAllSteps(status);
         this.parentStep = null;
+
+        logger.allure(
+            `updating test %O to have status:%s and details: %O`,
+            this.currentTest,
+            status,
+            details
+        );
 
         details && (this.currentTest.statusDetails = details);
         this.currentTest.status = status;
