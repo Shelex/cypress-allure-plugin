@@ -414,7 +414,10 @@ module.exports = class AllureReporter {
              * as result should be finished manually
              */
 
-            if (test.hookName && test.hookName === 'before all') {
+            if (
+                test.hookName &&
+                ['before all', 'before each'].includes(test.hookName)
+            ) {
                 logger.allure(
                     `finishing test as no events received for failed test in before all hook`
                 );
