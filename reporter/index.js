@@ -18,7 +18,7 @@ const {
     InMemoryAllureWriter,
     ContentType
 } = require('@shelex/allure-js-commons-browser');
-const AllureReporter = require('./mocha-allure/AllureReporter');
+const AllureReporter = require('./allure-cypress/AllureReporter');
 const stubbedAllure = require('./stubbedAllure');
 const logger = require('./debug');
 
@@ -136,8 +136,8 @@ class CypressAllureReporter {
                 logger.mocha(`EVENT_TEST_END: %s %O`, test.title, test);
                 attachVideo(this.reporter, test, 'finished');
 
-                this.reporter.populateGherkinLinksFromExampleTable();
-                this.reporter.handleCucumberTags();
+                this.reporter.gherkin.checkLinksInExamplesTable();
+                this.reporter.gherkin.checkTags();
                 this.reporter.endTest();
             })
             .on(EVENT_HOOK_BEGIN, (hook) => {
@@ -152,21 +152,21 @@ class CypressAllureReporter {
         Cypress.on('command:enqueued', (command) => {
             if (shouldListenToCyCommandEvents()) {
                 logger.cy(`command:enqueued %O`, command);
-                this.reporter.cyCommandEnqueue(command);
+                this.reporter.cy.enqueued(command);
             }
         });
 
         Cypress.on('command:start', (command) => {
             if (shouldListenToCyCommandEvents()) {
                 logger.cy(`command:start %O`, command);
-                this.reporter.cyCommandStart(command.attributes);
+                this.reporter.cy.started(command.attributes);
             }
         });
 
         Cypress.on('command:end', (command) => {
             if (shouldListenToCyCommandEvents()) {
                 logger.cy(`command:end %O`, command);
-                this.reporter.cyCommandEnd(command.attributes);
+                this.reporter.cy.finished(command.attributes);
             }
         });
     }
