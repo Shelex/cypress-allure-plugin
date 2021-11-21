@@ -117,10 +117,10 @@ module.exports = class CypressHandler {
 
             const displayArg = (arg) => {
                 logger.cy(`checking argument %O and provide to step`, arg);
-                if (typeof arg === 'function') {
+                if (arg && typeof arg === 'function') {
                     return '[function]';
                 }
-                if (typeof arg === 'object') {
+                if (arg && typeof arg === 'object') {
                     // for jquery objects log selector only
                     if (arg.selector) {
                         return arg.selector;
