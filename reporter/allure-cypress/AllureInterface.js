@@ -1,8 +1,3 @@
-/**
- * A lot of credit to Sergey Korol <serhii.s.korol@gmail.com> who made
- * Allure-mocha reporter: "https://github.com/allure-framework/allure-js/tree/master/packages/allure-mocha"
- */
-
 const {
     Allure,
     Status,
@@ -63,9 +58,7 @@ Allure.prototype.step = function (name, isParent = true) {
 
 Allure.prototype.stepStart = function (name) {
     // define last chainer that still not finished and has allure step
-    const chainer = this.reporter.commands
-        .reverse()
-        .find((c) => !c.finished && c.step && c.step.info.name);
+    const chainer = this.reporter.cy.chain.getLatestWithStep();
 
     // define fallback allure executable
     const previousExecutable = this.currentExecutable;
