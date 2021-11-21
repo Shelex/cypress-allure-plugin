@@ -121,21 +121,28 @@ module.exports = class CypressHandler {
                     return '[function]';
                 }
                 if (typeof arg === 'object') {
-                    if (
-                        arg &&
-                        arg.constructor &&
-                        arg.constructor.toString &&
-                        typeof arg.constructor.toString === 'function' &&
-                        ((arg.constructor.toString().includes('HTML') &&
-                            arg.constructor.toString().includes('Element')) ||
-                            arg.constructor
-                                .toString()
-                                .includes('The jQuery object'))
-                    ) {
-                        return '[Object]';
+                    // for jquery objects log selector only
+                    if (arg.selector) {
+                        return arg.selector;
                     }
 
-                    return JSON.stringify(arg, getCircularReplacer(), 2);
+                    // for html elements check name and class
+                    if (arg.localName) {
+                        return `${arg.localName}${
+                            arg.className ? `.${arg.className}` : ''
+                        }`;
+                    }
+
+                    // log just native types - object, array, etc
+                    if (
+                        arg.constructor &&
+                        typeof arg.constructor.toString === 'function' &&
+                        arg.constructor.toString().endsWith('{ [native code] }')
+                    ) {
+                        return JSON.stringify(arg, getCircularReplacer(), 2);
+                    }
+
+                    return '[Object]';
                 }
 
                 return arg;
