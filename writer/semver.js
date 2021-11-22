@@ -10,7 +10,10 @@ const semVer = (version) => {
 };
 
 const isBelow = (version, target) =>
-    compare(...[version, target].map((arg) => parseSemver(arg))) === 'below';
+    version && target
+        ? compare(...[version, target].map((arg) => parseSemver(arg))) ===
+          'below'
+        : false;
 
 const parseSemver = (versionString) =>
     versionString.split('.').map((str) => parseInt(str));
