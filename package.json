@@ -15,6 +15,7 @@
     },
     "files": [
         "reporter",
+        "writer",
         "writer.js",
         "writer.d.ts"
     ],

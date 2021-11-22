@@ -15,6 +15,7 @@ module.exports = class AllureReporter {
         this.suites = [];
         this.steps = [];
         this.files = [];
+        this.mochaIdToAllure = {};
         this.labelStorage = [];
         this.runningTest = null;
         this.previousTestName = null;
@@ -23,9 +24,7 @@ module.exports = class AllureReporter {
         this.parentStep = null;
         this.cy = new CypressHandler(this);
         this.gherkin = new CucumberHandler(this);
-        this.logCypress = options.logCypress || false;
-        this.logGherkinSteps = options.logGherkinSteps || false;
-        this.attachRequests = options.attachRequests || false;
+        this.config = options;
     }
 
     /**
@@ -95,15 +94,24 @@ module.exports = class AllureReporter {
         return hook.hookName || hook.originalTitle || hook.title;
     }
 
-    startSuite(suiteName) {
+    startSuite(suite) {
+        const suiteName = suite.fullTitle();
         if (this.currentSuite) {
-            if (this.currentSuiteIsGlobal) {
+            if (
+                this.currentSuiteIsGlobal ||
+                (suite.parent &&
+                    this.currentSuite.testResultContainer &&
+                    suite.parent.title ===
+                        this.currentSuite.testResultContainer.name)
+            ) {
                 /**
                  * cypress creates suite for spec file
                  * where global hooks and other nested suites are held
                  * in order to have global hooks available
                  * this global suite can just be renamed
-                 * to the first user's suite
+                 * to the first user's suite.
+                 * second condition is when nested mocha suites are used
+                 * so no need to end parent suite but just reuse
                  */
                 this.currentSuite.testResultContainer.name = suiteName;
                 return;
@@ -117,9 +125,9 @@ module.exports = class AllureReporter {
             }
         }
         const scope = this.currentSuite || this.runtime;
-        const suite = scope.startGroup(suiteName || 'Global');
-        logger.allure(`start suite %O`, suite);
-        this.pushSuite(suite);
+        const allureSuite = scope.startGroup(suiteName || 'Global');
+        logger.allure(`start suite %O`, allureSuite);
+        this.pushSuite(allureSuite);
     }
 
     endSuite(isGlobal = false) {
@@ -135,6 +143,7 @@ module.exports = class AllureReporter {
             this.currentSuite.endGroup();
             this.popSuite();
             logger.allure(`finished suite`);
+            this.currentTest = null;
         }
         // restrict label storage to single suite scope
         this.labelStorage = [];
@@ -165,6 +174,8 @@ module.exports = class AllureReporter {
 
         this.cy.chain.clear();
         this.currentTest = this.currentSuite.startTest(test.title);
+        logger.allure(`created test: %O`, this.currentTest);
+        this.mochaIdToAllure[test.id] = this.currentTest.uuid;
         this.currentTest.fullName = test.title;
         this.currentTest.historyId = crypto
             .MD5(test.fullTitle())
@@ -346,7 +357,7 @@ module.exports = class AllureReporter {
                 : parent.addAfter();
             this.currentHook = allureHook;
         } else {
-            if (!this.logCypress) {
+            if (!this.config.shouldLogCypress()) {
                 return;
             }
             const customHookName = hook.title.replace(
@@ -403,7 +414,8 @@ module.exports = class AllureReporter {
         if (this.currentTest === null) {
             throw new Error('finishing test while no test is running');
         }
-        (this.logCypress || this.logGherkinSteps) &&
+        (this.config.shouldLogCypress() ||
+            this.config.shouldLogGherkinSteps()) &&
             this.cy.handleRemainingCommands(status);
         this.finishRemainingSteps(status);
         this.parentStep = null;

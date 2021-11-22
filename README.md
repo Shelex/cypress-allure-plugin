@@ -302,8 +302,10 @@ In case you are using VS Code and [Cypress Helper](https://marketplace.visualstu
 ## Screenshots and Videos
 
 Screenshots are attached automatically, for other type of content feel free to use `testAttachment` (for current test), `attachment` (for current executable), `fileAttachment` (for existing file).
-
 Videos are attached for failed tests only from path specified in cypress config `videosFolder` and in case you have not passed `video=false` to Cypress configuration.
+
+### Before version 2.21.0
+
 In case you want to attach videos for passed tests please use `allureAddVideoOnPass=true` env variable.
 
 Videos are quite tricky as Cypress has no events which we can use to catch event with video name as it is processed when test runner itself (cy) has closed.
@@ -315,6 +317,16 @@ As a workaround we can add video link before even video is saved and then we hav
    relative path from `allure-report` to `videosFolder` will be added.
 
 Please take into account, that in case spec files have same name, cypress is creating subfolders in videos folder, and it is not handled from plugin unfortunately, so video may not have correct path in such edge case.
+
+### Update in version 2.21.0
+
+As Cypress has released [After Spec API](https://docs.cypress.io/api/plugins/after-spec-api) now this event could be evaluated for attachments.
+Now it will be used for:
+
+-   run mode with v6.7.0 and above
+-   run mode with v6.2.0 and above (but below v6.7.0) with `experimentalRunEvents` enabled
+-   interactive (open) mode for v7.1.0 with `experimentalInteractiveRunEvents` enabled
+    When one of this conditions is satisfied - `after:spec` event will be used for attachments. It will reliably copy all screenshots available for each test and video (if available) to your `allure-results` folder and attach to each of your tests, so you don't need to somehow upload your videos and configure paths, etc.
 
 ## Cypress commands
 

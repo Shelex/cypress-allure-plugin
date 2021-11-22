@@ -12,8 +12,8 @@ module.exports = class CypressHandler {
 
     shouldBeLogged(command) {
         return commandIsGherkinStep(command)
-            ? this.reporter.logGherkinSteps
-            : this.reporter.logCypress;
+            ? this.reporter.config.shouldLogGherkinSteps()
+            : this.reporter.config.shouldLogCypress();
     }
 
     findAllureExecutableFor(command) {
@@ -219,7 +219,7 @@ module.exports = class CypressHandler {
                                 this.findAllureExecutableFor(command);
 
                             if (
-                                !this.reporter.logGherkinSteps &&
+                                !this.reporter.config.shouldLogGherkinSteps() &&
                                 commandIsGherkinStep(chainable)
                             ) {
                                 return;
@@ -446,7 +446,10 @@ module.exports = class CypressHandler {
                 step.info.name = log.renderProps.message;
             }
 
-            if (this.reporter.attachRequests && log.consoleProps) {
+            if (
+                this.reporter.config.shouldAttachRequests() &&
+                log.consoleProps
+            ) {
                 const request =
                     log.consoleProps.Request ||
                     Cypress._.last(log.consoleProps.Requests);
