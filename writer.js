@@ -9,14 +9,14 @@ const { shouldUseAfterSpec } = require('./writer/useAfterSpec');
 const { handleCrash } = require('./writer/handleCrash');
 
 function allureWriter(on, config) {
+    allurePropertiesToEnvVars(config.env);
+
     // pass allure config from Cypress.env to process.env
     // to get access from node context
     process.env.allure = config.env.allure;
 
     process.env.allureResultsPath =
         config.env.allureResultsPath || 'allure-results';
-
-    allurePropertiesToEnvVars(config.env);
 
     let allureMapping = null;
 

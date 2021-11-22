@@ -12,7 +12,9 @@ const attachScreenshotsAndVideo = (allureMapping, results) => {
         return;
     }
 
-    const videoPath = `${uuid.v4()}-attachment${path.extname(results.video)}`;
+    const videoPath =
+        results.video &&
+        `${uuid.v4()}-attachment${path.extname(results.video)}`;
 
     const needVideo = results.tests.filter((test) => {
         const allureId = allureMapping[test.testId];
@@ -20,7 +22,7 @@ const attachScreenshotsAndVideo = (allureMapping, results) => {
             return false;
         }
 
-        logger.writer('going to attach video to "%s"', allureId);
+        logger.writer('going to check attachments for "%s"', allureId);
 
         const fileName = `${allureId}-result.json`;
 
@@ -71,6 +73,7 @@ const attachScreenshotsAndVideo = (allureMapping, results) => {
         });
 
         if (results.video) {
+            logger.writer('going to attach video for "%s"', allureId);
             const existingVideoIndex = allureTest.attachments.findIndex(
                 (attach) => attach.type === videoContentType
             );
@@ -86,7 +89,7 @@ const attachScreenshotsAndVideo = (allureMapping, results) => {
         }
 
         fs.writeFileSync(testFilePath, JSON.stringify(allureTest));
-        return true;
+        return results.video;
     });
 
     if (needVideo.length) {
