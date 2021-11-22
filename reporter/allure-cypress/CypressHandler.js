@@ -1,3 +1,4 @@
+const util = require('util');
 const logger = require('../debug');
 const stubbedAllure = require('../stubbedAllure');
 const callbacks = ['then', 'spread', 'each', 'within'];
@@ -139,7 +140,15 @@ module.exports = class CypressHandler {
                         typeof arg.constructor.toString === 'function' &&
                         arg.constructor.toString().endsWith('{ [native code] }')
                     ) {
-                        return JSON.stringify(arg, getCircularReplacer(), 2);
+                        try {
+                            return displayObject(arg);
+                        } catch (e) {
+                            logger.cy(
+                                `failed to stringify object %O, returning placeholder`,
+                                arg
+                            );
+                            return '[Object]';
+                        }
                     }
 
                     return '[Object]';
@@ -415,7 +424,7 @@ module.exports = class CypressHandler {
         // add expected and actual for asserts
         if (log.name === 'assert') {
             const displayValue = (value) =>
-                typeof value === 'object'
+                typeof value === 'object' && value !== null
                     ? JSON.stringify(value, getCircularReplacer(), 2)
                     : value;
 
@@ -516,3 +525,10 @@ const getCircularReplacer = () => {
         return value;
     };
 };
+
+const displayObject = (obj) =>
+    util.inspect(obj, {
+        depth: 2,
+        maxStringLength: 40,
+        maxArrayLength: 5
+    });
