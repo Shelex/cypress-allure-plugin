@@ -1,0 +1,108 @@
+const fs = require('fs');
+const path = require('path');
+const uuid = require('uuid');
+const logger = require('../reporter/debug');
+
+const videoContentType = 'video/mp4';
+const imageContentType = 'image/png';
+
+const attachScreenshotsAndVideo = (allureMapping, results) => {
+    if (!allureMapping) {
+        logger.writer('not found mapping of mocha test id to allure test ids');
+        return;
+    }
+
+    if (!results.video) {
+        logger.writer('no video in results');
+        return;
+    }
+
+    const videoPath = `${uuid.v4()}-attachment${path.extname(results.video)}`;
+
+    const needVideo = results.tests.filter((test) => {
+        const allureId = allureMapping[test.testId];
+        if (!allureId) {
+            return false;
+        }
+
+        logger.writer('going to attach video to "%s"', allureId);
+
+        const fileName = `${allureId}-result.json`;
+
+        const testFilePath = path.join(process.env.allureResultsPath, fileName);
+
+        const content =
+            fs.existsSync(testFilePath) && fs.readFileSync(testFilePath);
+
+        if (!content) {
+            logger.writer('could not find file "%s"', testFilePath);
+            return false;
+        }
+
+        const allureTest = JSON.parse(content);
+
+        const existingVideoIndex = allureTest.attachments.findIndex(
+            (attach) => attach.type === videoContentType
+        );
+
+        existingVideoIndex === -1
+            ? allureTest.attachments.push({
+                  name: 'video recording',
+                  type: videoContentType,
+                  source: videoPath
+              })
+            : (allureTest.attachments[existingVideoIndex].source = videoPath);
+
+        const screenshots = results.screenshots.filter(
+            (screenshot) => screenshot.testId === test.testId
+        );
+
+        screenshots.forEach((screenshot) => {
+            const allureScreenshotFileName = `${uuid.v4()}-attachment${path.extname(
+                screenshot.path
+            )}`;
+            logger.writer('going to attach screenshot to "%s"', allureId);
+            const allureScreenshotPath = path.join(
+                process.env.allureResultsPath,
+                allureScreenshotFileName
+            );
+
+            logger.writer(
+                'copying screenshot from "%s" to "%s"',
+                screenshot.path,
+                allureScreenshotPath
+            );
+            fs.copyFileSync(screenshot.path, allureScreenshotPath);
+
+            allureTest.attachments.push({
+                name:
+                    screenshot.name ||
+                    `${results.spec.name}:${screenshot.takenAt}${
+                        screenshot.testAttemptIndex
+                            ? `:attempt-${screenshot.testAttemptIndex}`
+                            : ''
+                    }`,
+                type: imageContentType,
+                source: allureScreenshotFileName
+            });
+        });
+
+        fs.writeFileSync(testFilePath, JSON.stringify(allureTest));
+        return true;
+    });
+
+    if (needVideo.length) {
+        logger.writer('found %d tests that require video', needVideo.length);
+        const resultsPath = path.join(process.env.allureResultsPath, videoPath);
+
+        logger.writer(
+            'copying video from "%s" to "%s"',
+            results.video,
+            resultsPath
+        );
+
+        fs.copyFileSync(results.video, resultsPath);
+    }
+};
+
+module.exports = { attachScreenshotsAndVideo };

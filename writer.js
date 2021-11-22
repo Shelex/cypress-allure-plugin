@@ -1,8 +1,12 @@
 const path = require('path');
 const fs = require('fs');
 const uuid = require('uuid');
-const crypto = require('crypto-js');
 const logger = require('./reporter/debug');
+const { allurePropertiesToEnvVars } = require('./writer/readProperties');
+const { attachScreenshotsAndVideo } = require('./writer/attachments');
+const { overwriteTestNameMaybe } = require('./writer/customTestName');
+const { shouldUseAfterSpec } = require('./writer/useAfterSpec');
+const { handleCrash } = require('./writer/handleCrash');
 
 function allureWriter(on, config) {
     // pass allure config from Cypress.env to process.env
@@ -12,10 +16,32 @@ function allureWriter(on, config) {
     process.env.allureResultsPath =
         config.env.allureResultsPath || 'allure-results';
 
-    parseAllureProperties(config.env);
+    allurePropertiesToEnvVars(config.env);
+
+    let allureMapping = null;
+
+    if (shouldUseAfterSpec(config)) {
+        on('after:spec', (_, results) => {
+            if (!config.env.allure) {
+                return;
+            }
+
+            try {
+                results.error
+                    ? handleCrash(results)
+                    : attachScreenshotsAndVideo(allureMapping, results);
+            } catch (e) {
+                logger.writer(
+                    'failed to add attachments in "after:spec" due to: %O',
+                    e
+                );
+            }
+            allureMapping = null;
+        });
+    }
 
     on('task', {
-        writeAllureResults: ({ results, files, clearSkipped }) => {
+        writeAllureResults: ({ results, files, mapping, clearSkipped }) => {
             const { resultsDir, writer } = results;
             logger.writer(
                 'starting writing allure results to "%s"',
@@ -29,6 +55,10 @@ function allureWriter(on, config) {
                 categories,
                 executorInfo
             } = writer;
+
+            process.env.allureResultsPath = resultsDir;
+            allureMapping = mapping;
+
             try {
                 !fs.existsSync(resultsDir) &&
                     fs.mkdirSync(resultsDir, { recursive: true });
@@ -203,81 +233,6 @@ const writeInfoFile = (fileName, data, resultsDir) => {
                 }
             );
     }
-};
-
-const parseAllureProperties = (env) => {
-    const allurePropertiesPath = 'allure.properties';
-
-    if (!fs.existsSync(allurePropertiesPath)) {
-        return null;
-    }
-
-    const propertiesContent = fs.readFileSync(allurePropertiesPath, {
-        encoding: 'utf-8'
-    });
-
-    if (!propertiesContent) {
-        return null;
-    }
-
-    const properties = propertiesContent
-        .split('\n')
-        .reduce((properties, record) => {
-            if (!record) {
-                return properties;
-            }
-
-            const [key, value] = record.split('=');
-            if (!key) {
-                return properties;
-            }
-
-            properties[key] = toBooleanMaybe(value);
-            return properties;
-        }, {});
-
-    const propertyToCypressEnv = new Map([
-        ['allure.results.directory', 'allureResultsPath'],
-        ['allure.link.issue.pattern', 'issuePrefix'],
-        ['allure.link.tms.pattern', 'tmsPrefix'],
-        ['allure.cypress.log.commands', 'allureLogCypress'],
-        ['allure.cypress.log.requests', 'allureAttachRequests'],
-        ['allure.cypress.log.gherkin', 'allureLogGherkin'],
-        [
-            'allure.omit.previous.attempt.screenshot',
-            'allureOmitPreviousAttemptScreenshots'
-        ],
-        ['allure.analytics', 'allureAddAnalyticLabels'],
-        ['allure.video.passed', 'allureAddVideoOnPass']
-    ]);
-
-    propertyToCypressEnv.forEach((envName, name) => {
-        if (typeof properties[name] !== 'undefined') {
-            env[envName] = properties[name];
-        }
-    });
-};
-
-const toBooleanMaybe = (str) => {
-    if (str === 'true' || str === 'false') {
-        return str === 'true';
-    }
-    return str;
-};
-
-const overwriteTestNameMaybe = (test) => {
-    const overrideIndex = test.parameters.findIndex(
-        (p) => p.name === 'OverwriteTestName'
-    );
-    if (overrideIndex !== -1) {
-        const name = test.parameters[overrideIndex].value;
-        logger.writer('overwriting test "%s" name to "%s"', test.name, name);
-        test.name = name;
-        test.fullName = name;
-        test.historyId = crypto.MD5(name).toString(crypto.enc.Hex);
-        test.parameters.splice(overrideIndex, 1);
-    }
-    return test;
 };
 
 module.exports = allureWriter;

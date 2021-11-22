@@ -21,6 +21,7 @@ const {
 const AllureReporter = require('./allure-cypress/AllureReporter');
 const stubbedAllure = require('./stubbedAllure');
 const logger = require('./debug');
+const { shouldUseAfterSpec } = require('../writer/useAfterSpec');
 
 const { env } = Cypress;
 
@@ -66,18 +67,14 @@ class CypressAllureReporter {
                 resultsDir: config.resultsPath(),
                 writer: new InMemoryAllureWriter()
             }),
-            {
-                logCypress: config.shouldLogCypress(),
-                logGherkinSteps: config.shouldLogGherkinSteps(),
-                attachRequests: config.shouldAttachRequests()
-            }
+            config
         );
 
         Cypress.mocha
             .getRunner()
             .on(EVENT_SUITE_BEGIN, (suite) => {
                 logger.mocha(`EVENT_SUITE_BEGIN: %s %O`, suite.title, suite);
-                this.reporter.startSuite(suite.fullTitle());
+                this.reporter.startSuite(suite);
             })
             .on(EVENT_SUITE_END, (suite) => {
                 logger.mocha(`EVENT_SUITE_END: %s %O`, suite.title, suite);
@@ -97,6 +94,7 @@ class CypressAllureReporter {
                             {
                                 results: this.reporter.runtime.config,
                                 files: this.reporter.files,
+                                mapping: this.reporter.mochaIdToAllure,
                                 clearSkipped: config.clearSkipped()
                             },
                             { log: false }
@@ -179,7 +177,7 @@ Cypress.Allure = config.allureEnabled()
 Cypress.Screenshot.defaults({
     onAfterScreenshot(_, details) {
         logger.cy(`onAfterScreenshot: %O`, details);
-        if (config.allureEnabled()) {
+        if (config.allureEnabled() && !shouldUseAfterSpec(Cypress.config())) {
             logger.allure(`allure enabled, attaching screenshot`);
             Cypress.Allure.reporter.files.push({
                 name: details.name || `${details.specName}:${details.takenAt}`,
@@ -192,6 +190,13 @@ Cypress.Screenshot.defaults({
 });
 
 const attachVideo = (reporter, test, status) => {
+    if (shouldUseAfterSpec(Cypress.config())) {
+        logger.allure(
+            `video attachment will be handled in after:spec plugins event`
+        );
+        return;
+    }
+
     const shouldAttach =
         status === 'failed'
             ? true
