@@ -12,11 +12,6 @@ const attachScreenshotsAndVideo = (allureMapping, results) => {
         return;
     }
 
-    if (!results.video) {
-        logger.writer('no video in results');
-        return;
-    }
-
     const videoPath = `${uuid.v4()}-attachment${path.extname(results.video)}`;
 
     const needVideo = results.tests.filter((test) => {
@@ -40,18 +35,6 @@ const attachScreenshotsAndVideo = (allureMapping, results) => {
         }
 
         const allureTest = JSON.parse(content);
-
-        const existingVideoIndex = allureTest.attachments.findIndex(
-            (attach) => attach.type === videoContentType
-        );
-
-        existingVideoIndex === -1
-            ? allureTest.attachments.push({
-                  name: 'video recording',
-                  type: videoContentType,
-                  source: videoPath
-              })
-            : (allureTest.attachments[existingVideoIndex].source = videoPath);
 
         const screenshots = results.screenshots.filter(
             (screenshot) => screenshot.testId === test.testId
@@ -86,6 +69,21 @@ const attachScreenshotsAndVideo = (allureMapping, results) => {
                 source: allureScreenshotFileName
             });
         });
+
+        if (results.video) {
+            const existingVideoIndex = allureTest.attachments.findIndex(
+                (attach) => attach.type === videoContentType
+            );
+
+            existingVideoIndex === -1
+                ? allureTest.attachments.push({
+                      name: 'video recording',
+                      type: videoContentType,
+                      source: videoPath
+                  })
+                : (allureTest.attachments[existingVideoIndex].source =
+                      videoPath);
+        }
 
         fs.writeFileSync(testFilePath, JSON.stringify(allureTest));
         return true;
