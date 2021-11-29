@@ -134,7 +134,7 @@ module.exports = class AllureReporter {
         if (this.currentSuite && isGlobal) {
             this.cy.handleRemainingCommands(Status.PASSED);
             logger.allure(`finished cypress commands`);
-            this.finishRemainingSteps(Status.PASSED);
+            this.finishRemainingSteps();
             logger.allure(`finished steps`);
             this.currentStep !== null && this.currentStep.endStep();
             this.currentTest &&
