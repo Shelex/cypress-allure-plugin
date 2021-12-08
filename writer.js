@@ -29,7 +29,7 @@ function allureWriter(on, config) {
             try {
                 results.error
                     ? handleCrash(results)
-                    : attachScreenshotsAndVideo(allureMapping, results);
+                    : attachScreenshotsAndVideo(allureMapping, results, config);
             } catch (e) {
                 logger.writer(
                     'failed to add attachments in "after:spec" due to: %O',

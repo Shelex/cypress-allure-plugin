@@ -76,9 +76,11 @@ Allure.prototype.stepEnd = function () {
     // just find the last user created step and finish it
     const step = this.reporter.popStep();
     if (step) {
-        const status = getStatus(this);
+        if (step.status !== Status.FAILED) {
+            const status = getStatus(this);
+            step.stepResult.status = status;
+        }
         step.stepResult.stage = Stage.FINISHED;
-        step.stepResult.status = status;
         step.endStep();
     }
 };

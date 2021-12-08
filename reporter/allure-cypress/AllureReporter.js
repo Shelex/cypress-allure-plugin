@@ -318,17 +318,28 @@ module.exports = class AllureReporter {
     }
 
     finishRemainingSteps(status = Status.PASSED) {
+        const alreadyHasFailedStep =
+            this.currentTest &&
+            this.currentTest.info &&
+            this.currentTest.info.steps.some(
+                (step) => step.status === Status.FAILED
+            );
+
         this.steps.forEach((step) => {
             step.info.stage = Stage.FINISHED;
-            if (step.info.steps.length) {
-                step.info.status = step.info.steps.some(
-                    (step) => step.status === Status.FAILED
-                )
-                    ? Status.FAILED
-                    : Status.PASSED;
-            } else {
-                step.info.status = status;
+
+            if (!alreadyHasFailedStep) {
+                if (step.info.steps.length) {
+                    step.info.status = step.info.steps.some(
+                        (step) => step.status === Status.FAILED
+                    )
+                        ? Status.FAILED
+                        : Status.PASSED;
+                } else {
+                    step.info.status = status;
+                }
             }
+
             step.endStep();
         });
         this.steps = [];

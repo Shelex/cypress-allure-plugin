@@ -167,6 +167,19 @@ class CypressAllureReporter {
                 this.reporter.cy.finished(command.attributes);
             }
         });
+
+        Cypress.on('log:added', (log) => {
+            if (log.state === 'failed') {
+                logger.cy('found failed log:added %O', log);
+
+                if (
+                    this.reporter.currentExecutable &&
+                    this.reporter.currentExecutable.info
+                ) {
+                    this.reporter.currentExecutable.info.status = 'failed';
+                }
+            }
+        });
     }
 }
 

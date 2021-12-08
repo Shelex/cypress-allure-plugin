@@ -6,7 +6,7 @@ const logger = require('../reporter/debug');
 const videoContentType = 'video/mp4';
 const imageContentType = 'image/png';
 
-const attachScreenshotsAndVideo = (allureMapping, results) => {
+const attachScreenshotsAndVideo = (allureMapping, results, config) => {
     if (!allureMapping) {
         logger.writer('not found mapping of mocha test id to allure test ids');
         return;
@@ -15,6 +15,8 @@ const attachScreenshotsAndVideo = (allureMapping, results) => {
     const videoPath =
         results.video &&
         `${uuid.v4()}-attachment${path.extname(results.video)}`;
+
+    const shouldAddVideoOnPass = config.env.allureAddVideoOnPass !== false;
 
     const needVideo = results.tests.filter((test) => {
         const allureId = allureMapping[test.testId];
@@ -72,7 +74,11 @@ const attachScreenshotsAndVideo = (allureMapping, results) => {
             });
         });
 
-        if (results.video) {
+        if (
+            results.video &&
+            // attach video for not passed tests or for every in case "allureAddVideoOnPass" enabled
+            (allureTest.status !== 'passed' || shouldAddVideoOnPass)
+        ) {
             logger.writer('going to attach video for "%s"', allureId);
             const existingVideoIndex = allureTest.attachments.findIndex(
                 (attach) => attach.type === videoContentType
