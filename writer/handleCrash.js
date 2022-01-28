@@ -3,13 +3,13 @@ const path = require('path');
 const uuid = require('uuid');
 const logger = require('../reporter/debug');
 
-const handleCrash = (results) => {
+const handleCrash = (results, config) => {
     if (!results.error) {
         return;
     }
 
-    !fs.existsSync(process.env.allureResultsPath) &&
-        fs.mkdirSync(process.env.allureResultsPath, { recursive: true });
+    !fs.existsSync(config.env.allureResultsPath) &&
+        fs.mkdirSync(config.env.allureResultsPath, { recursive: true });
 
     logger.writer('identified cypress error');
 
@@ -30,20 +30,20 @@ const handleCrash = (results) => {
             source: videoPath
         });
 
-        const resultsPath = path.join(process.env.allureResultsPath, videoPath);
+        const resultsPath = path.join(config.env.allureResultsPath, videoPath);
 
         fs.copyFileSync(results.video, resultsPath);
     }
 
     const suiteFileName = `${suite.uuid}-container.json`;
 
-    const suitePath = path.join(process.env.allureResultsPath, suiteFileName);
+    const suitePath = path.join(config.env.allureResultsPath, suiteFileName);
 
     fs.writeFileSync(suitePath, JSON.stringify(suite));
 
     const testFileName = `${test.uuid}-result.json`;
 
-    const testPath = path.join(process.env.allureResultsPath, testFileName);
+    const testPath = path.join(config.env.allureResultsPath, testFileName);
 
     fs.writeFileSync(testPath, JSON.stringify(test));
 

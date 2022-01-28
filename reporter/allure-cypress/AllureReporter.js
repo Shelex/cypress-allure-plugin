@@ -74,11 +74,6 @@ module.exports = class AllureReporter {
             this.previousTestName = this.runningTest.info.name;
         }
         this.runningTest = test;
-        // in case labels were defined outside of test
-        // we could attach them from storage
-        if (this.runningTest) {
-            this.runningTest.info.labels.push(...this.labelStorage);
-        }
     }
 
     get testNameForAttachment() {
@@ -411,6 +406,7 @@ module.exports = class AllureReporter {
             this.currentHook && this.currentHook.endStep();
         }
         !failed && (this.currentHook = null);
+        this.finishRemainingSteps(currentHookInfo.status);
     }
 
     pushSuite(suite) {
@@ -425,6 +421,21 @@ module.exports = class AllureReporter {
         if (this.currentTest === null) {
             throw new Error('finishing test while no test is running');
         }
+
+        // in case labels were defined outside of test
+        // we could attach them from storage
+        if (this.currentTest) {
+            this.labelStorage.forEach((label) => {
+                const indexOfExisting = this.currentTest.info.labels.findIndex(
+                    (existingLabel) => existingLabel.name === label.name
+                );
+                indexOfExisting === -1
+                    ? this.currentTest.info.labels.push(label)
+                    : (this.currentTest.info.labels[indexOfExisting].value =
+                          label.value);
+            });
+        }
+
         (this.config.shouldLogCypress() ||
             this.config.shouldLogGherkinSteps()) &&
             this.cy.handleRemainingCommands(status);

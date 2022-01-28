@@ -11,12 +11,9 @@ const { handleCrash } = require('./writer/handleCrash');
 function allureWriter(on, config) {
     allurePropertiesToEnvVars(config.env);
 
-    // pass allure config from Cypress.env to process.env
-    // to get access from node context
-    process.env.allure = config.env.allure;
-
-    process.env.allureResultsPath =
-        config.env.allureResultsPath || 'allure-results';
+    if (!config.env.allureResultsPath) {
+        config.env.allureResultsPath = 'allure-results';
+    }
 
     let allureMapping = null;
 
@@ -25,10 +22,11 @@ function allureWriter(on, config) {
             if (!config.env.allure) {
                 return;
             }
+            logger.writer('inside "after:spec" event');
 
             try {
                 results.error
-                    ? handleCrash(results)
+                    ? handleCrash(results, config)
                     : attachScreenshotsAndVideo(allureMapping, results, config);
             } catch (e) {
                 logger.writer(
@@ -56,7 +54,7 @@ function allureWriter(on, config) {
                 executorInfo
             } = writer;
 
-            process.env.allureResultsPath = resultsDir;
+            config.env.allureResultsPath = resultsDir;
             allureMapping = mapping;
 
             try {

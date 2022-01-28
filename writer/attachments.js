@@ -16,7 +16,7 @@ const attachScreenshotsAndVideo = (allureMapping, results, config) => {
         results.video &&
         `${uuid.v4()}-attachment${path.extname(results.video)}`;
 
-    const shouldAddVideoOnPass = config.env.allureAddVideoOnPass !== false;
+    const shouldAddVideoOnPass = config.env.allureAddVideoOnPass === true;
 
     const needVideo = results.tests.filter((test) => {
         const allureId = allureMapping[test.testId];
@@ -28,7 +28,7 @@ const attachScreenshotsAndVideo = (allureMapping, results, config) => {
 
         const fileName = `${allureId}-result.json`;
 
-        const testFilePath = path.join(process.env.allureResultsPath, fileName);
+        const testFilePath = path.join(config.env.allureResultsPath, fileName);
 
         const content =
             fs.existsSync(testFilePath) && fs.readFileSync(testFilePath);
@@ -50,7 +50,7 @@ const attachScreenshotsAndVideo = (allureMapping, results, config) => {
             )}`;
             logger.writer('going to attach screenshot to "%s"', allureId);
             const allureScreenshotPath = path.join(
-                process.env.allureResultsPath,
+                config.env.allureResultsPath,
                 allureScreenshotFileName
             );
 
@@ -100,7 +100,7 @@ const attachScreenshotsAndVideo = (allureMapping, results, config) => {
 
     if (needVideo.length) {
         logger.writer('found %d tests that require video', needVideo.length);
-        const resultsPath = path.join(process.env.allureResultsPath, videoPath);
+        const resultsPath = path.join(config.env.allureResultsPath, videoPath);
 
         logger.writer(
             'copying video from "%s" to "%s"',

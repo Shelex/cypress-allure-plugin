@@ -44,6 +44,7 @@ const allurePropertiesToEnvVars = (envVars) => {
             'allureOmitPreviousAttemptScreenshots'
         ],
         ['allure.analytics', 'allureAddAnalyticLabels'],
+        ['allure.clear.skipped', 'allureClearSkippedTests'],
         ['allure.video.passed', 'allureAddVideoOnPass']
     ]);
 

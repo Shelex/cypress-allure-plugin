@@ -86,10 +86,12 @@ Allure.prototype.stepEnd = function () {
 };
 
 Allure.prototype.parameter = function (name, value) {
+    shouldBePrimitiveType(value);
     this.reporter.currentExecutable.addParameter(name, value);
 };
 
 Allure.prototype.testParameter = function (name, value) {
+    shouldBePrimitiveType(value);
     this.reporter.currentTest.addParameter(name, value);
 };
 
@@ -98,7 +100,7 @@ Allure.prototype.testName = function (name) {
 };
 
 Allure.prototype.label = function (name, value) {
-    if (this.reporter.currentTest) {
+    if (this.reporter.currentTest && !this.reporter.currentHook) {
         const labelIndex = (name) =>
             this.reporter.currentTest.info.labels.findIndex(
                 (label) => label.name === name
@@ -135,5 +137,11 @@ module.exports = class AllureInterface {
         this.currentTest = this.reporter.currentTest;
         this.currentExecutable = this.reporter.currentExecutable;
         this.currentHook = this.reporter.currentHook;
+    }
+};
+
+const shouldBePrimitiveType = (value) => {
+    if (typeof value === 'object' || typeof value === 'function') {
+        throw new Error('allure.parameter value should be primitive type');
     }
 };

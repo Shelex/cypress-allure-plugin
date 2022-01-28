@@ -39,9 +39,9 @@
         "lint": "yarn eslint ."
     },
     "dependencies": {
-        "@shelex/allure-js-commons-browser": "1.2.0",
+        "@shelex/allure-js-commons-browser": "1.3.0",
         "crypto-js": "4.1.1",
-        "debug": "4.3.2",
+        "debug": "4.3.3",
         "uuid": "8.3.2"
     },
     "devDependencies": {

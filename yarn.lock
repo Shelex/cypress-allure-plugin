@@ -1192,12 +1192,12 @@
     lodash "^4.17.4"
     read-pkg-up "^7.0.0"
 
-"@shelex/allure-js-commons-browser@1.2.0":
-  version "1.2.0"
-  resolved "https://registry.yarnpkg.com/@shelex/allure-js-commons-browser/-/allure-js-commons-browser-1.2.0.tgz#16e8752e100860a3ecd5bb2581113f131e27cf39"
-  integrity sha512-BlRjExO+Y/Y0OMwEUhyCinf6rkcqTVPeAC7W5QENTXrvhu6CKXqUlhSTM+GUu4tOSlNSwdyvSI+fiMjCV1TI5g==
+"@shelex/allure-js-commons-browser@1.3.0":
+  version "1.3.0"
+  resolved "https://registry.yarnpkg.com/@shelex/allure-js-commons-browser/-/allure-js-commons-browser-1.3.0.tgz#dee9378678ebef57fd0793a3997146c785055529"
+  integrity sha512-wscwFaM/yZ72yXv0fnQGKLLecLVrDBJAsZ2PoyaMRi0E7E2Ix85XGbOjy0k+9e89SBskaF+Qq1B1IRGkKz39yA==
   dependencies:
-    uuid "8.3.0"
+    uuid "8.3.2"
 
 "@tootallnate/once@1":
   version "1.1.2"
@@ -2764,6 +2764,13 @@ debug@4.1.1:
   integrity sha512-pYAIzeRo8J6KPEaJ0VWOh5Pzkbw/RetuzehGM7QRRX5he4fPHx2rdKMB256ehJCkX+XRQm16eZLqLNS8RSZXZw==
   dependencies:
     ms "^2.1.1"
+
+debug@4.3.3:
+  version "4.3.3"
+  resolved "https://registry.yarnpkg.com/debug/-/debug-4.3.3.tgz#04266e0b70a98d4462e6e288e38259213332b664"
+  integrity sha512-/zxw5+vh1Tfv+4Qn7a5nsbcJKPaSvCDhojn6FEl9vupwK2VCSDtEiEtqr8DFtzYFOdz63LBkxec7DYuc2jon6Q==
+  dependencies:
+    ms "2.1.2"
 
 debug@^2.2.0, debug@^2.3.3:
   version "2.6.9"
@@ -7453,11 +7460,6 @@ util@~0.10.1:
   integrity sha512-0Pm9hTQ3se5ll1XihRic3FDIku70C+iHUdT/W926rSgHV5QgXsYbKZN8MSC3tJtSkhuROzvsQjAaFENRXr+19A==
   dependencies:
     inherits "2.0.3"
-
-uuid@8.3.0:
-  version "8.3.0"
-  resolved "https://registry.yarnpkg.com/uuid/-/uuid-8.3.0.tgz#ab738085ca22dc9a8c92725e459b1d507df5d6ea"
-  integrity sha512-fX6Z5o4m6XsXBdli9g7DtWgAx+osMsRRZFKma1mIUsLCz6vRvv+pz5VNbyu9UEDzpMWulZfvpgb/cmDXVulYFQ==
 
 uuid@8.3.2, uuid@^8.3.2:
   version "8.3.2"
