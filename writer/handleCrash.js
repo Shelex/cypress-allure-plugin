@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const uuid = require('uuid');
 const logger = require('../reporter/debug');
+const { createTest, createSuite } = require('./write');
 
 const handleCrash = (results, config) => {
     if (!results.error) {
@@ -15,7 +16,18 @@ const handleCrash = (results, config) => {
 
     const suite = createSuite(results.spec.name);
 
-    const test = createTest(results, suite);
+    const test = createTest(
+        {
+            title: [results.spec.name],
+            name: `Oops...we found an error preparing this test file: ${results.spec.name}`,
+            uuid: uuid.v4(),
+            status: 'broken',
+            error: results.error,
+            start: results.stats.wallClockStartedAt,
+            stop: results.stats.wallClockEndedAt
+        },
+        suite
+    );
 
     suite.children.push(test.uuid);
 
@@ -51,33 +63,3 @@ const handleCrash = (results, config) => {
 };
 
 module.exports = { handleCrash };
-
-const createSuite = (spec) => ({
-    uuid: uuid.v4(),
-    children: [],
-    befores: [],
-    afters: [],
-    name: spec
-});
-
-const createTest = (results, suite) => {
-    const name = `Oops...we found an error preparing this test file: ${results.spec.name}`;
-    return {
-        uuid: uuid.v4(),
-        historyId: null,
-        status: 'broken',
-        statusDetails: {
-            message: results.error.split('The error was:').shift(),
-            trace: results.error.split('The error was:').pop()
-        },
-        stage: 'finished',
-        attachments: [],
-        parameters: [],
-        labels: [{ name: 'suite', value: suite.name }],
-        links: [],
-        start: Date.parse(results.stats.wallClockStartedAt),
-        name: name,
-        fullName: name,
-        stop: Date.parse(results.stats.wallClockEndedAt)
-    };
-};

@@ -9,6 +9,7 @@ const { languageLabel } = require('../languageLabel');
 const logger = require('../debug');
 const CypressHandler = require('./CypressHandler');
 const CucumberHandler = require('./CucumberHandler');
+const defineSuites = require('../defineSuites');
 
 module.exports = class AllureReporter {
     constructor(runtime, options) {
@@ -199,26 +200,9 @@ module.exports = class AllureReporter {
         if (test.parent) {
             const titlePath = test.parent.titlePath();
             // should add suite label for test if it has parent
-            if (titlePath.length === 1) {
-                this.currentTest.addLabel(LabelName.SUITE, titlePath.pop());
-            } else {
-                const [parentSuite, suite, ...subSuites] = titlePath;
-                if (parentSuite) {
-                    this.currentTest.addLabel(
-                        LabelName.PARENT_SUITE,
-                        parentSuite
-                    );
-                }
-                if (suite) {
-                    this.currentTest.addLabel(LabelName.SUITE, suite);
-                }
-                if (subSuites.length > 0) {
-                    this.currentTest.addLabel(
-                        LabelName.SUB_SUITE,
-                        subSuites.join(' > ')
-                    );
-                }
-            }
+            defineSuites(titlePath).forEach((label) =>
+                this.currentTest.addLabel(label.name, label.value)
+            );
         }
     }
 

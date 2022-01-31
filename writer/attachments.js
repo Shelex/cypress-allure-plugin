@@ -2,6 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const uuid = require('uuid');
 const logger = require('../reporter/debug');
+const { createTest } = require('./write');
 
 const videoContentType = 'video/mp4';
 const imageContentType = 'image/png';
@@ -29,6 +30,22 @@ const attachScreenshotsAndVideo = (allureMapping, results, config) => {
         const fileName = `${allureId}-result.json`;
 
         const testFilePath = path.join(config.env.allureResultsPath, fileName);
+
+        // check if results exist, if no - create allure file
+        const isWritten = fs.existsSync(testFilePath);
+
+        if (!isWritten) {
+            const allureTest = createTest({
+                title: test.title,
+                name: test.title.pop(),
+                uuid: allureId,
+                status: test.state,
+                error: test.displayError,
+                start: results.stats.wallClockStartedAt,
+                stop: results.stats.wallClockEndedAt
+            });
+            fs.writeFileSync(testFilePath, JSON.stringify(allureTest));
+        }
 
         const content =
             fs.existsSync(testFilePath) && fs.readFileSync(testFilePath);
