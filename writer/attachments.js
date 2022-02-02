@@ -57,9 +57,11 @@ const attachScreenshotsAndVideo = (allureMapping, results, config) => {
 
         const allureTest = JSON.parse(content);
 
-        const screenshots = results.screenshots.filter(
-            (screenshot) => screenshot.testId === test.testId
-        );
+        const screenshots = config.env.allureSkipAutomaticScreenshots
+            ? []
+            : results.screenshots.filter(
+                  (screenshot) => screenshot.testId === test.testId
+              );
 
         screenshots.forEach((screenshot) => {
             const allureScreenshotFileName = `${uuid.v4()}-attachment${path.extname(

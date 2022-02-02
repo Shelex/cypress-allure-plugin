@@ -50,7 +50,9 @@ const config = {
         env('allureOmitPreviousAttemptScreenshots'),
     clearSkipped: () => env('allureClearSkippedTests') === true,
     addAnalyticLabels: () => env('allureAddAnalyticLabels'),
-    addVideoOnPass: () => env('allureAddVideoOnPass')
+    addVideoOnPass: () => env('allureAddVideoOnPass'),
+    skipAutomaticScreenshots: () =>
+        env('allureSkipAutomaticScreenshots') === true
 };
 
 const shouldListenToCyCommandEvents = () =>
@@ -190,7 +192,11 @@ Cypress.Allure = config.allureEnabled()
 Cypress.Screenshot.defaults({
     onAfterScreenshot(_, details) {
         logger.cy(`onAfterScreenshot: %O`, details);
-        if (config.allureEnabled() && !shouldUseAfterSpec(Cypress.config())) {
+        if (
+            config.allureEnabled() &&
+            !shouldUseAfterSpec(Cypress.config()) &&
+            !config.skipAutomaticScreenshots()
+        ) {
             logger.allure(`allure enabled, attaching screenshot`);
             Cypress.Allure.reporter.files.push({
                 name: details.name || `${details.specName}:${details.takenAt}`,

@@ -97,6 +97,7 @@ Plugin is customizable via Cypress environment variables:
 | `allureLogGherkin`                     | log gherkin steps from cucumber-preprocessor                                                             | inherits `allureLogCypress` value if not specified directly |
 | `allureAttachRequests`                 | attach `cy.request` headers, body, response headers, respose body to step automatically                  | false                                                       |
 | `allureOmitPreviousAttemptScreenshots` | omit screenshots attached in previous attempts when retries are used                                     | false                                                       |
+| `allureSkipAutomaticScreenshots`       | do not add screenshots automatically (for those who uses custom scripts, etc.)                           | false                                                       |
 | `allureClearSkippedTests`              | remove skipped tests from report                                                                         | false                                                       |
 | `allureAddAnalyticLabels`              | add framework and language labels to tests (used for allure analytics only)                              | false                                                       |
 | `allureAddVideoOnPass`                 | attach video to report for passed tests                                                                  | false                                                       |
