@@ -143,17 +143,16 @@ module.exports = class AllureReporter {
         }
 
         // restrict label storage to single suite scope
-        // check if there are skipped tests and reapply labels from storage
-        // as beforeEach\afterEach hooks for them are not executed
-        this.runtime.config.writer.tests
-            .filter((test) => test.status === Status.SKIPPED)
-            .forEach((test) =>
-                this.labelStorage.forEach((label) =>
-                    // in case label is missing - it will be applied to test
-                    // but not overwrite it
-                    applyLabel(test, label, false)
-                )
-            );
+        // try to reapply labels from storage
+        // as beforeEach\afterEach hooks for skipped tests are not executed
+        // and handle labels provided in afterEach
+        this.runtime.config.writer.tests.forEach((test) =>
+            this.labelStorage.forEach((label) =>
+                // in case label is missing - it will be applied to test
+                // but not overwrite it
+                applyLabel(test, label, false)
+            )
+        );
         this.labelStorage = [];
     }
 
