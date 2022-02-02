@@ -108,7 +108,10 @@ Allure.prototype.label = function (name, value) {
 
         // by default allure not overwrite label value
         // so there is separate handling for existing labels
-        if (labelIndex(name) === -1) {
+        if (
+            labelIndex(name) === -1 ||
+            ['epic', 'feature', 'story'].includes(name)
+        ) {
             this.reporter.currentTest.addLabel(name, value);
         } else {
             this.reporter.currentTest.info.labels[labelIndex(name)] = {
