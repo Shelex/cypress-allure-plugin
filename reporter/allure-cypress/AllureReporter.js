@@ -141,7 +141,19 @@ module.exports = class AllureReporter {
             logger.allure(`finished suite`);
             this.currentTest = null;
         }
+
         // restrict label storage to single suite scope
+        // check if there are skipped tests and reapply labels from storage
+        // as beforeEach\afterEach hooks for them are not executed
+        this.runtime.config.writer.tests
+            .filter((test) => test.status === Status.SKIPPED)
+            .forEach((test) =>
+                this.labelStorage.forEach((label) =>
+                    // in case label is missing - it will be applied to test
+                    // but not overwrite it
+                    applyLabel(test, label, false)
+                )
+            );
         this.labelStorage = [];
     }
 
@@ -409,15 +421,9 @@ module.exports = class AllureReporter {
         // in case labels were defined outside of test
         // we could attach them from storage
         if (this.currentTest) {
-            this.labelStorage.forEach((label) => {
-                const indexOfExisting = this.currentTest.info.labels.findIndex(
-                    (existingLabel) => existingLabel.name === label.name
-                );
-                indexOfExisting === -1
-                    ? this.currentTest.info.labels.push(label)
-                    : (this.currentTest.info.labels[indexOfExisting].value =
-                          label.value);
-            });
+            this.labelStorage.forEach((label) =>
+                applyLabel(this.currentTest.info, label)
+            );
         }
 
         (this.config.shouldLogCypress() ||
@@ -446,3 +452,12 @@ module.exports = class AllureReporter {
 };
 
 const isEmpty = (hook) => hook && hook.body === 'function () {}';
+
+const applyLabel = (test, label, shouldOverride = true) => {
+    const indexOfExisting = test.labels.findIndex(
+        (existingLabel) => existingLabel.name === label.name
+    );
+    indexOfExisting === -1
+        ? test.labels.push(label)
+        : shouldOverride && (test.labels[indexOfExisting].value = label.value);
+};
