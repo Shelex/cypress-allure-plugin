@@ -17,6 +17,12 @@ module.exports = class Chain {
             commandLog: null
         };
         this.chain.push(command);
+
+        // in case command in enqueued while there is active chainer - treat it as parent
+        // so this command should be added as a child to track if we should finish parent command step
+        if (command.parent) {
+            this.addChild(command.id, command.parent);
+        }
         return command;
     }
 

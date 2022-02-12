@@ -77,17 +77,10 @@ module.exports = class CypressHandler {
             return;
         }
 
-        // prepare chainer command object with specific information to process it with events
+        // gather command info to use for later processing
         const chainable = this.chain.add(command);
 
         logger.cy(`tracking command: %O`, chainable);
-
-        // in case command in enqueued while there was active chainer - treat it as parent
-        // so this command should be added as child to track if we should finish parent command step
-        if (chainable.parent) {
-            this.chain.addChild(command.id, chainable.parent);
-            logger.cy(`added as child of command: %O`, parent);
-        }
     }
 
     started(command) {
