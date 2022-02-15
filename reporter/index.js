@@ -185,9 +185,15 @@ class CypressAllureReporter {
     }
 }
 
-Cypress.Allure = config.allureEnabled()
-    ? new CypressAllureReporter()
-    : stubbedAllure;
+// when different hosts used in same test
+// Cypress opens new host URL and loads index.js
+// so if we already have Allure data we should not replace it with new instance
+// https://github.com/Shelex/cypress-allure-plugin/issues/125
+if (!Cypress.Allure) {
+    Cypress.Allure = config.allureEnabled()
+        ? new CypressAllureReporter()
+        : stubbedAllure;
+}
 
 Cypress.Screenshot.defaults({
     onAfterScreenshot(_, details) {
