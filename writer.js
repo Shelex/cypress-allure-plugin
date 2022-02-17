@@ -1,12 +1,13 @@
 const path = require('path');
 const fs = require('fs');
+const process = require('process');
 const uuid = require('uuid');
 const logger = require('./reporter/debug');
 const { allurePropertiesToEnvVars } = require('./writer/readProperties');
-const { attachScreenshotsAndVideo } = require('./writer/attachments');
 const { overwriteTestNameMaybe } = require('./writer/customTestName');
 const { shouldUseAfterSpec } = require('./writer/useAfterSpec');
-const { handleCrash } = require('./writer/handleCrash');
+const { alreadyRegisteredAfterSpec } = require('./writer/checkPluginsFile');
+const { handleResults } = require('./writer/handleCypressResults');
 
 function allureWriter(on, config) {
     allurePropertiesToEnvVars(config.env);
@@ -18,24 +19,37 @@ function allureWriter(on, config) {
     let allureMapping = null;
 
     if (shouldUseAfterSpec(config)) {
-        on('after:spec', (_, results) => {
-            if (!config.env.allure) {
-                return;
-            }
-            logger.writer('inside "after:spec" event');
+        logger.writer(
+            'allure should use "after:spec" for handling attachments'
+        );
+        if (alreadyRegisteredAfterSpec(config)) {
+            logger.writer(
+                'you already have "after:spec", allure plugin will listen to process'
+            );
 
-            try {
-                results.error
-                    ? handleCrash(results, config)
-                    : attachScreenshotsAndVideo(allureMapping, results, config);
-            } catch (e) {
-                logger.writer(
-                    'failed to add attachments in "after:spec" due to: %O',
-                    e
-                );
-            }
-            allureMapping = null;
-        });
+            // in case cypress "after:spec" event is already registered by user
+            // and we will register new callback - it will be overwritten
+            // as a workaround we will listen directly to process messages
+            // ( cypress uses it to trigger event for internal event emitter under the hood )
+            process.on('message', (message) => {
+                const [event, , args] = message.args;
+                if (event !== 'after:spec' || !config.env.allure) {
+                    return;
+                }
+                const [, results] = args;
+                logger.writer('got "after:spec" process message');
+                handleResults(allureMapping, results, config);
+            });
+        } else {
+            logger.writer('register "after:spec" event listener');
+            on('after:spec', (_, results) => {
+                if (!config.env.allure) {
+                    return;
+                }
+                logger.writer('inside "after:spec" event');
+                handleResults(allureMapping, results, config);
+            });
+        }
     }
 
     on('task', {
