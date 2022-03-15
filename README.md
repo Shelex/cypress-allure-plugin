@@ -1,5 +1,7 @@
 # cypress-allure-plugin
 
+[![SWUbanner](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/banner2-direct.svg)](https://vshymanskyy.github.io/StandWithUkraine/)
+
 > Plugin for integrating allure reporter in Cypress with support of Allure API.
 
 ![Build][gh-image]
@@ -171,9 +173,9 @@ Cypress.Allure.reporter.runtime.writer;
 
 ## Debugging
 
--   In-browser logs
+-   for in-browser information (cypress events, mocha events, allure events, data collecting)
     execute `localStorage.debug = 'allure-plugin*'` in DevTools console
--   Writer task
+-   for writer task information (writing results to disk, handling attachments, plugin events)
     add `DEBUG=allure-plugin*` before cypress run\open command
 
 ## Examples
