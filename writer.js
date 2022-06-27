@@ -1,4 +1,4 @@
-const path = require('path');
+const path = require('path-browserify');
 const fs = require('fs');
 const process = require('process');
 const uuid = require('uuid');

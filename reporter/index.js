@@ -12,7 +12,7 @@ const {
     EVENT_HOOK_END
 } = Mocha.Runner.constants;
 
-const path = require('path');
+const path = require('path-browserify');
 const {
     AllureRuntime,
     InMemoryAllureWriter,

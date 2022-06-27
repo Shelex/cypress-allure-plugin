@@ -1,5 +1,5 @@
 const fs = require('fs');
-const path = require('path');
+const path = require('path-browserify');
 const uuid = require('uuid');
 const logger = require('../reporter/debug');
 const { createTest } = require('./write');
