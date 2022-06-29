@@ -31,7 +31,9 @@ module.exports = class CucumberHandler {
         return (
             this.state.currentScenario ||
             this.state.gherkinDocument.feature.children.find((child) =>
-                this.state.pickle.astNodeIds.includes(child.scenario.id)
+                this.state.pickle.astNodeIds.includes(
+                    child.scenario && child.scenario.id
+                )
             ).scenario
         );
     }
@@ -46,7 +48,10 @@ module.exports = class CucumberHandler {
     get outlineExampleIndex() {
         if (this.isNewFormat) {
             const [, exampleId] = this.state.pickle.astNodeIds;
-            if (!this.currentScenario.examples.length) {
+            if (
+                !this.currentScenario.examples ||
+                !this.currentScenario.examples.length
+            ) {
                 return -1;
             }
             return this.currentScenario.examples[0].tableBody.findIndex(
@@ -66,7 +71,7 @@ module.exports = class CucumberHandler {
         const currentTags = this.currentScenario.tags || [];
         if (this.isNewFormat) {
             const indexOfChild = this.feature.children.findIndex(
-                (child) => child.scenario.id === scenarioId
+                (child) => child.scenario && child.scenario.id === scenarioId
             );
             if (indexOfChild === -1) {
                 return;
