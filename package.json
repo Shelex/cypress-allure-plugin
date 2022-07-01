@@ -31,8 +31,8 @@
     ],
     "scripts": {
         "semantic-release": "semantic-release",
-        "test": "yarn cypress run --config integrationFolder=cypress/integration/results,testFiles=**/*.spec.js,video=false",
-        "test:debug": "yarn cypress open --config integrationFolder=cypress/integration/results,testFiles=**/*.test.js,video=false",
+        "test": "yarn cypress run --config specPattern=cypress/e2e/results/*.cy.js,video=false",
+        "test:debug": "yarn cypress open --config specPattern=cypress/e2e/results/*.test.js,video=false",
         "test:prepare:basic": "DEBUG=allure-plugin* node cypress/scripts/runner basic",
         "test:prepare:cucumber": "DEBUG=allure-plugin* node cypress/scripts/runner cucumber",
         "fixtures:clear": "rm -r cypress/fixtures/*",
@@ -47,7 +47,7 @@
     },
     "devDependencies": {
         "@types/mocha": "7.0.2",
-        "cypress": "7.5.0",
+        "cypress": "10.3.0",
         "cypress-cucumber-preprocessor": "2.3.1",
         "eslint": "7.32.0",
         "eslint-config-prettier": "8.3.0",
@@ -58,6 +58,7 @@
         "semantic-release": "17.4.7"
     },
     "cypress-cucumber-preprocessor": {
-        "nonGlobalStepDefinitions": true
+        "nonGlobalStepDefinitions": true,
+        "stepDefinitions": "cypress/e2e/cucumber"
     }
 }

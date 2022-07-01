@@ -32,9 +32,7 @@
 
 ## Setup
 
--   Connect plugin in `cypress/plugins/index.js`. Take into account that Cypress generate plugins file with `module.exports` on the first initialization but you should have only one export section. In order to add Allure writer task just replace it or add writer task somewhere before returning config:
-
-    -   as only plugin:
+-  (Before Cypress 10) Connect plugin in `cypress/plugins/index.js`. Take into account that Cypress generate plugins file with `module.exports` on the first initialization but you should have only one export section. In order to add Allure writer task just replace it or add writer task somewhere before returning config:
 
     ```js
     const allureWriter = require('@shelex/cypress-allure-plugin/writer');
@@ -46,17 +44,45 @@
     };
     ```
 
-    -   if you have webpack or other preprocessors please set allure writer before returning "config":
+- (After Cypress 10) Use `defineConfig` and `setupNodeEvents` inside config.js\config.ts files:
 
     ```js
-    module.exports = (on, config) => {
-        on('file:preprocessor', webpackPreprocessor);
-        allureWriter(on, config);
-        return config;
-    };
+    module.exports = defineConfig({
+        e2e: {
+            setupNodeEvents(on, config) {
+                AllureWriter(on, config);
+                return config;
+            }
+        }
+    });
     ```
 
--   Register commands in `cypress/support/index.js` file:
+    -   if you have webpack or other preprocessors 
+        - (Before Cypress 10) please set allure writer before returning "config":
+
+        ```js
+        module.exports = (on, config) => {
+            on('file:preprocessor', webpackPreprocessor);
+            allureWriter(on, config);
+            return config;
+        };
+        ```
+
+        - (After Cypress 10) use `defineConfig` and `setupNodeEvents` inside config.js\config.ts files:
+    
+        ```js
+        module.exports = defineConfig({
+            e2e: {
+                setupNodeEvents(on, config) {
+                    on('file:preprocessor', webpackPreprocessor);
+                    AllureWriter(on, config);
+                    return config;
+                }
+            }
+        });
+        ```
+
+-   Register commands in `cypress/support/index.js` (or `cypress/support/e2e.js` for cypress 10+) file:
 
     -   with `import`:
 
@@ -70,19 +96,15 @@
     require('@shelex/cypress-allure-plugin');
     ```
 
--   for IntelliSense (autocompletion) support in your IDE add on top of your `cypress/plugins/index.js` file:
-
-```js
-/// <reference types="@shelex/cypress-allure-plugin" />
-```
-
--   for typescript support, update your tsconfig.json:
+-   for IntelliSense (autocompletion) support in your IDE add `tsconfig.json` and specify `types` property for `compilerOptions`:
 
 ```json
-"include": [
-   "../node_modules/@shelex/cypress-allure-plugin/reporter",
-   "../node_modules/cypress"
- ]
+ "compilerOptions": {
+        "allowJs": true,
+        "baseUrl": "./",
+        "types": ["@shelex/cypress-allure-plugin"],
+        "noEmit": true
+    },
 ```
 
 ## Configuration
@@ -104,62 +126,24 @@ Plugin is customizable via Cypress environment variables:
 | `allureAddAnalyticLabels`              | add framework and language labels to tests (used for allure analytics only)                              | false                                                       |
 | `allureAddVideoOnPass`                 | attach video to report for passed tests                                                                  | false                                                       |
 
-This options could be passed:
-
--   via `cypress.json`
-
-    ```json
-    {
-        "env": {
-            "allureResultsPath": "someFolder/results",
-            // tms prefix used without `*`, equivalent to `https://url-to-bug-tracking-system/task-*`
-            "tmsPrefix": "https://url-to-bug-tracking-system/task-",
-            "issuePrefix": "https://url-to-tms/tests/caseId-"
-            // usage:  cy.allure().issue('blockerIssue', 'AST-111')
-            // result: https://url-to-bug-tracking-system/task-AST-111
-        }
-    }
-    ```
-
--   via `command line`:
-    as [Cypress environment variables](https://docs.cypress.io/guides/guides/environment-variables#Option-4-env) are used please take into account that cli should have only one argument `--env` or `-e`, otherwise values will not be passed
-
-        ```bash
-        yarn cypress run --env allure=true,allureResultsPath=someFolder/results
-
-        yarn cypress run --env TAGS='@smoke',allure=true
-
-        # for windows:
-        yarn cypress run --env  "TAGS=@smoke","allure=true"
-        ```
-
--   via `Cypress environment variables`:
-
-    ```js
-    Cypress.env('issuePrefix', 'url_to_bug_tracker');
-    ```
-
--   via `allure.properties` file (but you still need to enable allure by passing `allure=true` to cypress env variables):
-
-    ```bash
-    allure.results.directory=custom_dir
-    allure.link.issue.pattern=https://example.com/task_
-    allure.link.tms.pattern=https://example.com/test_case_
-    allure.cypress.log.commands=true
-    allure.cypress.log.requests=true
-    allure.cypress.log.gherkin=true
-    allure.omit.previous.attempt.screenshot=true
-    allure.analytics=false
-    allure.video.passed=false
-    ```
+These options could be passed in multiple ways, you can check [docs](https://docs.cypress.io/guides/guides/environment-variables#Setting).
+But also you can use `allure.properties` file (but you still need to enable allure by passing `allure=true` to cypress env variables):
+    
+```bash
+allure.results.directory=custom_dir
+allure.link.issue.pattern=https://example.com/task_
+allure.link.tms.pattern=https://example.com/test_case_
+allure.cypress.log.commands=true
+allure.cypress.log.requests=true
+allure.cypress.log.gherkin=true
+allure.omit.previous.attempt.screenshot=true
+allure.analytics=false
+allure.video.passed=false
+```
 
 ## Execution
 
--   be sure your docker or local browser versions are next: Chrome 71+, Edge 79+. Firefox 65+
-
--   plugin might not be applied to older Cypress versions, 4+ is recommended
-
--   to enable Allure results writing just pass environment variable `allure=true`, example:
+- To enable Allure results writing just pass environment variable `allure=true`, example:
 
 ```bash
 npx cypress run --env allure=true
@@ -180,8 +164,7 @@ Cypress.Allure.reporter.runtime.writer;
 
 ## Examples
 
-See [cypress-allure-plugin-example](https://github.com/Shelex/cypress-allure-plugin-example) project, which is already configured to use this plugin, hosting report as github page and run by github action. It has configuration for basic allure history saving (just having numbers and statuses in trends and history).  
-For complete history (allure can display 20 build results ) with links to older reports and links to CI builds check [cypress-allure-historical-example](https://github.com/Shelex/cypress-allure-historical-example) with basic and straightforward idea how to achieve it.
+See [cypress-allure-plugin-example](https://github.com/Shelex/cypress-allure-plugin-example) project, which is already configured to use this plugin, hosting report as github page and run by github action. It has configuration with complete history (allure can display 20 build results ) with links to older reports and links to CI builds.
 
 There are also existing solutions that may help you prepare your report infrastructure:
 
@@ -331,7 +314,7 @@ Now it will be used for:
 -   interactive (open) mode for v7.1.0 with `experimentalInteractiveRunEvents` enabled
     When one of this conditions is satisfied - `after:spec` event will be used for attachments. It will reliably copy all screenshots available for each test and video (if available) to your `allure-results` folder and attach to each of your tests, so you don't need to somehow upload your videos and configure paths, etc.
 
-## Cypress commands
+## Cypress commands as steps
 
 Commands are producing allure steps automatically based on cypress events and are trying to represent how code and custom commands are executed with nested structure.  
 Moreover, steps functionality could be expanded with:
@@ -352,7 +335,7 @@ A lot of respect to [Sergey Korol](serhii.s.korol@gmail.com) who made [Allure-mo
 
 ## License
 
-Copyright 2020-2021 Oleksandr Shevtsov <ovr.shevtsov@gmail.com>.  
+Copyright 2020-2022 Oleksandr Shevtsov <ovr.shevtsov@gmail.com>.  
 This project is licensed under the Apache 2.0 License.
 
 [npm-url]: https://npmjs.com/package/@shelex/cypress-allure-plugin

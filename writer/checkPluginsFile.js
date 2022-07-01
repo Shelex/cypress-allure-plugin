@@ -1,9 +1,10 @@
 const fs = require('fs');
 
 const alreadyRegisteredAfterSpec = (config) => {
+    const configPath = config.pluginsFile || config.configFile;
+
     const content =
-        fs.existsSync(config.pluginsFile) &&
-        fs.readFileSync(config.pluginsFile, 'utf-8');
+        fs.existsSync(configPath) && fs.readFileSync(configPath, 'utf-8');
     if (!content) {
         return;
     }

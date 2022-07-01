@@ -10,16 +10,21 @@ const cypressConfig = {
     }
 };
 
-cypressConfig.config =
-    mode === 'cucumber'
-        ? {
-              ignoreTestFiles: '*.js',
-              testFiles: '**/*.{feature,features}',
-              video: false
-          }
-        : {
-              integrationFolder: 'cypress/integration/basic',
-              video: false
-          };
+const config = (mode) => {
+    const configs = {
+        cucumber: {
+            specPattern: 'cypress/e2e/cucumber/*.feature',
+            excludeSpecPattern: '*.js'
+        },
+        basic: {
+            specPattern: 'cypress/e2e/basic/*.cy.*'
+        }
+    };
 
-cypress.run(cypressConfig);
+    const config = configs[mode] || configs.basic;
+    config.video = false;
+    cypressConfig.config = config;
+    return cypressConfig;
+};
+
+cypress.run(config(mode));
