@@ -54,7 +54,12 @@ function allureWriter(on, config) {
 
     on('task', {
         writeAllureResults: ({ results, files, mapping, clearSkipped }) => {
-            const { resultsDir, writer } = results;
+            const { resultsDir: relativeResultsDir, writer } = results;
+
+            const resultsDir = config.projectRoot
+                ? path.join(config.projectRoot, relativeResultsDir)
+                : relativeResultsDir;
+
             logger.writer(
                 'starting writing allure results to "%s"',
                 resultsDir
