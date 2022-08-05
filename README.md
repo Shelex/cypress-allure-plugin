@@ -325,8 +325,8 @@ Moreover, steps functionality could be expanded with:
 
 ## Testing
 
--   `yarn test:prepare:basic` - generate allure results for tests in `cypress/integration/basic`folder
--   `yarn test:prepare:cucumber` - generate allure results for tests in `cypress/integration/cucumber` folder
+-   `npm run test:prepare:basic` - generate allure results for tests in `cypress/integration/basic`folder
+-   `npm run test:prepare:cucumber` - generate allure results for tests in `cypress/integration/cucumber` folder
 -   `test` - run tests from `cypress/integration/results` against these allure results
 
 ## Credits

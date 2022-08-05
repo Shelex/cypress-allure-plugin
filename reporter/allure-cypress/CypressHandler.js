@@ -110,11 +110,15 @@ module.exports = class CypressHandler {
             const executable = this.findAllureExecutableFor(chainable);
 
             const displayArg = (arg) => {
+                if (!arg) {
+                    return arg;
+                }
+
                 logger.cy(`checking argument %O and provide to step`, arg);
-                if (arg && typeof arg === 'function') {
+                if (typeof arg === 'function') {
                     return '[function]';
                 }
-                if (arg && typeof arg === 'object') {
+                if (typeof arg === 'object') {
                     // for jquery objects log selector only
                     if (arg.selector) {
                         return arg.selector;
@@ -294,37 +298,38 @@ module.exports = class CypressHandler {
     }
 
     informParent(child, failed = false) {
-        if (child.parent) {
-            const parent = this.chain.getParent(child.parent);
+        if (!child.parent) {
+            return;
+        }
+        const parent = this.chain.getParent(child.parent);
 
-            // better to skip case when no parent found
-            if (!parent) {
-                return;
+        // better to skip case when no parent found
+        if (!parent) {
+            return;
+        }
+
+        logger.cy(`command has parent, %O`, parent);
+
+        const childIndex = parent.children.indexOf(child.id);
+
+        // if found child - remove it from parent
+        if (childIndex > -1) {
+            logger.cy(`removing child from parent %O`, parent);
+            parent.children.splice(childIndex, 1);
+            // update status of parent in case any of children failed
+            if (!child.passed || failed) {
+                parent.passed = false;
             }
+        }
 
-            logger.cy(`command has parent, %O`, parent);
-
-            const childIndex = parent.children.indexOf(child.id);
-
-            // if found child - remove it from parent
-            if (childIndex > -1) {
-                logger.cy(`removing child from parent %O`, parent);
-                parent.children.splice(childIndex, 1);
-                // update status of parent in case any of children failed
-                if (!child.passed || failed) {
-                    parent.passed = false;
-                }
-            }
-
-            // finish parent step when no children left or when test is failed
-            if (!parent.children.length || failed) {
-                logger.cy(
-                    `finish parent step as no other children left %O`,
-                    parent
-                );
-                !parent.passed && (failed = true);
-                this.finished(parent.commandLog, failed);
-            }
+        // finish parent step when no children left or when test is failed
+        if (!parent.children.length || failed) {
+            logger.cy(
+                `finish parent step as no other children left %O`,
+                parent
+            );
+            !parent.passed && (failed = true);
+            this.finished(parent.commandLog, failed);
         }
     }
 
@@ -508,7 +513,7 @@ const commandIsGherkinStep = (command) =>
 
 const getCircularReplacer = () => {
     const seen = new WeakSet();
-    return (key, value) => {
+    return (_, value) => {
         if (typeof value === 'object' && value !== null) {
             if (seen.has(value)) {
                 return;

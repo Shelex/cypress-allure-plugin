@@ -31,23 +31,24 @@
     ],
     "scripts": {
         "semantic-release": "semantic-release",
-        "test": "yarn cypress run --config specPattern=cypress/e2e/results/*.cy.js,video=false",
-        "test:debug": "yarn cypress open --config specPattern=cypress/e2e/results/*.test.js,video=false",
+        "test": "npx cypress run --config specPattern=cypress/e2e/results/*.cy.js,video=false",
+        "test:debug": "npx cypress open --config specPattern=cypress/e2e/results/*.test.js,video=false",
         "test:prepare:basic": "DEBUG=allure-plugin* node cypress/scripts/runner basic",
         "test:prepare:cucumber": "DEBUG=allure-plugin* node cypress/scripts/runner cucumber",
         "fixtures:clear": "rm -r cypress/fixtures/*",
-        "lint": "yarn eslint ."
+        "lint": "npx eslint ."
     },
     "dependencies": {
         "@shelex/allure-js-commons-browser": "1.3.0",
         "crypto-js": "4.1.1",
         "debug": "4.3.4",
         "path-browserify": "1.0.1",
+        "util": "0.12.4",
         "uuid": "8.3.2"
     },
     "devDependencies": {
         "@types/mocha": "7.0.2",
-        "cypress": "10.3.0",
+        "cypress": "10.4.0",
         "cypress-cucumber-preprocessor": "2.3.1",
         "eslint": "7.32.0",
         "eslint-config-prettier": "8.3.0",

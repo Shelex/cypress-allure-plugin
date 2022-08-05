@@ -35,7 +35,6 @@ git commit --signoff
 
 -   [Git](https://git-scm.com/)
 -   [Node.JS](https://nodejs.org/en/), x64, version >= 10.16.0, < 11.0.0
--   [Yarn](https://yarnpkg.com/en/), follow the [installation guide](https://yarnpkg.com/en/docs/install)
 -   [Visual Studio Code](https://code.visualstudio.com/), version >= 1.38.0
 
 2. Fork this repository and clone it by running:
@@ -48,7 +47,7 @@ git clone git@github.com:<yourusername>/cypress-allure-plugin.git
 
 ```bash
 cd cypress-allure-plugin
-yarn install
+npm install
 ```
 
 #### 2. Find a feature to work on
