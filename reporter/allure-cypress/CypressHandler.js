@@ -1,4 +1,4 @@
-const util = require('util');
+const inspect = require('object-inspect');
 const logger = require('../debug');
 const stubbedAllure = require('../stubbedAllure');
 const callbacks = ['then', 'spread', 'each', 'within'];
@@ -525,8 +525,7 @@ const getCircularReplacer = () => {
 };
 
 const displayObject = (obj) =>
-    util.inspect(obj, {
+    inspect(obj, {
         depth: 2,
-        maxStringLength: 40,
-        maxArrayLength: 5
+        maxStringLength: 40
     });
