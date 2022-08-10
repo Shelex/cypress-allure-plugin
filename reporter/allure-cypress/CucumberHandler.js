@@ -28,14 +28,18 @@ module.exports = class CucumberHandler {
         if (!this.isStateAvailable) {
             return;
         }
-        return (
-            this.state.currentScenario ||
-            this.state.gherkinDocument.feature.children.find((child) =>
+
+        const findScenario = () => {
+            const child = getScenarios(this.feature).find((child) =>
                 this.state.pickle.astNodeIds.includes(
                     child.scenario && child.scenario.id
                 )
-            ).scenario
-        );
+            );
+
+            return child && child.scenario;
+        };
+
+        return this.state.currentScenario || findScenario();
     }
 
     get isNewFormat() {
@@ -70,20 +74,33 @@ module.exports = class CucumberHandler {
     addTag(scenarioId, tag) {
         const currentTags = this.currentScenario.tags || [];
         if (this.isNewFormat) {
-            const indexOfChild = this.feature.children.findIndex(
-                (child) => child.scenario && child.scenario.id === scenarioId
-            );
-            if (indexOfChild === -1) {
+            const indexes = findScenarioIndexes(this.feature, scenarioId);
+
+            // scenario not found
+            if (indexes.child === -1) {
                 return;
             }
-            globalThis.testState.gherkinDocument.feature.children[
-                indexOfChild
-            ].scenario.tags = [
+
+            const newTags = [
                 ...currentTags.filter((t) => !t.type && !t.type !== 'Tag'),
                 tag
             ];
+
+            // set tags for scenario under Rule keyword
+            if (indexes.rule !== -1) {
+                globalThis.testState.gherkinDocument.feature.children[
+                    indexes.rule
+                ].rule.children[indexes.child].scenario.tags = newTags;
+                return;
+            }
+
+            // set tags for scenario
+            globalThis.testState.gherkinDocument.feature.children[
+                indexes.child
+            ].scenario.tags = newTags;
             return;
         }
+
         globalThis.testState.runScenarios[this.currentScenario.name].tags = [
             ...currentTags,
             tag
@@ -94,11 +111,17 @@ module.exports = class CucumberHandler {
         if (!this.isStateAvailable) {
             return;
         }
-        if (this.currentScenario.keyword !== 'Scenario Outline') {
+
+        const scenario = this.currentScenario;
+
+        if (!scenario) {
+            return;
+        }
+
+        if (scenario.keyword !== 'Scenario Outline') {
             return;
         }
         logger.allure(`populating gherkin links from examples table`);
-        const scenario = this.currentScenario;
 
         !this.examplesStorage.length &&
             this.examplesStorage.push(...scenario.examples);
@@ -219,4 +242,43 @@ module.exports = class CucumberHandler {
                 });
         });
     }
+};
+
+const getScenarios = (feature) => {
+    const { children } = feature;
+
+    return children.reduce((scenarios, child) => {
+        const children = child.rule ? child.rule.children : [child];
+        scenarios.push(...children);
+        return scenarios;
+    }, []);
+};
+
+// get object with index of rule and child scenario by id
+const findScenarioIndexes = (feature, scenarioId) => {
+    const { children } = feature;
+
+    return children.reduce((indexes, child, index) => {
+        const isRule = Boolean(child.rule);
+
+        const children = isRule ? child.rule.children : [child];
+
+        const matchIndex = children.findIndex(
+            (child) => child.scenario && child.scenario.id === scenarioId
+        );
+
+        if (matchIndex === -1) {
+            return indexes;
+        }
+
+        return isRule
+            ? {
+                  rule: index,
+                  child: matchIndex
+              }
+            : {
+                  rule: -1,
+                  child: index
+              };
+    }, {});
 };
