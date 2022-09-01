@@ -99,6 +99,13 @@ Allure.prototype.testName = function (name) {
     this.reporter.currentTest.addParameter('OverwriteTestName', name);
 };
 
+Allure.prototype.defineSuiteLabels = function (defineSuiteLabelsFn) {
+    if (!defineSuiteLabelsFn) {
+        return;
+    }
+    this.reporter.defineSuiteLabelsFn = defineSuiteLabelsFn;
+};
+
 Allure.prototype.label = function (name, value) {
     if (this.reporter.currentTest && !this.reporter.currentHook) {
         const labelIndex = (name) =>

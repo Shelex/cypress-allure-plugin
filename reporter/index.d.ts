@@ -37,6 +37,14 @@ type ContentType =
 type Status = 'failed' | 'broken' | 'passed' | 'skipped';
 type Severity = 'blocker' | 'critical' | 'normal' | 'minor' | 'trivial';
 
+interface SuiteLabelFunctionFileInfo {
+    absolutePath: string;
+    file: string;
+    ext: string;
+    name: string;
+    folder: string;
+}
+
 declare global {
     namespace Cypress {
         interface Chainable {
@@ -52,7 +60,7 @@ declare global {
              */
             Allure: {
                 reporter: {
-                    getInterface(): Allure;
+                    getInterface(): Allure & SyncInterfaceSpecific;
                 };
             };
         }
@@ -230,6 +238,15 @@ declare global {
              * End last created allure step
              */
             endStep(): Allure;
+        }
+
+        interface SyncInterfaceSpecific {
+            /**
+             * Pass function for custom processing of suite labels
+             */
+            defineSuiteLabels(
+                fn: (titlePath: string[], fileInfo: SuiteLabelFunctionFileInfo) => string[]
+            ): void;
         }
     }
 }

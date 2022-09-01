@@ -32,7 +32,7 @@
 
 ## Setup
 
--  (Before Cypress 10) Connect plugin in `cypress/plugins/index.js`. Take into account that Cypress generate plugins file with `module.exports` on the first initialization but you should have only one export section. In order to add Allure writer task just replace it or add writer task somewhere before returning config:
+-   (Before Cypress 10) Connect plugin in `cypress/plugins/index.js`. Take into account that Cypress generate plugins file with `module.exports` on the first initialization but you should have only one export section. In order to add Allure writer task just replace it or add writer task somewhere before returning config:
 
     ```js
     const allureWriter = require('@shelex/cypress-allure-plugin/writer');
@@ -44,7 +44,7 @@
     };
     ```
 
-- (After Cypress 10) Use `defineConfig` and `setupNodeEvents` inside config.js\config.ts files:
+-   (After Cypress 10) Use `defineConfig` and `setupNodeEvents` inside config.js\config.ts files:
 
     ```js
     module.exports = defineConfig({
@@ -57,8 +57,9 @@
     });
     ```
 
-    -   if you have webpack or other preprocessors 
-        - (Before Cypress 10) please set allure writer before returning "config":
+    -   if you have webpack or other preprocessors
+
+        -   (Before Cypress 10) please set allure writer before returning "config":
 
         ```js
         module.exports = (on, config) => {
@@ -68,8 +69,8 @@
         };
         ```
 
-        - (After Cypress 10) use `defineConfig` and `setupNodeEvents` inside config.js\config.ts files:
-    
+        -   (After Cypress 10) use `defineConfig` and `setupNodeEvents` inside config.js\config.ts files:
+
         ```js
         module.exports = defineConfig({
             e2e: {
@@ -128,7 +129,7 @@ Plugin is customizable via Cypress environment variables:
 
 These options could be passed in multiple ways, you can check [docs](https://docs.cypress.io/guides/guides/environment-variables#Setting).
 But also you can use `allure.properties` file (but you still need to enable allure by passing `allure=true` to cypress env variables):
-    
+
 ```bash
 allure.results.directory=custom_dir
 allure.link.issue.pattern=https://example.com/task_
@@ -143,7 +144,7 @@ allure.video.passed=false
 
 ## Execution
 
-- To enable Allure results writing just pass environment variable `allure=true`, example:
+-   To enable Allure results writing just pass environment variable `allure=true`, example:
 
 ```bash
 npx cypress run --env allure=true
@@ -173,7 +174,6 @@ There are also existing solutions that may help you prepare your report infrastr
 -   [allure-reports-portal](https://github.com/pumano/allure-reports-portal) - another portal which allows to gather reports for multiple projects in single ui
 -   [allure-static-booster](https://gitlab.com/seitar/allure-static-booster/-/tree/master/) - solution for generating self-hosted Allure report on GitLab pages including the tables with results, pipeline links and navigation between the different Allure reports.
 -   [Github Action](https://github.com/simple-elf/allure-report-action) - report generation + better implementation for historic reports described above
--   [Allure TestOps](https://docs.qameta.io/allure-testops/) - Allure portal for those who want more than report
 
 ## How to open report
 
@@ -313,6 +313,65 @@ Now it will be used for:
 -   run mode with v6.2.0 and above (but below v6.7.0) with `experimentalRunEvents` enabled
 -   interactive (open) mode for v7.1.0 with `experimentalInteractiveRunEvents` enabled
     When one of this conditions is satisfied - `after:spec` event will be used for attachments. It will reliably copy all screenshots available for each test and video (if available) to your `allure-results` folder and attach to each of your tests, so you don't need to somehow upload your videos and configure paths, etc.
+
+## Suite structuring
+
+Allure support 3 levels of suite structure:
+
+-   `Suite` tab: `parentSuite` -> `suite` -> `subSuite` -> tests
+-   `Behaviors` tab: `epic` -> `feature` -> `story` -> tests
+
+They are defined automatically by structure passed from cypress mocha test object with titles of each parent.
+So an array of names of `describe` blocks is just transformed into:
+`[parentSuite, suite, "subsuite1 -> subsuite2 -> ..."]`
+
+However, since v2.29.0 you can modify the strategy of defining names for structuring the tests by overwriting the function in `support/index` file using `Cypress.Allure.reporter.getInterface().defineSuiteLabels` which will accept your function:
+```js
+// remove all describe block names and leave just last one:
+Cypress.Allure.reporter
+    .getInterface()
+    .defineSuiteLabels((titlePath, fileInfo) => {
+        return [titlePath.pop()];
+    });
+```
+This function will have 2 arguments. `titlePath` is that array of describe names, and `fileInfo` is a parsed representation of a filepath for cases when you want to include folder or filename into some names, or just wrap suites in folders, or implement any of your ideas how to structure tests in reports.
+
+```js
+// supplement parentSuite name with folder name
+Cypress.Allure.reporter
+    .getInterface()
+    .defineSuiteLabels((titlePath, fileInfo) => {
+        const [parentSuite, suite, ...subSuites] = titlePath;
+        return [`${fileInfo.folder} | ${parentSuite}`, suite, ...subSuites];
+    });
+```
+
+```js
+// make folder name a parentSuite:
+Cypress.Allure.reporter
+    .getInterface()
+    .defineSuiteLabels((titlePath, fileInfo) => {
+        return [fileInfo.folder, ...titlePath];
+    });
+```
+
+```js
+// remove any other describe blocks and just show last one:
+Cypress.Allure.reporter
+    .getInterface()
+    .defineSuiteLabels((titlePath, fileInfo) => {
+        return [titlePath.pop()];
+    });
+```
+
+```js
+// remove describe names and just place tests in folder -> filename structure:
+Cypress.Allure.reporter
+    .getInterface()
+    .defineSuiteLabels((titlePath, fileInfo) => {
+        return [fileInfo.folder, fileInfo.name];
+    });
+```
 
 ## Cypress commands as steps
 

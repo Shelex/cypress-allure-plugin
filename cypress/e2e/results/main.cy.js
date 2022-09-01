@@ -107,23 +107,26 @@ const expectedLabels = (mode, type) =>
               { name: 'feature', value: 'AllureAPI' }
           ];
 
+const issuePrefix = 'https://example.com/project/test/issue/';
+const tmsPrefix = 'https://example.com/testcases/TEST/';
+
 const expectedLinks = (mode, type) =>
     mode === 'basic'
         ? [
               {
                   name: 'bug',
-                  url: `${type === 'Chainer' ? 'issuePrefix-' : ''}issueUrl`,
+                  url: `${type === 'Chainer' ? issuePrefix : ''}issueUrl`,
                   type: 'issue'
               },
               {
                   name: 'test case',
-                  url: `${type === 'Chainer' ? 'tmsPrefix-' : ''}tmsUrl`,
+                  url: `${type === 'Chainer' ? tmsPrefix : ''}tmsUrl`,
                   type: 'tms'
               }
           ]
         : [
-              { name: 'jira', url: 'issuePrefix-tmsLink', type: 'issue' },
-              { name: 'tms', url: 'tmsPrefix-tmsLink', type: 'tms' },
+              { name: 'jira', url: `${issuePrefix}tmsLink`, type: 'issue' },
+              { name: 'tms', url: `${tmsPrefix}tmsLink`, type: 'tms' },
               { name: 'example', url: 'https://example.com', type: 'link' }
           ];
 

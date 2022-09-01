@@ -26,6 +26,7 @@ module.exports = class AllureReporter {
         this.cy = new CypressHandler(this);
         this.gherkin = new CucumberHandler(this);
         this.config = options;
+        this.defineSuiteLabelsFn = (titles) => titles;
     }
 
     /**
@@ -211,7 +212,11 @@ module.exports = class AllureReporter {
         if (test.parent) {
             const titlePath = test.parent.titlePath();
             // should add suite label for test if it has parent
-            defineSuites(titlePath).forEach((label) =>
+            defineSuites(
+                titlePath,
+                Cypress.spec.absolute,
+                this.defineSuiteLabelsFn
+            ).forEach((label) =>
                 this.currentTest.addLabel(label.name, label.value)
             );
         }

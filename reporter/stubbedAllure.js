@@ -41,5 +41,6 @@ const stubbedAllure = {
     endStep: () => {},
     fileAttachment: () => {},
     testParameter: () => {},
-    testName: () => {}
+    testName: () => {},
+    defineSuiteLabels: () => {}
 };

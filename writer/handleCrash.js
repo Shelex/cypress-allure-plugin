@@ -16,18 +16,15 @@ const handleCrash = (results, config) => {
 
     const suite = createSuite(results.spec.name);
 
-    const test = createTest(
-        {
-            title: [results.spec.name],
-            name: `Oops...we found an error preparing this test file: ${results.spec.name}`,
-            uuid: uuid.v4(),
-            status: 'broken',
-            error: results.error,
-            start: results.stats.wallClockStartedAt,
-            stop: results.stats.wallClockEndedAt
-        },
-        suite
-    );
+    const test = createTest({
+        title: [results.spec.name],
+        name: `Oops...we found an error preparing this test file: ${results.spec.name}`,
+        uuid: uuid.v4(),
+        status: 'broken',
+        error: results.error,
+        start: results.stats.wallClockStartedAt,
+        stop: results.stats.wallClockEndedAt
+    });
 
     suite.children.push(test.uuid);
 

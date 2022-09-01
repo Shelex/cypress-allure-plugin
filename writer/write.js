@@ -25,7 +25,10 @@ const createTest = (results) => {
         stage: 'finished',
         attachments: [],
         parameters: [],
-        labels: defineSuites(results.title),
+        labels: defineSuites(
+            results.title,
+            results.spec ? results.spec.absolute : ''
+        ),
         links: [],
         start: Date.parse(results.start),
         name: results.name,
