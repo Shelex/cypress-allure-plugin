@@ -21,21 +21,21 @@ const defineSuites = (
 ) => {
     const labels = [];
 
-    if (!titlePath.length) {
+    const fileInfo = parseAbsolutePath(fileName);
+
+    const suiteLabels = defineSuitesFn(titlePath, fileInfo);
+
+    if (!suiteLabels.length) {
         return labels;
     }
 
-    if (titlePath.length === 1) {
+    if (suiteLabels.length === 1) {
         labels.push(label('suite', titlePath.pop()));
         return labels;
     }
 
-    const fileInfo = parseAbsolutePath(fileName);
+    const [parentSuite, suite, ...subSuites] = suiteLabels;
 
-    const [parentSuite, suite, ...subSuites] = defineSuitesFn(
-        titlePath,
-        fileInfo
-    );
     if (parentSuite) {
         labels.push(label('parentSuite', parentSuite));
     }
