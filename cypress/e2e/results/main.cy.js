@@ -97,7 +97,8 @@ const expectedLabels = (mode, type) =>
               { name: 'tag', value: 'customTag2' }
           ]
         : [
-              { name: 'suite', value: 'AllureAPI' },
+              { name: 'parentSuite', value: 'AllureAPI' },
+              { name: 'suite', value: 'TestRule' },
               { name: 'epic', value: 'AllureAPI' },
               { name: 'story', value: 'Cucumber' },
               { name: 'owner', value: 'OleksandrShevtsov' },
