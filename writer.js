@@ -5,6 +5,7 @@ const uuid = require('uuid');
 const logger = require('./reporter/debug');
 const { allurePropertiesToEnvVars } = require('./writer/readProperties');
 const { overwriteTestNameMaybe } = require('./writer/customTestName');
+const { clearEmptyHookSteps } = require('./writer/clearEmptyHookSteps');
 const { shouldUseAfterSpec } = require('./writer/useAfterSpec');
 const { alreadyRegisteredAfterSpec } = require('./writer/checkPluginsFile');
 const { handleResults } = require('./writer/handleCypressResults');
@@ -192,7 +193,8 @@ function allureWriter(on, config) {
                             fileName
                         );
                         const testResultPath = path.join(resultsDir, fileName);
-                        const testResult = overwriteTestNameMaybe(test);
+                        const updatedTest = overwriteTestNameMaybe(test);
+                        const testResult = clearEmptyHookSteps(updatedTest);
                         fs.writeFileSync(
                             testResultPath,
                             JSON.stringify(testResult)
