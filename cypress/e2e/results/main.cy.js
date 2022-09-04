@@ -102,6 +102,7 @@ const expectedLabels = (mode, type) =>
               { name: 'story', value: 'Cucumber' },
               { name: 'owner', value: 'OleksandrShevtsov' },
               { name: 'tag', value: 'tagForFeature' },
+              { name: 'tag', value: 'tagForRule' },
               { name: 'severity', value: 'minor' },
               { name: 'tag', value: 'tagForTest' },
               { name: 'feature', value: 'AllureAPI' }

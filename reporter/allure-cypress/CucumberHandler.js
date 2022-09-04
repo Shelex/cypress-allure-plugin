@@ -42,6 +42,32 @@ module.exports = class CucumberHandler {
         return this.state.currentScenario || findScenario();
     }
 
+    get currentRule() {
+        if (!this.isStateAvailable) {
+            return;
+        }
+
+        const currentScenarioId =
+            this.currentScenario && this.currentScenario.id;
+
+        if (!currentScenarioId) {
+            return;
+        }
+
+        const hasScenarioById = (children, id) =>
+            children.some(
+                (child) => child.scenario && child.scenario.id === id
+            );
+
+        const featureChild = this.feature.children.find(
+            (child) =>
+                child.rule &&
+                hasScenarioById(child.rule.children, currentScenarioId)
+        );
+
+        return featureChild.rule;
+    }
+
     get isNewFormat() {
         if (!this.isStateAvailable) {
             return;
@@ -179,68 +205,70 @@ module.exports = class CucumberHandler {
 
         /**
          * tags set on test level has higher priority
-         * to not be overwritten by feature tags
+         * to not be overwritten by feature or rule tags
          */
 
-        [this.feature, this.currentScenario].forEach(function (kind) {
-            if (!kind || !kind.tags || !kind.tags.length) {
-                return;
-            }
+        [this.feature, this.currentRule, this.currentScenario].forEach(
+            function (kind) {
+                if (!kind || !kind.tags || !kind.tags.length) {
+                    return;
+                }
 
-            kind.tags
-                .filter(function ({ name }) {
-                    const match = tagToLabel.exec(name);
-                    if (match) {
-                        const [, command, value] = match;
-                        // feature and suite should be overwritten to avoid duplicates
-                        if (['feature', 'suite'].includes(command)) {
-                            const index = currentTest.info.labels.findIndex(
-                                (label) => label.name === command
-                            );
-                            currentTest.info.labels[index] = {
-                                name: command,
-                                value: value
-                            };
-                        } else {
-                            currentTest.addLabel(command, value);
+                kind.tags
+                    .filter(function ({ name }) {
+                        const match = tagToLabel.exec(name);
+                        if (match) {
+                            const [, command, value] = match;
+                            // feature and suite should be overwritten to avoid duplicates
+                            if (['feature', 'suite'].includes(command)) {
+                                const index = currentTest.info.labels.findIndex(
+                                    (label) => label.name === command
+                                );
+                                currentTest.info.labels[index] = {
+                                    name: command,
+                                    value: value
+                                };
+                            } else {
+                                currentTest.addLabel(command, value);
+                            }
                         }
-                    }
-                    return !match;
-                })
-                // check for links
-                .filter(function ({ name }) {
-                    const match = tagToLink.exec(name);
-                    if (match) {
-                        const [, command, name, matchUrl] = match;
+                        return !match;
+                    })
+                    // check for links
+                    .filter(function ({ name }) {
+                        const match = tagToLink.exec(name);
+                        if (match) {
+                            const [, command, name, matchUrl] = match;
 
-                        const url = matchUrl || name;
+                            const url = matchUrl || name;
 
-                        const prefixBy = {
-                            issue: Cypress.env('issuePrefix'),
-                            tms: Cypress.env('tmsPrefix'),
-                            link: null
-                        };
-                        const urlPrefix = prefixBy[command];
+                            const prefixBy = {
+                                issue: Cypress.env('issuePrefix'),
+                                tms: Cypress.env('tmsPrefix'),
+                                link: null
+                            };
+                            const urlPrefix = prefixBy[command];
 
-                        const pattern =
-                            urlPrefix && urlPrefix.includes('*')
-                                ? urlPrefix
-                                : `${urlPrefix}*`;
-                        currentTest.addLink(
-                            urlPrefix && pattern
-                                ? pattern.replace(/\*/g, url)
-                                : url,
-                            name,
-                            command
-                        );
-                    }
-                    return !match;
-                })
-                // add other tags
-                .forEach(function ({ name }) {
-                    currentTest.addLabel('tag', name.replace('@', ''));
-                });
-        });
+                            const pattern =
+                                urlPrefix && urlPrefix.includes('*')
+                                    ? urlPrefix
+                                    : `${urlPrefix}*`;
+                            currentTest.addLink(
+                                urlPrefix && pattern
+                                    ? pattern.replace(/\*/g, url)
+                                    : url,
+                                name,
+                                command
+                            );
+                        }
+                        return !match;
+                    })
+                    // add other tags
+                    .forEach(function ({ name }) {
+                        currentTest.addLabel('tag', name.replace('@', ''));
+                    });
+            }
+        );
     }
 };
 

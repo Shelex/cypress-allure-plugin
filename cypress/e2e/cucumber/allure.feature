@@ -5,6 +5,9 @@
 Feature: AllureAPI
     I want to use allure api in cypress tests
 
+@tagForRule
+Rule: TestRule
+
 @issue("jira","tmsLink")
 @tms("tms","tmsLink")
 @link("example","https://example.com")
