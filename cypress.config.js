@@ -1,13 +1,38 @@
 const AllureWriter = require('./writer');
-const cucumber = require('cypress-cucumber-preprocessor').default;
+const webpack = require('@cypress/webpack-preprocessor');
+const {
+    addCucumberPreprocessorPlugin
+} = require('@badeball/cypress-cucumber-preprocessor');
 const fs = require('fs');
 const path = require('path');
 const { defineConfig } = require('cypress');
 
 module.exports = defineConfig({
     e2e: {
-        setupNodeEvents(on, config) {
-            on('file:preprocessor', cucumber());
+        setupNodeEvents: async function (on, config) {
+            await addCucumberPreprocessorPlugin(on, config);
+            on(
+                'file:preprocessor',
+                webpack({
+                    webpackOptions: {
+                        resolve: { extensions: ['.ts', '.js'] },
+                        module: {
+                            rules: [
+                                {
+                                    test: /\.feature$/,
+                                    use: [
+                                        {
+                                            loader: '@badeball/cypress-cucumber-preprocessor/webpack',
+                                            options: config
+                                        }
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                })
+            );
+
             AllureWriter(on, config);
             on('task', {
                 readAllureResults: () => {
@@ -64,6 +89,9 @@ module.exports = defineConfig({
                 }
             });
             return config;
+        },
+        env: {
+            stepDefinitions: `cypress/e2e/cucumber/**/*.cy.js`
         }
     }
 });

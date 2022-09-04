@@ -6,7 +6,8 @@ const mode = process.argv.slice(2)[0];
 const cypressConfig = {
     env: {
         allure: true,
-        allureResultsPath: `cypress/fixtures/${mode}`
+        allureResultsPath: `cypress/fixtures/${mode}`,
+        stepDefinitions: `cypress/e2e/cucumber/**/*.cy.js`
     }
 };
 
