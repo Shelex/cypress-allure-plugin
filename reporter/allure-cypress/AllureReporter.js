@@ -281,21 +281,31 @@ module.exports = class AllureReporter {
                     return this.endTest();
                 }
 
-                // mark remaining tests as broken due to before all hook failure
-                test.parent.tests.forEach((test, index) => {
-                    logger.allure(
-                        `found cancelled test due to before all hook: %O`,
-                        test
-                    );
-                    index === 0
-                        ? (this.currentTest.info.name = test.title)
-                        : this.startCase(test);
-                    this.updateTest(Status.BROKEN, {
-                        message: error.message,
-                        trace: error.stack
+                // handle remaining tests due to before all hook failure
+                test.parent.tests
+                    // if mocha test instance is not final - means it is not yet finished
+                    .filter((test) => !test.final)
+                    .forEach((test, index) => {
+                        logger.allure(
+                            `found cancelled test due to before all hook: %O`,
+                            test
+                        );
+
+                        // update current test failed due to beforeEach hook
+                        if (index === 0) {
+                            this.currentTest.info.name = test.title;
+                            this.updateTest(Status.BROKEN, {
+                                message: error.message,
+                                trace: error.stack
+                            });
+                        }
+                        // create allure tests for remaining cases and mark as skipped
+                        else {
+                            this.startCase(test);
+                            this.updateTest(Status.SKIPPED);
+                        }
+                        this.endTest();
                     });
-                    this.endTest();
-                });
             }
         }
     }
