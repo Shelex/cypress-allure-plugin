@@ -22,6 +22,20 @@ Allure.prototype.testAttachment = function (name, content, type) {
     executable.addAttachment(name, type, fileName);
 };
 
+Allure.prototype.description = function (markdown) {
+    if (!this.currentTest) {
+        return;
+    }
+    this.currentTest.info.description = markdown;
+};
+
+Allure.prototype.descriptionHtml = function (html) {
+    if (!this.currentTest) {
+        return;
+    }
+    this.currentTest.info.descriptionHtml = html;
+};
+
 Allure.prototype.fileAttachment = function (name, path, type) {
     this.reporter.files.push({
         name: name,
