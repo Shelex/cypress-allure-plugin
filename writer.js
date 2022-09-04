@@ -23,7 +23,10 @@ function allureWriter(on, config) {
         logger.writer(
             'allure should use "after:spec" for handling attachments'
         );
-        if (alreadyRegisteredAfterSpec(config)) {
+        if (
+            alreadyRegisteredAfterSpec(config) ||
+            config.env.allureReuseAfterSpec
+        ) {
             logger.writer(
                 'you already have "after:spec", allure plugin will listen to process'
             );

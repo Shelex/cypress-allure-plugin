@@ -112,20 +112,21 @@
 
 Plugin is customizable via Cypress environment variables:
 
-| env variable name                      | description                                                                                              | default                                                     |
-| :------------------------------------- | :------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------- |
-| `allure`                               | enable Allure plugin                                                                                     | false                                                       |
-| `allureResultsPath `                   | customize path to allure results folder                                                                  | `allure-results`                                            |
-| `tmsPrefix`                            | just a prefix substring or pattern with `*` for links from allure API in tests to test management system | ``                                                          |
-| `issuePrefix`                          | prefix for links from allure API in tests to bug tracking system                                         | ``                                                          |
-| `allureLogCypress`                     | log cypress chainer (commands) and display them as steps in report                                       | true                                                        |
-| `allureLogGherkin`                     | log gherkin steps from cucumber-preprocessor                                                             | inherits `allureLogCypress` value if not specified directly |
-| `allureAttachRequests`                 | attach `cy.request` headers, body, response headers, respose body to step automatically                  | false                                                       |
-| `allureOmitPreviousAttemptScreenshots` | omit screenshots attached in previous attempts when retries are used                                     | false                                                       |
-| `allureSkipAutomaticScreenshots`       | do not add screenshots automatically (for those who uses custom scripts, etc.)                           | false                                                       |
-| `allureClearSkippedTests`              | remove skipped tests from report                                                                         | false                                                       |
-| `allureAddAnalyticLabels`              | add framework and language labels to tests (used for allure analytics only)                              | false                                                       |
-| `allureAddVideoOnPass`                 | attach video to report for passed tests                                                                  | false                                                       |
+| env variable name                      | description                                                                                                                                                     | default                                                     |
+| :------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------- |
+| `allure`                               | enable Allure plugin                                                                                                                                            | false                                                       |
+| `allureReuseAfterSpec`                  | reuse existing `after:spec` event listener which is mandatory for handling test results. may be already used by other plugins, and if it is your case (see [#150](https://github.com/Shelex/cypress-allure-plugin/issues/150)) - just set to `true` | false                                                       |
+| `allureResultsPath `                   | customize path to allure results folder                                                                                                                         | `allure-results`                                            |
+| `tmsPrefix`                            | just a prefix substring or pattern with `*` for links from allure API in tests to test management system                                                        | ``                                                          |
+| `issuePrefix`                          | prefix for links from allure API in tests to bug tracking system                                                                                                | ``                                                          |
+| `allureLogCypress`                     | log cypress chainer (commands) and display them as steps in report                                                                                              | true                                                        |
+| `allureLogGherkin`                     | log gherkin steps from cucumber-preprocessor                                                                                                                    | inherits `allureLogCypress` value if not specified directly |
+| `allureAttachRequests`                 | attach `cy.request` headers, body, response headers, respose body to step automatically                                                                         | false                                                       |
+| `allureOmitPreviousAttemptScreenshots` | omit screenshots attached in previous attempts when retries are used                                                                                            | false                                                       |
+| `allureSkipAutomaticScreenshots`       | do not add screenshots automatically (for those who uses custom scripts, etc.)                                                                                  | false                                                       |
+| `allureClearSkippedTests`              | remove skipped tests from report                                                                                                                                | false                                                       |
+| `allureAddAnalyticLabels`              | add framework and language labels to tests (used for allure analytics only)                                                                                     | false                                                       |
+| `allureAddVideoOnPass`                 | attach video to report for passed tests                                                                                                                         | false                                                       |
 
 These options could be passed in multiple ways, you can check [docs](https://docs.cypress.io/guides/guides/environment-variables#Setting).
 But also you can use `allure.properties` file (but you still need to enable allure by passing `allure=true` to cypress env variables):
@@ -326,6 +327,7 @@ So an array of names of `describe` blocks is just transformed into:
 `[parentSuite, suite, "subsuite1 -> subsuite2 -> ..."]`
 
 However, since v2.29.0 you can modify the strategy of defining names for structuring the tests by overwriting the function in `support/index` file using `Cypress.Allure.reporter.getInterface().defineSuiteLabels` which will accept your function:
+
 ```js
 // remove all describe block names and leave just last one:
 Cypress.Allure.reporter
@@ -334,6 +336,7 @@ Cypress.Allure.reporter
         return [titlePath.pop()];
     });
 ```
+
 This function will have 2 arguments. `titlePath` is that array of describe names, and `fileInfo` is a parsed representation of a filepath for cases when you want to include folder or filename into some names, or just wrap suites in folders, or implement any of your ideas how to structure tests in reports.
 
 ```js
