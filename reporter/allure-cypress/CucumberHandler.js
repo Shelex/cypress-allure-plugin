@@ -54,16 +54,21 @@ module.exports = class CucumberHandler {
             return;
         }
 
-        const hasScenarioById = (children, id) =>
+        const hasScenarioById = (children = [], id) =>
             children.some(
                 (child) => child.scenario && child.scenario.id === id
             );
 
         const featureChild = this.feature.children.find(
             (child) =>
+                child &&
                 child.rule &&
                 hasScenarioById(child.rule.children, currentScenarioId)
         );
+
+        if (!featureChild) {
+            return;
+        }
 
         return featureChild.rule;
     }
@@ -113,7 +118,7 @@ module.exports = class CucumberHandler {
             ];
 
             // set tags for scenario under Rule keyword
-            if (indexes.rule !== -1) {
+            if (indexes.rule !== undefined && indexes.rule !== -1) {
                 globalThis.testState.gherkinDocument.feature.children[
                     indexes.rule
                 ].rule.children[indexes.child].scenario.tags = newTags;
@@ -276,7 +281,7 @@ const getScenarios = (feature) => {
     const { children } = feature;
 
     return children.reduce((scenarios, child) => {
-        const children = child.rule ? child.rule.children : [child];
+        const children = child && child.rule ? child.rule.children : [child];
         scenarios.push(...children);
         return scenarios;
     }, []);

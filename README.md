@@ -157,6 +157,13 @@ npx cypress run --env allure=true
 Cypress.Allure.reporter.runtime.writer;
 ```
 
+## Troubleshooting
+Answers to common questions/issues:
+ - I open allure report and I see just empty results with NaN counters
+ > You should not open allure report directly as a static html page. It uses local resources, thus is banned by modern browsers and requires web server to be opened properly. To resolve it you can disable CORS (not recommended), use live server extension for vs code, or just use `allure serve` command (recommended). To serve generated report an s3 bucket with hosting option could be used or any other web hosting.
+ - My other plugins do not work / allure-results is not generated
+ > It is likely other plugins (as cucumber-preprocessor) may also listen to events (especially after:spec) in Cypress that this plugin uses. Unfortunately, only one listener is available and other are just overwritten, that's why you can pass env variable `allureReuseAfterSpec: true`  to not create new listeners from this plugin, but reuse existing.
+
 ## Debugging
 
 -   for in-browser information (cypress events, mocha events, allure events, data collecting)
