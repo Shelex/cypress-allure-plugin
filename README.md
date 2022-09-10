@@ -218,7 +218,7 @@ cy.allure()
 3. Using Cypress-cucumber-preprocessor with cucumber tags:
 
 ```feature
-@AS_ID("id_of_test_for_testops")
+@testID("id_of_test_for_testops")
 @parentSuite("someParentSuite")
 @suite("someSuite")
 @subSuite("someSubSuite")
