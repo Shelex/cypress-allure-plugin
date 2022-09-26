@@ -47,10 +47,13 @@
 -   (After Cypress 10) Use `defineConfig` and `setupNodeEvents` inside config.js\config.ts files:
 
     ```js
+    const allureWriter = require('@shelex/cypress-allure-plugin/writer');
+    // import allureWriter from "@shelex/cypress-allure-plugin/writer";
+
     module.exports = defineConfig({
         e2e: {
             setupNodeEvents(on, config) {
-                AllureWriter(on, config);
+                allureWriter(on, config);
                 return config;
             }
         }
@@ -58,10 +61,15 @@
     ```
 
     -   if you have webpack or other preprocessors
+        
+        -   Please take into account that some plugins/preprocessors may register event listeners in Cypress (especially `after:spec` to have access to results) which will block work other plugins. To make allure-plugin work with such plugins/preprocessors please use env variable `allureReuseAfterSpec: true` 
 
         -   (Before Cypress 10) please set allure writer before returning "config":
 
         ```js
+        const allureWriter = require('@shelex/cypress-allure-plugin/writer');
+        // import allureWriter from "@shelex/cypress-allure-plugin/writer";
+
         module.exports = (on, config) => {
             on('file:preprocessor', webpackPreprocessor);
             allureWriter(on, config);
@@ -72,12 +80,18 @@
         -   (After Cypress 10) use `defineConfig` and `setupNodeEvents` inside config.js\config.ts files:
 
         ```js
+        const allureWriter = require('@shelex/cypress-allure-plugin/writer');
+        // import allureWriter from "@shelex/cypress-allure-plugin/writer";
+
         module.exports = defineConfig({
             e2e: {
                 setupNodeEvents(on, config) {
                     on('file:preprocessor', webpackPreprocessor);
-                    AllureWriter(on, config);
+                    allureWriter(on, config);
                     return config;
+                },
+                env: {
+                    allureReuseAfterSpec: true
                 }
             }
         });
@@ -126,7 +140,7 @@ Plugin is customizable via Cypress environment variables:
 | `allureSkipAutomaticScreenshots`       | do not add screenshots automatically (for those who uses custom scripts, etc.)                                                                                  | false                                                       |
 | `allureClearSkippedTests`              | remove skipped tests from report                                                                                                                                | false                                                       |
 | `allureAddAnalyticLabels`              | add framework and language labels to tests (used for allure analytics only)                                                                                     | false                                                       |
-| `allureAddVideoOnPass`                 | attach video to report for passed tests                                                                                                                         | false                                                       |
+| `allureAddVideoOnPass`                 | attach video to report for passed, will work only when video is enabled tests                                                                                                                         | false                                                       |
 
 These options could be passed in multiple ways, you can check [docs](https://docs.cypress.io/guides/guides/environment-variables#Setting).
 But also you can use `allure.properties` file (but you still need to enable allure by passing `allure=true` to cypress env variables):
@@ -296,31 +310,18 @@ In case you are using VS Code and [Cypress Helper](https://marketplace.visualstu
 ## Screenshots and Videos
 
 Screenshots are attached automatically, for other type of content feel free to use `testAttachment` (for current test), `attachment` (for current executable), `fileAttachment` (for existing file).
-Videos are attached for failed tests only from path specified in cypress config `videosFolder` and in case you have not passed `video=false` to Cypress configuration.
 
-### Before version 2.21.0
+Videos are attached for failed tests only from path specified in cypress config `videosFolder` and in case you have not passed `video=false` to Cypress configuration. In case you want to attach videos for passed tests please use `allureAddVideoOnPass=true` env variable.
 
-In case you want to attach videos for passed tests please use `allureAddVideoOnPass=true` env variable.
-
-Videos are quite tricky as Cypress has no events which we can use to catch event with video name as it is processed when test runner itself (cy) has closed.
-As a workaround we can add video link before even video is saved and then we have two options:
-
-1. `videosFolder` is set as `allure-results` (or custom value you can pass as `allureResultsPath`) in cypress.json or configuration options.
-   in this case video is written directly in allure-results and will be linked by name.
-2. `videosFolder` is outside `allure-results`
-   relative path from `allure-report` to `videosFolder` will be added.
-
-Please take into account, that in case spec files have same name, cypress is creating subfolders in videos folder, and it is not handled from plugin unfortunately, so video may not have correct path in such edge case.
-
-### Update in version 2.21.0
-
-As Cypress has released [After Spec API](https://docs.cypress.io/api/plugins/after-spec-api) now this event could be evaluated for attachments.
-Now it will be used for:
+It is done with the help of [After Spec API](https://docs.cypress.io/api/plugins/after-spec-api).
+It will be used for:
 
 -   run mode with v6.7.0 and above
 -   run mode with v6.2.0 and above (but below v6.7.0) with `experimentalRunEvents` enabled
 -   interactive (open) mode for v7.1.0 with `experimentalInteractiveRunEvents` enabled
     When one of this conditions is satisfied - `after:spec` event will be used for attachments. It will reliably copy all screenshots available for each test and video (if available) to your `allure-results` folder and attach to each of your tests, so you don't need to somehow upload your videos and configure paths, etc.
+
+In lower versions some other heuristics would be used, but they are not as reliable as `after:spec`.
 
 ## Suite structuring
 
@@ -391,13 +392,6 @@ Moreover, steps functionality could be expanded with:
 -   `cy.allure().step('name')` - will create step "name" for current test. This step will be finished when next such step is created or test is finished.
 -   `cy.allure().step('name', false)` OR `cy.allure().logStep('name')` - will create step "name" for current parent step/hook/test. Will be finished when next step is created or test finished.
 -   `cy.allure().startStep('name')` - will create step "name" for current cypress command step / current step / current parent step / current hook or test. Is automatically finished on fail event or test end, but I would recommend to explicitly mention `cy.allure().endStep()` which will finish last created step.
-
-## Testing
-
--   `npm run test:prepare:basic` - generate allure results for tests in `cypress/integration/basic`folder
--   `npm run test:prepare:cucumber` - generate allure results for tests in `cypress/integration/cucumber` folder
--   `test` - run tests from `cypress/integration/results` against these allure results
-
 ## Credits
 
 A lot of respect to [Sergey Korol](serhii.s.korol@gmail.com) who made [Allure-mocha](https://github.com/allure-framework/allure-js/tree/master/packages/allure-mocha) reporter. Base integration with Cypress internal mocha runner is based on that solution.

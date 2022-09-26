@@ -50,6 +50,12 @@ cd cypress-allure-plugin
 npm install
 ```
 
+4. You can run tests to validate that setup is fine:
+
+-   `npm run test:prepare:basic` - run tests from `cypress/e2e/basic` with allure results copied into `cypress/e2e/fixtures/basic`
+-   `npm run test:prepare:cucumber` - run tests from `cypress/e2e/cucumber` with allure results copied into `cypress/e2e/fixtures/cucumber`
+-   `npm test` - run tests from `cypress/e2e/results` against these allure results in `cypress/e2e/fixtures`
+
 #### 2. Find a feature to work on
 
 -   Look at the existing [issues](https://github.com/90poe/cypress-allure-plugin/issues) to see if there is anything
