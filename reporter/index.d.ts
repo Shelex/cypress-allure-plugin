@@ -27,13 +27,15 @@ type ContentType =
     | 'text/tab-separated-values'
     | 'text/css'
     | 'text/uri-list'
+    | 'text/html'
     | 'image/svg+xml'
     | 'image/png'
     | 'application/json'
     | 'video/webm'
     | 'video/mp4'
     | 'image/jpeg'
-    | 'application/pdf';
+    | 'application/pdf'
+    | 'application/zip';
 type Status = 'failed' | 'broken' | 'passed' | 'skipped';
 type Severity = 'blocker' | 'critical' | 'normal' | 'minor' | 'trivial';
 
@@ -245,7 +247,10 @@ declare global {
              * Pass function for custom processing of suite labels
              */
             defineSuiteLabels(
-                fn: (titlePath: string[], fileInfo: SuiteLabelFunctionFileInfo) => string[]
+                fn: (
+                    titlePath: string[],
+                    fileInfo: SuiteLabelFunctionFileInfo
+                ) => string[]
             ): void;
         }
     }
