@@ -9,6 +9,10 @@ const { clearEmptyHookSteps } = require('./writer/clearEmptyHookSteps');
 const { shouldUseAfterSpec } = require('./writer/useAfterSpec');
 const { alreadyRegisteredAfterSpec } = require('./writer/checkPluginsFile');
 const { handleResults } = require('./writer/handleCypressResults');
+const {
+    writeEnvProperties,
+    writeInfoFile
+} = require('./writer/writeInfoFiles');
 
 function allureWriter(on, config) {
     allurePropertiesToEnvVars(config.env);
@@ -219,9 +223,19 @@ function allureWriter(on, config) {
                             });
                     }
                 }
-                writeInfoFile('categories.json', categories, resultsDir);
-                writeInfoFile('executor.json', executorInfo, resultsDir);
-                writeInfoFile('environment.properties', envInfo, resultsDir);
+
+                writeInfoFile(
+                    path.join(resultsDir, 'categories.json'),
+                    categories
+                );
+                writeInfoFile(
+                    path.join(resultsDir, 'executor.json'),
+                    executorInfo
+                );
+                writeEnvProperties(
+                    path.join(resultsDir, 'environment.properties'),
+                    envInfo
+                );
                 logger.writer('finished writing allure results');
             } catch (e) {
                 process.stdout.write(
@@ -234,27 +248,5 @@ function allureWriter(on, config) {
         }
     });
 }
-
-const writeInfoFile = (fileName, data, resultsDir) => {
-    if (data) {
-        logger.writer('write file "%s"', fileName);
-        const isEnvProps = fileName === 'environment.properties';
-        isEnvProps &&
-            (data = Object.keys(data)
-                .map((key) => `${key}=${data[key]}`)
-                .join('\n'));
-        const filePath = path.join(resultsDir, fileName);
-        !fs.existsSync(filePath) &&
-            fs.writeFileSync(
-                filePath,
-                isEnvProps ? data : JSON.stringify(data),
-                {
-                    encoding: 'binary',
-                    // if file exist use appending for env props, other files will be truncated
-                    flag: isEnvProps ? 'as' : 'w'
-                }
-            );
-    }
-};
 
 module.exports = allureWriter;

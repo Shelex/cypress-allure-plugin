@@ -49,6 +49,10 @@ Allure.prototype.writeExecutorInfo = function (info) {
     this.runtime.writer.executorInfo = info;
 };
 
+Allure.prototype.writeEnvironmentInfo = function (info) {
+    this.runtime.writer.envInfo = { ...this.runtime.writer.envInfo, ...info };
+};
+
 Allure.prototype.step = function (name, isParent = true) {
     const item = isParent
         ? this.currentTest || this.currentHook
