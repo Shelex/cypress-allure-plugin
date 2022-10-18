@@ -93,11 +93,16 @@ const attachScreenshotsAndVideo = (allureMapping, results, config) => {
             });
         });
 
-        if (
+        const shouldAttachVideo =
             results.video &&
             // attach video for not passed tests or for every in case "allureAddVideoOnPass" enabled
-            (allureTest.status !== 'passed' || shouldAddVideoOnPass)
-        ) {
+            (allureTest.status !== 'passed' || shouldAddVideoOnPass);
+
+        logger.writer(
+            `video will ${shouldAttachVideo ? '' : 'not'} be attached`
+        );
+
+        if (shouldAttachVideo) {
             logger.writer('going to attach video for "%s"', allureId);
             const existingVideoIndex = allureTest.attachments.findIndex(
                 (attach) => attach.type === videoContentType
@@ -114,7 +119,8 @@ const attachScreenshotsAndVideo = (allureMapping, results, config) => {
         }
 
         fs.writeFileSync(testFilePath, JSON.stringify(allureTest));
-        return results.video;
+
+        return shouldAttachVideo;
     });
 
     if (needVideo.length) {
