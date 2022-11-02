@@ -7,7 +7,7 @@ const writeInfoFile = (fileName, data) => {
     }
     logger.writer('write file "%s"', fileName);
 
-    !fs.existsSync(filePath) &&
+    !fs.existsSync(fileName) &&
         fs.writeFileSync(fileName, JSON.stringify(data));
 };
 
