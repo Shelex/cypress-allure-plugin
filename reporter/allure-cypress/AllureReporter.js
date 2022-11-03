@@ -257,57 +257,64 @@ module.exports = class AllureReporter {
             message: error.message,
             trace: error.stack
         });
-        /**
-         * in case error comes from hook
-         */
-        if (test.type === 'hook') {
-            logger.allure(`test error origin is hook`);
-            this.endHook(test, true);
-            /**
-             * in case of before all cypress creates new test
-             * which not produce any mocha events
-             * as result should be finished manually
-             */
 
-            if (
-                test.hookName &&
-                ['before all', 'before each'].includes(test.hookName)
-            ) {
+        if (test.type !== 'hook') {
+            return;
+        }
+
+        logger.allure(`test error origin is hook`);
+        this.endHook(test, true);
+        /**
+         * in case of failed before all cypress creates new test
+         * which not produce any mocha events
+         * as result should be finished manually
+         * as well as in case tests are skipped
+         * when beforeEach failed
+         */
+
+        if (
+            !test.hookName ||
+            !['before all', 'before each'].includes(test.hookName)
+        ) {
+            return;
+        }
+
+        logger.allure(
+            `finishing test as no events received for failed test in before all/each hook`
+        );
+
+        if (!test.parent && !test.parent.tests) {
+            return this.endTest();
+        }
+
+        const registeredIds = Object.keys(this.mochaIdToAllure);
+        const finishedTestIds = registeredIds.slice(0, -1);
+
+        // handle remaining tests due to before all hook failure
+        test.parent.tests
+            // if mocha test id is not mapped to allure - means it is not yet finished
+            .filter((test) => !finishedTestIds.includes(test.id))
+            .forEach((test, index) => {
                 logger.allure(
-                    `finishing test as no events received for failed test in before all hook`
+                    `found cancelled test due to before all hook: %O`,
+                    test
                 );
 
-                if (!test.parent && !test.parent.tests) {
-                    return this.endTest();
-                }
-
-                // handle remaining tests due to before all hook failure
-                test.parent.tests
-                    // if mocha test instance is not final - means it is not yet finished
-                    .filter((test) => !test.final)
-                    .forEach((test, index) => {
-                        logger.allure(
-                            `found cancelled test due to before all hook: %O`,
-                            test
-                        );
-
-                        // update current test failed due to beforeEach hook
-                        if (index === 0) {
-                            this.currentTest.info.name = test.title;
-                            this.updateTest(Status.BROKEN, {
-                                message: error.message,
-                                trace: error.stack
-                            });
-                        }
-                        // create allure tests for remaining cases and mark as skipped
-                        else {
-                            this.startCase(test);
-                            this.updateTest(Status.SKIPPED);
-                        }
-                        this.endTest();
+                // update current test to be failed due to beforeEach hook
+                if (index === 0) {
+                    this.currentTest.info.name = test.title;
+                    this.updateTest(Status.BROKEN, {
+                        message: error.message,
+                        trace: error.stack
                     });
-            }
-        }
+                }
+                // create allure tests for remaining cases and mark as skipped
+                else {
+                    this.startCase(test);
+                    this.updateTest(Status.SKIPPED);
+                }
+                this.endTest();
+            });
     }
 
     writeAttachment(content, type) {
