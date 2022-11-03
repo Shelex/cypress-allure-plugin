@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path-browserify');
 const uuid = require('uuid');
 const logger = require('../reporter/debug');
-const { createTest, createSuite } = require('./write');
+const { createTest, createSuite } = require('./sampleEntity');
 
 const handleCrash = (results, config) => {
     if (!results.error) {

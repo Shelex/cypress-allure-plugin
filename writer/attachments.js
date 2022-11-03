@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path-browserify');
 const uuid = require('uuid');
 const logger = require('../reporter/debug');
-const { createTest } = require('./write');
+const { createTest } = require('./sampleEntity');
 
 const videoContentType = 'video/mp4';
 const imageContentType = 'image/png';
