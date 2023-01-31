@@ -98,7 +98,7 @@ const writeSuites = ({ groups, resultsDir, tests, clearSkipped }) => {
     });
 };
 
-const writeTests = ({ tests, resultsDir, clearSkipped }) => {
+const writeTests = ({ tests, resultsDir, clearSkipped, allureMapping }) => {
     if (!tests || !tests.length) {
         return;
     }
@@ -106,6 +106,13 @@ const writeTests = ({ tests, resultsDir, clearSkipped }) => {
     tests.forEach((test) => {
         if (clearSkipped && test.status === 'skipped') {
             logger.writer('skipping test "%s"', test.name);
+
+            const mochaID = Object.keys(allureMapping).find(
+                (id) => allureMapping[id] === test.uuid
+            );
+            if (mochaID) {
+                delete allureMapping[mochaID];
+            }
             return;
         }
 
@@ -144,7 +151,13 @@ const catchError = (fn, ...args) => {
     }
 };
 
-const writeResultFiles = ({ resultsDir, files, clearSkipped, writer }) => {
+const writeResultFiles = ({
+    resultsDir,
+    files,
+    clearSkipped,
+    writer,
+    allureMapping
+}) => {
     !fs.existsSync(resultsDir) && fs.mkdirSync(resultsDir, { recursive: true });
 
     logger.writer('starting writing allure results to "%s"', resultsDir);
@@ -154,7 +167,7 @@ const writeResultFiles = ({ resultsDir, files, clearSkipped, writer }) => {
 
     catchError(writeAttachmentFiles, { files, resultsDir, tests });
     catchError(writeSuites, { groups, resultsDir, tests, clearSkipped });
-    catchError(writeTests, { tests, resultsDir, clearSkipped });
+    catchError(writeTests, { tests, resultsDir, clearSkipped, allureMapping });
     catchError(writeAttachments, { attachments, resultsDir });
 
     const allureResultsPath = (file) => path.join(resultsDir, file);

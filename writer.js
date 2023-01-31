@@ -68,7 +68,8 @@ function allureWriter(on, config) {
                 resultsDir,
                 files,
                 clearSkipped,
-                writer
+                writer,
+                allureMapping
             });
 
             return null;
