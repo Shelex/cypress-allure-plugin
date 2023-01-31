@@ -42,21 +42,21 @@
         "@shelex/allure-js-commons-browser": "1.4.1",
         "crypto-js": "4.1.1",
         "debug": "4.3.4",
-        "object-inspect": "1.12.2",
+        "object-inspect": "1.12.3",
         "path-browserify": "1.0.1",
         "uuid": "9.0.0"
     },
     "devDependencies": {
         "@badeball/cypress-cucumber-preprocessor": "12.1.0",
-        "@cypress/webpack-preprocessor": "5.14.0",
+        "@cypress/webpack-preprocessor": "5.16.1",
         "@types/mocha": "7.0.2",
-        "cypress": "10.11.0",
+        "cypress": "12.4.1",
         "eslint": "7.32.0",
-        "eslint-config-prettier": "8.5.0",
+        "eslint-config-prettier": "8.6.0",
         "eslint-plugin-chai-friendly": "0.7.2",
         "eslint-plugin-cypress": "2.12.1",
         "eslint-plugin-prettier": "4.2.1",
-        "prettier": "2.7.1",
+        "prettier": "2.8.3",
         "semantic-release": "17.4.7"
     },
     "cypress-cucumber-preprocessor": {
