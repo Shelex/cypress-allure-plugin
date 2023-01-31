@@ -197,8 +197,14 @@ module.exports = class CypressHandler {
                 );
                 // set first command log (which refers to current command) as last
                 // and process other child logs first (asserts are processed such way)
-
-                command.commandLog.logs.push(command.commandLog.logs.shift());
+                // NOTE: applies to older cypress versions, where "commandLogId" not existed
+                !command.commandLog.logs.some(
+                    (log) =>
+                        log && log.attributes && log.attributes.commandLogId
+                ) &&
+                    command.commandLog.logs.push(
+                        command.commandLog.logs.shift()
+                    );
 
                 command.commandLog.logs.forEach((entry, index) => {
                     let log;
