@@ -442,12 +442,9 @@ module.exports = class CypressHandler {
 
     attachRequestsMaybe(step, log) {
         if (
-            // check for requests
-            log.name === 'request' ||
-            // or for then commands which have requests being logged in command log
-            (log.name === 'then' &&
-                log.consoleProps &&
-                log.consoleProps.Request)
+            // check for logs where console props contain request info
+            log.consoleProps &&
+            (log.consoleProps.Request || log.consoleProps.Requests)
         ) {
             if (log.renderProps && log.renderProps.message) {
                 step.info.name = log.renderProps.message;
