@@ -52,11 +52,19 @@ const config = {
     addAnalyticLabels: () => env('allureAddAnalyticLabels'),
     addVideoOnPass: () => env('allureAddVideoOnPass'),
     skipAutomaticScreenshots: () =>
-        env('allureSkipAutomaticScreenshots') === true
+        env('allureSkipAutomaticScreenshots') === true,
+    loggingCommandStepsEnabled: true,
+    avoidLoggingCommands: () => {
+        const input = env('allureAvoidLoggingCommands');
+        if (Array.isArray(input)) {
+            return input;
+        }
+        if (input && typeof input === 'string') {
+            return input.startsWith('[') ? JSON.parse(input) : input.split(',');
+        }
+        return [];
+    }
 };
-
-const shouldListenToCyCommandEvents = () =>
-    config.shouldLogCypress() || config.shouldLogGherkinSteps();
 
 class CypressAllureReporter {
     constructor() {
@@ -71,6 +79,7 @@ class CypressAllureReporter {
             }),
             config
         );
+        this.config = config;
 
         Cypress.mocha
             .getRunner()
@@ -150,21 +159,21 @@ class CypressAllureReporter {
             });
 
         Cypress.on('command:enqueued', (command) => {
-            if (shouldListenToCyCommandEvents()) {
+            if (this.commandShouldBeLogged(command)) {
                 logger.cy(`command:enqueued %O`, command);
                 this.reporter.cy.enqueued(command);
             }
         });
 
         Cypress.on('command:start', (command) => {
-            if (shouldListenToCyCommandEvents()) {
+            if (this.commandShouldBeLogged(command)) {
                 logger.cy(`command:start %O`, command);
                 this.reporter.cy.started(command.attributes);
             }
         });
 
         Cypress.on('command:end', (command) => {
-            if (shouldListenToCyCommandEvents()) {
+            if (this.commandShouldBeLogged(command)) {
                 logger.cy(`command:end %O`, command);
                 this.reporter.cy.finished(command.attributes);
             }
@@ -182,6 +191,27 @@ class CypressAllureReporter {
                 }
             }
         });
+    }
+
+    commandShouldBeLogged(command) {
+        if (!this.config.loggingCommandStepsEnabled) {
+            logger.cy(`command tracking is disabled`);
+            return;
+        }
+
+        if (this.config.avoidLoggingCommands().includes(command.name)) {
+            logger.cy(`command %s tracking is disabled`, command.name);
+            return;
+        }
+
+        if (
+            !this.config.shouldLogCypress() &&
+            !this.config.shouldLogGherkinSteps()
+        ) {
+            return;
+        }
+
+        return true;
     }
 }
 

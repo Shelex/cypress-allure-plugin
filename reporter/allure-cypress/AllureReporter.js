@@ -470,6 +470,11 @@ module.exports = class AllureReporter {
         logger.allure(`finishing current test`);
         this.currentTest && this.currentTest.endTest();
     }
+
+    loggingCommandStepsEnabled(enabled) {
+        logger.allure(`setting step logging to: %s`, `${enabled}`);
+        this.config.loggingCommandStepsEnabled = enabled;
+    }
 };
 
 const isEmpty = (hook) => hook && hook.body === 'function () {}';

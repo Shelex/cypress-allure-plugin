@@ -47,7 +47,8 @@ const childCommands = {
     writeEnvironmentInfo: (allure, info) => allure.writeEnvironmentInfo(info),
     writeExecutorInfo: (allure, info) => allure.writeExecutorInfo(info),
     writeCategoriesDefinitions: (allure, categories) =>
-        allure.writeCategoriesDefinitions(categories)
+        allure.writeCategoriesDefinitions(categories),
+    logCommandSteps: (allure, state) => allure.loggingCommandStepsEnabled(state)
 };
 
 for (const command in childCommands) {

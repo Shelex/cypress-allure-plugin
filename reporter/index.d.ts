@@ -240,6 +240,12 @@ declare global {
              * End last created allure step
              */
             endStep(): Allure;
+
+            /**
+             * Turn on and off logging cypress commands as allure steps
+             * `true` by default
+             */
+            logCommandSteps(enabled?: boolean): Allure;
         }
 
         interface SyncInterfaceSpecific {

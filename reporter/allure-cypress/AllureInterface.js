@@ -152,6 +152,10 @@ Allure.prototype.label = function (name, value) {
     }
 };
 
+Allure.prototype.loggingCommandStepsEnabled = function (enabled = true) {
+    this.reporter.loggingCommandStepsEnabled(enabled);
+};
+
 const getStatus = (runtime) =>
     (!runtime.currentHook &&
         runtime.currentTest &&

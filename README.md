@@ -141,6 +141,7 @@ Plugin is customizable via Cypress environment variables:
 | `allureClearSkippedTests`              | remove skipped tests from report                                                                                                                                | false                                                       |
 | `allureAddAnalyticLabels`              | add framework and language labels to tests (used for allure analytics only)                                                                                     | false                                                       |
 | `allureAddVideoOnPass`                 | attach video to report for passed, will work only when video is enabled tests                                                                                                                         | false                                                       |
+| `allureAvoidLoggingCommands`                 | names of cypress commands to not be logged as allure steps                                                                             | []                                                       |
 
 These options could be passed in multiple ways, you can check [docs](https://docs.cypress.io/guides/guides/environment-variables#Setting).
 But also you can use `allure.properties` file (but you still need to enable allure by passing `allure=true` to cypress env variables):
@@ -277,6 +278,7 @@ Allure API available:
 -   endStep()
 -   step(name: string, isParent: boolean)
 -   logStep(name: string)
+-   logCommandSteps(state: boolean)
 
 ## Gherkin and tms or issue links
 
@@ -391,14 +393,29 @@ Moreover, steps functionality could be expanded with:
 
 -   `cy.allure().step('name')` - will create step "name" for current test. This step will be finished when next such step is created or test is finished.
 -   `cy.allure().step('name', false)` OR `cy.allure().logStep('name')` - will create step "name" for current parent step/hook/test. Will be finished when next step is created or test finished.
--   `cy.allure().startStep('name')` - will create step "name" for current cypress command step / current step / current parent step / current hook or test. Is automatically finished on fail event or test end, but I would recommend to explicitly mention `cy.allure().endStep()` which will finish last created step.
+-   `cy.allure().startStep('name')` - will create step "name" for current cypress command step / current step / current parent step / current hook or test. Is automatically finished on fail event or test end, but I would recommend to explicitly mention `cy.allure().endStep()` which will finish last created step.  
+
+To disable tracking of specific cypress commands to be not logged as steps in allure you can set env variable `allureAvoidLoggingCommands` which should contain an array of command names to be ignored, for example:
+```json
+allureAvoidLoggingCommands: ["intercept", "myCustomCommand"]
+```
+
+To disable tracking of all cypress commands for specific code block you can use `logCommandSteps` api method:
+```js
+// disable tracking cypress commands:
+cy.allure().logCommandSteps(false);
+cy.login(username, password);
+// enable tracking cypress commands back again:
+cy.allure().logCommandSteps();
+```
+
 ## Credits
 
 A lot of respect to [Sergey Korol](serhii.s.korol@gmail.com) who made [Allure-mocha](https://github.com/allure-framework/allure-js/tree/master/packages/allure-mocha) reporter. Base integration with Cypress internal mocha runner is based on that solution.
 
 ## License
 
-Copyright 2020-2022 Oleksandr Shevtsov <ovr.shevtsov@gmail.com>.  
+Copyright 2020-2023 Oleksandr Shevtsov <ovr.shevtsov@gmail.com>.  
 This project is licensed under the Apache 2.0 License.
 
 [npm-url]: https://npmjs.com/package/@shelex/cypress-allure-plugin
