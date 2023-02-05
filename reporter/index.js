@@ -72,13 +72,8 @@ class CypressAllureReporter {
             `creating allure reporter instance, cypress env: %O`,
             env()
         );
-        this.reporter = new AllureReporter(
-            new AllureRuntime({
-                resultsDir: config.resultsPath(),
-                writer: new InMemoryAllureWriter()
-            }),
-            config
-        );
+
+        this.createAllureReporter(config);
         this.config = config;
 
         Cypress.mocha
@@ -147,7 +142,7 @@ class CypressAllureReporter {
 
                 this.reporter.gherkin.checkLinksInExamplesTable();
                 this.reporter.gherkin.checkTags();
-                this.reporter.endTest();
+                this.reporter.endTest(test);
             })
             .on(EVENT_HOOK_BEGIN, (hook) => {
                 logger.mocha(`EVENT_HOOK_BEGIN: %s %O`, hook.title, hook);
@@ -191,6 +186,18 @@ class CypressAllureReporter {
                 }
             }
         });
+    }
+
+    createAllureReporter(config) {
+        this.reporter = Cypress.Allure
+            ? Cypress.Allure.reporter
+            : new AllureReporter(
+                  new AllureRuntime({
+                      resultsDir: config.resultsPath(),
+                      writer: new InMemoryAllureWriter()
+                  }),
+                  config
+              );
     }
 
     commandShouldBeLogged(command) {

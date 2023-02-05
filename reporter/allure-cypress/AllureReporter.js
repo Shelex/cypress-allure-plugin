@@ -232,6 +232,10 @@ module.exports = class AllureReporter {
     }
 
     pendingTestCase(test) {
+        if (this.mochaIdToAllure[test.id]) {
+            logger.allure(`test is already tracked, no need to create one`);
+            return;
+        }
         this.startCase(test);
         this.updateTest(Status.SKIPPED, { message: 'Test ignored' });
         logger.allure(
@@ -466,9 +470,25 @@ module.exports = class AllureReporter {
         this.currentTest.testResult.stop = Date.now();
     }
 
-    endTest() {
+    endTest(test) {
         logger.allure(`finishing current test`);
-        this.currentTest && this.currentTest.endTest();
+        if (!this.currentTest) {
+            return;
+        }
+        // update test, which may had a pending event previously
+        if (
+            test.state &&
+            [Status.FAILED, Status.PASSED, Status.SKIPPED].includes(test.state)
+        ) {
+            this.updateTest(
+                test.state,
+                test.err && {
+                    message: test.err.message,
+                    trace: test.err.stack
+                }
+            );
+        }
+        this.currentTest.endTest();
     }
 
     loggingCommandStepsEnabled(enabled) {
