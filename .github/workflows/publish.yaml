@@ -12,6 +12,8 @@ jobs:
 
             - name: Download Cypress
               uses: bahmutov/npm-install@v1
+              with:
+                  install-command: npm i --force
               env:
                   CYPRESS_INSTALL_BINARY: 0
 
