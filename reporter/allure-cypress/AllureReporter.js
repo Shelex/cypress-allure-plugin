@@ -464,7 +464,7 @@ module.exports = class AllureReporter {
             details
         );
 
-        details && (this.currentTest.statusDetails = details);
+        this.currentTest.statusDetails = details || null;
         this.currentTest.status = status;
         this.currentTest.stage = Stage.FINISHED;
         this.currentTest.testResult.stop = Date.now();
@@ -477,6 +477,7 @@ module.exports = class AllureReporter {
         }
         // update test, which may had a pending event previously
         if (
+            test &&
             test.state &&
             [Status.FAILED, Status.PASSED, Status.SKIPPED].includes(test.state)
         ) {
