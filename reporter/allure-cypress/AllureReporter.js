@@ -183,7 +183,18 @@ module.exports = class AllureReporter {
         this.cy.chain.clear();
         this.currentTest = this.currentSuite.startTest(test.title);
         logger.allure(`created test: %O`, this.currentTest);
-        this.mochaIdToAllure[test.id] = this.currentTest.uuid;
+
+        const itemWithAttempt = {
+            allureId: this.currentTest.uuid,
+            attempt: test._currentRetry
+        };
+
+        if (this.mochaIdToAllure[test.id]) {
+            this.mochaIdToAllure[test.id].push(itemWithAttempt);
+        } else {
+            this.mochaIdToAllure[test.id] = [itemWithAttempt];
+        }
+
         this.currentTest.fullName = test.title;
         this.currentTest.historyId = crypto
             .MD5(test.fullTitle())
