@@ -1,6 +1,8 @@
 .DS_Store
+/.idea
 node_modules
 cypress/screenshots
 cypress/videos
 cypress/fixtures/*
-allure-results
+/allure-results
+/allure-report
