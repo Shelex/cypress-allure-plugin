@@ -9,8 +9,7 @@ const {
     EVENT_SUITE_END,
     EVENT_TEST_END,
     EVENT_HOOK_BEGIN,
-    EVENT_HOOK_END,
-    EVENT_TEST_RETRY
+    EVENT_HOOK_END
 } = Mocha.Runner.constants;
 
 const path = require('path-browserify');
@@ -77,26 +76,6 @@ class CypressAllureReporter {
         this.createAllureReporter(config);
         this.config = config;
 
-        const onTestFail = (test, err) => {
-            logger.mocha(`EVENT_TEST_FAIL: %s %O`, test.title, test);
-            this.reporter.failTestCase(test, err);
-            attachVideo(this.reporter, test, 'failed');
-        };
-
-        const onTestBegin = (test) => {
-            logger.mocha(`EVENT_TEST_BEGIN: %s %O`, test.title, test);
-            this.reporter.startCase(test, config);
-        };
-
-        const onTestEnd = (test) => {
-            logger.mocha(`EVENT_TEST_END: %s %O`, test.title, test);
-            attachVideo(this.reporter, test, 'finished');
-
-            this.reporter.gherkin.checkLinksInExamplesTable();
-            this.reporter.gherkin.checkTags();
-            this.reporter.endTest(test);
-        };
-
         Cypress.mocha
             .getRunner()
             .on(EVENT_SUITE_BEGIN, (suite) => {
@@ -141,26 +120,29 @@ class CypressAllureReporter {
                 }
             })
             .on(EVENT_TEST_BEGIN, (test) => {
-                onTestBegin(test);
+                logger.mocha(`EVENT_TEST_BEGIN: %s %O`, test.title, test);
+                this.reporter.startCase(test, config);
             })
             .on(EVENT_TEST_FAIL, (test, err) => {
-                onTestFail(test, err);
+                logger.mocha(`EVENT_TEST_FAIL: %s %O`, test.title, test);
+                this.reporter.failTestCase(test, err);
+                attachVideo(this.reporter, test, 'failed');
             })
             .on(EVENT_TEST_PASS, (test) => {
                 logger.mocha(`EVENT_TEST_PASS: %s %O`, test.title, test);
                 this.reporter.passTestCase(test);
-            })
-            .on(EVENT_TEST_RETRY, (test) => {
-                logger.mocha(`EVENT_TEST_RETRY: %s %O`, test.title, test);
-                onTestFail(test, test.err);
-                onTestEnd(test);
             })
             .on(EVENT_TEST_PENDING, (test) => {
                 logger.mocha(`EVENT_TEST_PENDING: %s %O`, test.title, test);
                 this.reporter.pendingTestCase(test);
             })
             .on(EVENT_TEST_END, (test) => {
-                onTestEnd(test);
+                logger.mocha(`EVENT_TEST_END: %s %O`, test.title, test);
+                attachVideo(this.reporter, test, 'finished');
+
+                this.reporter.gherkin.checkLinksInExamplesTable();
+                this.reporter.gherkin.checkTags();
+                this.reporter.endTest(test);
             })
             .on(EVENT_HOOK_BEGIN, (hook) => {
                 logger.mocha(`EVENT_HOOK_BEGIN: %s %O`, hook.title, hook);
