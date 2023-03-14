@@ -253,15 +253,17 @@ module.exports = class AllureReporter {
     }
 
     pendingTestCase(test) {
-        if (!this.mochaIdToAllure[test.id]) {
+        const alreadyMapped = this.mochaIdToAllure[test.id];
+
+        if (alreadyMapped) {
+            logger.allure(`test is already tracked, no need to create one`);
+        } else {
             this.startCase(test);
             logger.allure(
                 `created new test and set to pending: %s %O`,
                 test.title,
                 test
             );
-        } else {
-            logger.allure(`test is already tracked, no need to create one`);
         }
 
         this.updateTest(Status.SKIPPED, { message: 'Test ignored' });
