@@ -22,13 +22,13 @@ const attachScreenshotsAndVideo = (allureMapping, results, config) => {
     const needVideo = results.tests.filter((test) => {
         let shouldAttachVideo = false;
 
-        const testWithRetries = allureMapping[test.testId];
-        if (!testWithRetries) {
+        const testIds = allureMapping[test.testId];
+        if (!testIds) {
             return false;
         }
 
-        testWithRetries.forEach((testRetry) => {
-            const { allureId, attempt } = testRetry;
+        testIds.forEach((ids) => {
+            const { allureId, attempt } = ids;
             const currentTest = test.attempts[attempt];
 
             logger.writer('going to check attachments for "%s"', allureId);
@@ -49,12 +49,12 @@ const attachScreenshotsAndVideo = (allureMapping, results, config) => {
                     status: currentTest.state,
                     error: currentTest.error,
                     start: Date.parse(
-                        currentTest.wallClockStartedAt ?? fallBackDate
+                        currentTest.wallClockStartedAt || fallBackDate
                     ),
                     stop:
                         Date.parse(
-                            currentTest.wallClockStartedAt ?? fallBackDate
-                        ) + (currentTest.wallClockDuration ?? 0)
+                            currentTest.wallClockStartedAt || fallBackDate
+                        ) + (currentTest.wallClockDuration || 0)
                 });
 
                 fs.writeFileSync(testFilePath, JSON.stringify(allureTest));
@@ -126,7 +126,7 @@ const attachScreenshotsAndVideo = (allureMapping, results, config) => {
                 `video will ${shouldAttachVideo ? '' : 'not'} be attached`
             );
 
-            if (shouldAttachVideo) {
+            if (shouldAttachVideo && videoPath) {
                 logger.writer('going to attach video for "%s"', allureId);
                 const existingVideoIndex = allureTest.attachments.findIndex(
                     (attach) => attach.type === videoContentType
@@ -148,7 +148,7 @@ const attachScreenshotsAndVideo = (allureMapping, results, config) => {
         return shouldAttachVideo;
     });
 
-    if (needVideo.length) {
+    if (needVideo.length && videoPath) {
         logger.writer('found %d tests that require video', needVideo.length);
         const resultsPath = path.join(config.env.allureResultsPath, videoPath);
 

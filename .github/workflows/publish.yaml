@@ -42,6 +42,7 @@ jobs:
             - name: Testing
               run: |
                   npm run test:prepare:basic
+                  npm run test:prepare:retries
                   npm run test:prepare:cucumber
                   npm run test
 

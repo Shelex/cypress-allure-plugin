@@ -13,6 +13,7 @@ describe('Allure Retry', () => {
         cy.visit('mytest.com');
         cy.get('body').screenshot('test-retry-screenshot');
         cy.allure().attachment('someFile.txt', 'data', 'text/plain');
+        // eslint-disable-next-line no-invalid-this
         if (this.test._currentRetry < this.test.retries()) {
             cy.wrap('Fail during test with retry').then((t) => {
                 throw new Error(t);
@@ -33,6 +34,7 @@ describe('Allure Retry', () => {
             cy.visit('mytest.com');
             cy.get('body').screenshot('test-retry-screenshot');
 
+            // eslint-disable-next-line no-invalid-this
             if (this.test._currentRetry < this.test.retries()) {
                 cy.wrap('Fail during test with retry').then((t) => {
                     throw new Error(t);

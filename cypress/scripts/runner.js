@@ -18,7 +18,10 @@ const config = (mode) => {
             excludeSpecPattern: '*.js'
         },
         basic: {
-            specPattern: 'cypress/e2e/basic/*.cy.*'
+            specPattern: 'cypress/e2e/basic/allure.cy.*'
+        },
+        retries: {
+            specPattern: 'cypress/e2e/basic/retries.cy.*'
         }
     };
 
