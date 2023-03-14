@@ -286,43 +286,48 @@ const attachVideo = (reporter, test, status) => {
 
     if (Cypress.config().video && reporter.currentTest) {
         // add video to failed test case or for passed in case addVideoOnPass is true
-        if (shouldAttach) {
-            const absoluteVideoPath = Cypress.config()
-                .videosFolder.split(config.resultsPath())
-                .pop();
-
-            const relativeVideoPath = path.isAbsolute(absoluteVideoPath)
-                ? path.join(
-                      '..',
-                      path.relative(
-                          Cypress.config().fileServerFolder,
-                          absoluteVideoPath
-                      )
-                  )
-                : absoluteVideoPath;
-
-            const fileName = `${Cypress.spec.name}.mp4`;
-
-            // avoid duplicating videos, especially for after all hook when test is passed
-            if (
-                reporter.currentTest.info.attachments.some(
-                    (attachment) => attachment.name === fileName
-                )
-            ) {
-                return;
-            }
-
-            logger.allure(
-                `attaching video %s`,
-                path.join(relativeVideoPath, fileName)
-            );
-
-            reporter.currentTest.addAttachment(
-                fileName,
-                'video/mp4',
-                path.join(relativeVideoPath, fileName)
-            );
+        if (!shouldAttach) {
+            return;
         }
+
+        const absoluteVideoPath = Cypress.config()
+            .videosFolder.split(config.resultsPath())
+            .pop();
+
+        const relativeVideoPath = path.isAbsolute(absoluteVideoPath)
+            ? path.join(
+                  '..',
+                  path.relative(
+                      Cypress.config().fileServerFolder,
+                      absoluteVideoPath
+                  )
+              )
+            : absoluteVideoPath;
+
+        const fileName = `${Cypress.spec.name}.mp4`;
+
+        // avoid duplicating videos, especially for after all hook when test is passed
+        if (
+            reporter.currentTest.info.attachments.some(
+                (attachment) => attachment.name === fileName
+            )
+        ) {
+            return;
+        }
+
+        const videoFilePath = path.join(relativeVideoPath, fileName);
+
+        if (!videoFilePath) {
+            return;
+        }
+
+        logger.allure(`attaching video %s`, videoFilePath);
+
+        reporter.currentTest.addAttachment(
+            fileName,
+            'video/mp4',
+            videoFilePath
+        );
     }
 };
 

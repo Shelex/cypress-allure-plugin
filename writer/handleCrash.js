@@ -28,11 +28,11 @@ const handleCrash = (results, config) => {
 
     suite.children.push(test.uuid);
 
-    if (results.video) {
-        const videoPath = `${uuid.v4()}-attachment${path.extname(
-            results.video
-        )}`;
+    const videoPath =
+        results.video &&
+        `${uuid.v4()}-attachment${path.extname(results.video)}`;
 
+    if (videoPath) {
         test.attachments.push({
             name: 'video recording',
             type: 'video/mp4',

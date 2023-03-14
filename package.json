@@ -34,6 +34,7 @@
         "test": "npx cypress run --config specPattern=cypress/e2e/results/*.cy.js,video=false",
         "test:debug": "npx cypress open --config specPattern=cypress/e2e/results/*.test.js,video=false",
         "test:prepare:basic": "DEBUG=allure-plugin* node cypress/scripts/runner basic",
+        "test:prepare:retries": "DEBUG=allure-plugin* node cypress/scripts/runner retries",
         "test:prepare:cucumber": "DEBUG=allure-plugin* node cypress/scripts/runner cucumber",
         "fixtures:clear": "rm -r cypress/fixtures/*",
         "lint": "npx eslint ."
