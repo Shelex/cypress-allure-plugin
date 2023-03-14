@@ -38,7 +38,7 @@ module.exports = defineConfig({
                 readAllureResults: () => {
                     try {
                         const dir = 'cypress/fixtures';
-                        const subdirs = ['basic', 'cucumber', 'retries'];
+                        const subdirs = ['basic', 'cucumber', 'statuses'];
                         return subdirs.reduce((dirMap, subdir) => {
                             const dirFiles = fs.readdirSync(
                                 path.join(dir, subdir)

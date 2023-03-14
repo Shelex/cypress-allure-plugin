@@ -20,8 +20,8 @@ const config = (mode) => {
         basic: {
             specPattern: 'cypress/e2e/basic/allure.cy.*'
         },
-        retries: {
-            specPattern: 'cypress/e2e/basic/retries.cy.*'
+        statuses: {
+            specPattern: 'cypress/e2e/basic/statuses.cy.*'
         }
     };
 
