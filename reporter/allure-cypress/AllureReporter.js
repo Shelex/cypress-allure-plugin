@@ -91,6 +91,15 @@ module.exports = class AllureReporter {
         return hook.hookName || hook.originalTitle || hook.title;
     }
 
+    /**
+     * Adds package label, so tab 'packages' in report
+     * will be populated with correct folder structure
+     */
+    addPackageLabel() {
+        const packagePath = Cypress.spec.relative.replace(/\//g, '.');
+        this.currentTest.addLabel(LabelName.PACKAGE, packagePath);
+    }
+
     startSuite(suite) {
         const suiteName = suite.fullTitle();
         if (this.currentSuite) {
@@ -189,6 +198,7 @@ module.exports = class AllureReporter {
             .MD5(test.fullTitle())
             .toString(crypto.enc.Hex);
         this.currentTest.stage = Stage.RUNNING;
+        this.addPackageLabel();
 
         if (
             config &&
