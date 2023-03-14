@@ -94,7 +94,8 @@ const expectedLabels = (mode, type) =>
               { name: 'story', value: `${type} api should work` },
               { name: 'suite', value: 'Allure API Context' },
               { name: 'tag', value: 'customTag' },
-              { name: 'tag', value: 'customTag2' }
+              { name: 'tag', value: 'customTag2' },
+              { name: 'package', value: 'cypress.e2e.basic.allure.cy.js' }
           ]
         : [
               { name: 'parentSuite', value: 'AllureAPI' },
@@ -106,7 +107,8 @@ const expectedLabels = (mode, type) =>
               { name: 'tag', value: 'tagForRule' },
               { name: 'severity', value: 'minor' },
               { name: 'tag', value: 'tagForTest' },
-              { name: 'feature', value: 'AllureAPI' }
+              { name: 'feature', value: 'AllureAPI' },
+              { name: 'package', value: 'cypress.e2e.cucumber.allure.feature' }
           ];
 
 const issuePrefix = 'https://example.com/project/test/issue/';
@@ -143,7 +145,8 @@ describe('Cucumber specific', () => {
         expect(test.links).to.have.deep.members(expectedLinks('cucumber'));
     });
 
-    it('should contain cucumber steps', () => {
+    // TODO: https://github.com/Shelex/cypress-allure-plugin/issues/186
+    it.skip('should contain cucumber steps', () => {
         const { cucumber } = result;
         const [test] = cucumber.tests;
 
