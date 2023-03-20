@@ -352,7 +352,15 @@ module.exports = class CypressHandler {
     finishStep(step, log, commandStatus) {
         this.attachRequestsMaybe(step, log);
 
-        const shouldOverrideName = !['request', 'step'].includes(log.name);
+        const shouldOverrideName = ![
+            'request',
+            'step',
+            'GET',
+            'POST',
+            'PUT',
+            'DELETE',
+            'PATCH'
+        ].includes(log.name);
 
         if (
             step &&
@@ -447,61 +455,84 @@ module.exports = class CypressHandler {
     }
 
     attachRequestsMaybe(step, log) {
+        // just cy.request output
+        const isCyRequest =
+            log.consoleProps &&
+            (log.consoleProps.Request || log.consoleProps.Requests);
+
+        // output from https://github.com/filiphric/cypress-plugin-api
+        const isCyApiRequest =
+            log.consoleProps &&
+            log.consoleProps.yielded &&
+            log.consoleProps.yielded.allRequestResponses &&
+            log.consoleProps.yielded.allRequestResponses.length;
+
         if (
             // check for logs where console props contain request info
-            log.consoleProps &&
-            (log.consoleProps.Request || log.consoleProps.Requests)
+            !isCyRequest &&
+            !isCyApiRequest
         ) {
-            if (log.renderProps && log.renderProps.message) {
-                step.info.name = log.renderProps.message;
+            return;
+        }
+
+        if (log.renderProps && log.renderProps.message) {
+            step.info.name = log.renderProps.message;
+        }
+
+        if (isCyApiRequest) {
+            const { status, statusText } = log.consoleProps.yielded;
+            step.info.name = `${log.name} "${log.message}" - ${status} | ${statusText}`;
+        }
+
+        if (!this.reporter.config.shouldAttachRequests()) {
+            return;
+        }
+
+        const request =
+            log.consoleProps.Request ||
+            Cypress._.last(log.consoleProps.Requests) ||
+            Cypress._.last(log.consoleProps.yielded.allRequestResponses);
+        const response =
+            log.consoleProps.Yielded ||
+            Cypress._.last(log.consoleProps.yielded.allRequestResponses);
+
+        const attach = (step, name, content) => {
+            if (!content) {
+                return;
             }
 
-            if (
-                this.reporter.config.shouldAttachRequests() &&
-                log.consoleProps
-            ) {
-                const request =
-                    log.consoleProps.Request ||
-                    Cypress._.last(log.consoleProps.Requests);
-                const response = log.consoleProps.Yielded;
+            let jsonContent;
 
-                const attach = (step, name, content) => {
-                    if (!content) {
-                        return;
-                    }
-
-                    let jsonContent;
-
-                    try {
-                        jsonContent =
-                            typeof content === 'string'
-                                ? JSON.parse(content)
-                                : content;
-                    } catch (e) {
-                        // content is not json
-                    }
-
-                    const fileType = jsonContent
-                        ? 'application/json'
-                        : 'text/plain';
-                    const fileName = this.reporter.writeAttachment(
-                        jsonContent
-                            ? JSON.stringify(jsonContent, null, 2)
-                            : content,
-                        fileType
-                    );
-                    step.addAttachment(name, fileType, fileName);
-                };
-
-                if (request) {
-                    attach(step, 'requestHeaders', request['Request Headers']);
-                    attach(step, 'request', request['Request Body']);
-                }
-                if (response) {
-                    attach(step, 'responseHeaders', response.headers);
-                    attach(step, 'response', response.body);
-                }
+            try {
+                jsonContent =
+                    typeof content === 'string' ? JSON.parse(content) : content;
+            } catch (e) {
+                // content is not json
             }
+
+            const fileType = jsonContent ? 'application/json' : 'text/plain';
+            const fileName = this.reporter.writeAttachment(
+                jsonContent ? JSON.stringify(jsonContent, null, 2) : content,
+                fileType
+            );
+            step.addAttachment(name, fileType, fileName);
+        };
+
+        if (request) {
+            attach(step, 'requestHeaders', request['Request Headers']);
+            attach(step, 'request', request['Request Body']);
+        }
+        if (response) {
+            attach(
+                step,
+                'responseHeaders',
+                response.headers || response['Response Headers']
+            );
+            attach(
+                step,
+                'response',
+                response.body || response['Response Body']
+            );
         }
     }
 };
