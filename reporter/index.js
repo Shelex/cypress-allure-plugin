@@ -255,7 +255,7 @@ Cypress.Screenshot.defaults({
         logger.cy(`onAfterScreenshot: %O`, details);
         if (
             config.allureEnabled() &&
-            !shouldUseAfterSpec(Cypress.config()) &&
+            shouldUseAfterSpec(Cypress.config()) &&
             !config.skipAutomaticScreenshots()
         ) {
             logger.allure(`allure enabled, attaching screenshot`);
