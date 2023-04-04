@@ -8,6 +8,7 @@ Feature: AllureAPI
 @tagForRule
 Rule: TestRule
 
+@testID("12345")
 @issue("jira","tmsLink")
 @tms("tms","tmsLink")
 @link("example","https://example.com")

@@ -234,7 +234,11 @@ module.exports = class CucumberHandler {
                                     value: value
                                 };
                             } else {
-                                currentTest.addLabel(command, value);
+                                // handle renaming label for testID, or just use label name
+                                currentTest.addLabel(
+                                    command === 'testID' ? 'AS_ID' : command,
+                                    value
+                                );
                             }
                         }
                         return !match;

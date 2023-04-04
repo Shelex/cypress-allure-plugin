@@ -98,6 +98,7 @@ const expectedLabels = (mode, type) =>
               { name: 'package', value: 'cypress.e2e.basic.allure.cy.js' }
           ]
         : [
+              { name: 'AS_ID', value: '12345' },
               { name: 'parentSuite', value: 'AllureAPI' },
               { name: 'suite', value: 'TestRule' },
               { name: 'epic', value: 'AllureAPI' },
