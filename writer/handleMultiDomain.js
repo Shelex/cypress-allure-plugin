@@ -49,7 +49,12 @@ const sanitizeSuites = (folder, files, isGlobal) => {
         for (const childID of suite.children) {
             const child = files.find((file) => file.uuid === childID);
 
-            if (child.steps.length) {
+            if (!child) {
+                logger.writer('missing file for child %s', child.uuid);
+                continue;
+            }
+
+            if (child.steps && child.steps.length) {
                 logger.writer('child %s %s has steps', child.uuid, child.name);
                 continue;
             }
