@@ -54,7 +54,13 @@ function allureWriter(on, config) {
     }
 
     on('task', {
-        writeAllureResults: ({ results, files, mapping, clearSkipped }) => {
+        writeAllureResults: ({
+            results,
+            files,
+            mapping,
+            clearSkipped,
+            isGlobal
+        }) => {
             const { resultsDir: relativeResultsDir, writer } = results;
 
             const resultsDir = config.projectRoot
@@ -69,7 +75,8 @@ function allureWriter(on, config) {
                 files,
                 clearSkipped,
                 writer,
-                allureMapping
+                allureMapping,
+                isGlobal
             });
 
             return null;

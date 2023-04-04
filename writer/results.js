@@ -6,6 +6,7 @@ const logger = require('../reporter/debug');
 const { overwriteTestNameMaybe } = require('./customTestName');
 const { clearEmptyHookSteps } = require('./clearEmptyHookSteps');
 const { writeInfoFile, writeEnvProperties } = require('./infoFiles');
+const { readAllureResults, sanitizeSuites } = require('./handleMultiDomain');
 
 const writeAttachmentFiles = ({ files, resultsDir, tests }) => {
     if (!files || !files.length) {
@@ -142,6 +143,11 @@ const writeAttachments = ({ attachments, resultsDir }) => {
     }
 };
 
+const handleAfterTestWrites = ({ resultsDir, isGlobal }) => {
+    const parsed = readAllureResults(resultsDir);
+    return sanitizeSuites(resultsDir, parsed, isGlobal);
+};
+
 const catchError = (fn, ...args) => {
     try {
         fn(...args);
@@ -156,7 +162,8 @@ const writeResultFiles = ({
     files,
     clearSkipped,
     writer,
-    allureMapping
+    allureMapping,
+    isGlobal
 }) => {
     !fs.existsSync(resultsDir) && fs.mkdirSync(resultsDir, { recursive: true });
 
@@ -169,6 +176,7 @@ const writeResultFiles = ({
     catchError(writeSuites, { groups, resultsDir, tests, clearSkipped });
     catchError(writeTests, { tests, resultsDir, clearSkipped, allureMapping });
     catchError(writeAttachments, { attachments, resultsDir });
+    catchError(handleAfterTestWrites, { resultsDir, isGlobal });
 
     const allureResultsPath = (file) => path.join(resultsDir, file);
 
