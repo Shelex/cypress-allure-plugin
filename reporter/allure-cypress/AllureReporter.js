@@ -205,10 +205,25 @@ module.exports = class AllureReporter {
         }
 
         this.currentTest.fullName = test.title;
-        this.currentTest.historyId = crypto
-            .MD5(test.fullTitle())
+
+        // handle history hash match for tests failed in before all hook
+        if (test.state === Status.FAILED && test.hookName) {
+            logger.allure(
+                `found test failed in hook, fixing title to match history id`
+            );
+            // "hooktype" hook: hookname for "testname"
+            // grab just "testname" to consider for calculating historyid hash
+            const match = test.title.match(/\"(.*?)\"/g).pop();
+
+            // set title if match does contain test title
+            test.title =
+                match === test.hookName ? test.title : match.replace(/\"/g, '');
+        }
+
+        this.currentTest.info.historyId = crypto
+            .MD5(test.title)
             .toString(crypto.enc.Hex);
-        this.currentTest.stage = Stage.RUNNING;
+        this.currentTest.info.stage = Stage.RUNNING;
         this.addPackageLabel();
 
         if (
