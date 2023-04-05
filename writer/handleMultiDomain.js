@@ -50,7 +50,7 @@ const sanitizeSuites = (folder, files, isGlobal) => {
             const child = files.find((file) => file.uuid === childID);
 
             if (!child) {
-                logger.writer('missing file for child %s', child.uuid);
+                logger.writer('missing file for child %s', childID);
                 continue;
             }
 
