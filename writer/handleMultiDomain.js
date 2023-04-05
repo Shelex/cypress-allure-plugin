@@ -85,6 +85,9 @@ const sanitizeSuites = (folder, files, isGlobal) => {
                 path.join(folder, newChild),
                 path.join(folder, originalChild)
             );
+
+            fs.existsSync(path.join(folder, newChild)) &&
+                fs.unlinkSync(path.join(folder, newChild));
         }
 
         const suitePath = `${suite.uuid}-container.json`;
