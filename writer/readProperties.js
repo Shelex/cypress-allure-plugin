@@ -34,18 +34,20 @@ const allurePropertiesToEnvVars = (envVars) => {
 
     const propertyToCypressEnv = new Map([
         ['allure.results.directory', 'allureResultsPath'],
-        ['allure.link.issue.pattern', 'issuePrefix'],
-        ['allure.link.tms.pattern', 'tmsPrefix'],
+        ['allure.reuse.after.spec', 'allureReuseAfterSpec'],
+        ['allure.clear.skipped', 'allureClearSkippedTests'],
         ['allure.cypress.log.commands', 'allureLogCypress'],
-        ['allure.cypress.log.requests', 'allureAttachRequests'],
         ['allure.cypress.log.gherkin', 'allureLogGherkin'],
+        ['allure.cypress.log.requests', 'allureAttachRequests'],
+        ['allure.skip.automatic.screenshot', 'allureSkipAutomaticScreenshots'],
         [
             'allure.omit.previous.attempt.screenshot',
             'allureOmitPreviousAttemptScreenshots'
         ],
-        ['allure.analytics', 'allureAddAnalyticLabels'],
-        ['allure.clear.skipped', 'allureClearSkippedTests'],
-        ['allure.video.passed', 'allureAddVideoOnPass']
+        ['allure.video.passed', 'allureAddVideoOnPass'],
+        ['allure.link.issue.pattern', 'issuePrefix'],
+        ['allure.link.tms.pattern', 'tmsPrefix'],
+        ['allure.analytics', 'allureAddAnalyticLabels']
     ]);
 
     propertyToCypressEnv.forEach((envVariable, name) => {

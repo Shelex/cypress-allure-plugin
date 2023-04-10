@@ -32,19 +32,9 @@
 
 ## Setup
 
--   (Before Cypress 10) Connect plugin in `cypress/plugins/index.js`. Take into account that Cypress generate plugins file with `module.exports` on the first initialization but you should have only one export section. In order to add Allure writer task just replace it or add writer task somewhere before returning config:
+### Cypress v10+
 
-    ```js
-    const allureWriter = require('@shelex/cypress-allure-plugin/writer');
-    // import allureWriter from "@shelex/cypress-allure-plugin/writer";
-
-    module.exports = (on, config) => {
-        allureWriter(on, config);
-        return config;
-    };
-    ```
-
--   (After Cypress 10) Use `defineConfig` and `setupNodeEvents` inside config.js\config.ts files:
+-   Use `defineConfig` and `setupNodeEvents` inside config.js\config.ts files:
 
     ```js
     const allureWriter = require('@shelex/cypress-allure-plugin/writer');
@@ -61,23 +51,10 @@
     ```
 
     -   if you have webpack or other preprocessors
-        
-        -   Please take into account that some plugins/preprocessors may register event listeners in Cypress (especially `after:spec` to have access to results) which will block work other plugins. To make allure-plugin work with such plugins/preprocessors please use env variable `allureReuseAfterSpec: true` 
 
-        -   (Before Cypress 10) please set allure writer before returning "config":
+        -   Please take into account that some plugins/preprocessors may register event listeners in Cypress (especially `after:spec` to have access to results) which will block other plugins - [cypress#22428](https://github.com/cypress-io/cypress/issues/22428). To make allure-plugin work with such plugins/preprocessors please use env variable `allureReuseAfterSpec: true`, it will listen to cypress process directly, avoiding registering a listener (but if none of listeners is registered - process will not receive an event).
 
-        ```js
-        const allureWriter = require('@shelex/cypress-allure-plugin/writer');
-        // import allureWriter from "@shelex/cypress-allure-plugin/writer";
-
-        module.exports = (on, config) => {
-            on('file:preprocessor', webpackPreprocessor);
-            allureWriter(on, config);
-            return config;
-        };
-        ```
-
-        -   (After Cypress 10) use `defineConfig` and `setupNodeEvents` inside config.js\config.ts files:
+        -   use `defineConfig` and `setupNodeEvents` inside config.js\config.ts files:
 
         ```js
         const allureWriter = require('@shelex/cypress-allure-plugin/writer');
@@ -97,7 +74,7 @@
         });
         ```
 
--   Register commands in `cypress/support/index.js` (or `cypress/support/e2e.js` for cypress 10+) file:
+-   Register commands in `cypress/support/e2e.js` file:
 
     -   with `import`:
 
@@ -110,6 +87,51 @@
     ```js
     require('@shelex/cypress-allure-plugin');
     ```
+
+### Cypress before v10
+
+-   Connect plugin in `cypress/plugins/index.js`. Take into account that Cypress generate plugins file with `module.exports` on the first initialization but you should have only one export section. In order to add Allure writer task just replace it or add writer task somewhere before returning config:
+
+    ```js
+    const allureWriter = require('@shelex/cypress-allure-plugin/writer');
+    // import allureWriter from "@shelex/cypress-allure-plugin/writer";
+
+    module.exports = (on, config) => {
+        allureWriter(on, config);
+        return config;
+    };
+    ```
+
+    -   if you have webpack or other preprocessors
+
+        -   please set allure writer before returning "config":
+
+        ```js
+        const allureWriter = require('@shelex/cypress-allure-plugin/writer');
+        // import allureWriter from "@shelex/cypress-allure-plugin/writer";
+
+        module.exports = (on, config) => {
+            on('file:preprocessor', webpackPreprocessor);
+            allureWriter(on, config);
+            return config;
+        };
+        ```
+
+-   Register commands in `cypress/support/index.js` file:
+
+    -   with `import`:
+
+    ```js
+    import '@shelex/cypress-allure-plugin';
+    ```
+
+    -   with `require`:
+
+    ```js
+    require('@shelex/cypress-allure-plugin');
+    ```
+
+### Autocompletion
 
 -   for IntelliSense (autocompletion) support in your IDE add `tsconfig.json` and specify `types` property for `compilerOptions`:
 
@@ -126,36 +148,61 @@
 
 Plugin is customizable via Cypress environment variables:
 
-| env variable name                      | description                                                                                                                                                                                                                                         | default                                                     |
-|:---------------------------------------|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:------------------------------------------------------------|
-| `allure`                               | enable Allure plugin                                                                                                                                                                                                                                | false                                                       |
-| `allureReuseAfterSpec`                 | reuse existing `after:spec` event listener which is mandatory for handling test results. may be already used by other plugins, and if it is your case (see [#150](https://github.com/Shelex/cypress-allure-plugin/issues/150)) - just set to `true` | false                                                       |
-| `allureResultsPath `                   | customize path to allure results folder                                                                                                                                                                                                             | `allure-results`                                            |
-| `tmsPrefix`                            | just a prefix substring or pattern with `*` for links from allure API in tests to test management system                                                                                                                                            | ``                                                          |
-| `issuePrefix`                          | prefix for links from allure API in tests to bug tracking system                                                                                                                                                                                    | ``                                                          |
-| `allureLogCypress`                     | log cypress chainer (commands) and display them as steps in report                                                                                                                                                                                  | true                                                        |
-| `allureLogGherkin`                     | log gherkin steps from cucumber-preprocessor                                                                                                                                                                                                        | inherits `allureLogCypress` value if not specified directly |
-| `allureAttachRequests`                 | attach `cy.request` headers, body, response headers, respose body to step automatically                                                                                                                                                             | false                                                       |
-| `allureOmitPreviousAttemptScreenshots` | omit screenshots attached in previous attempts when retries are used                                                                                                                                                                                | false                                                       |
-| `allureSkipAutomaticScreenshots`       | do not add screenshots automatically (for those who uses custom scripts, etc.)                                                                                                                                                                      | false                                                       |
-| `allureClearSkippedTests`              | remove skipped tests from report                                                                                                                                                                                                                    | false                                                       |
-| `allureAddAnalyticLabels`              | add framework and language labels to tests (used for allure analytics only)                                                                                                                                                                         | false                                                       |
-| `allureAddVideoOnPass`                 | attach video to report for passed, will work only when video is enabled tests                                                                                                                                                                       | false                                                       |
-| `allureAvoidLoggingCommands`           | names of cypress commands to not be logged as allure steps                                                                                                                                                                                          | []                                                          |
+### General
 
-These options could be passed in multiple ways, you can check [docs](https://docs.cypress.io/guides/guides/environment-variables#Setting).
-But also you can use `allure.properties` file (but you still need to enable allure by passing `allure=true` to cypress env variables):
+| env variable name         | description                                                                                                                                                                                                                                         | default          |
+| :------------------------ | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------- |
+| `allure`                  | enable Allure plugin                                                                                                                                                                                                                                | false            |
+| `allureReuseAfterSpec`    | reuse existing `after:spec` event listener which is mandatory for handling test results. may be already used by other plugins, and if it is your case (see [#150](https://github.com/Shelex/cypress-allure-plugin/issues/150)) - just set to `true` | false            |
+| `allureResultsPath `      | customize path to allure results folder                                                                                                                                                                                                             | `allure-results` |
+| `allureClearSkippedTests` | remove skipped tests from report                                                                                                                                                                                                                    | false            |
+
+### Steps
+
+| env variable name            | description                                                        | default                                                     |
+| :--------------------------- | :----------------------------------------------------------------- | :---------------------------------------------------------- |
+| `allureLogCypress`           | log cypress chainer (commands) and display them as steps in report | true                                                        |
+| `allureAvoidLoggingCommands` | specify names of cypress commands to not be logged as allure steps | []                                                          |
+| `allureLogGherkin`           | log gherkin steps from cucumber-preprocessor                       | inherits `allureLogCypress` value if not specified directly |
+
+### Attachments
+
+| env variable name                      | description                                                                       | default |
+| :------------------------------------- | :-------------------------------------------------------------------------------- | :------ |
+| `allureAttachRequests`                 | attach `cy.request` and `cy.api` headers, body, response headers, response body   | false   |
+| `allureSkipAutomaticScreenshots`       | do not attach screenshots automatically (for those who uses custom scripts, etc.) | false   |
+| `allureOmitPreviousAttemptScreenshots` | remove screenshots from previous retries                                          | false   |
+| `allureAddVideoOnPass`                 | attach video for passed tests, works when video is enabled                        | false   |
+
+### Links
+
+| env variable name | description                                                                     | default |
+| :---------------- | :------------------------------------------------------------------------------ | :------ |
+| `tmsPrefix`       | just a prefix substring or pattern with `*` for links to test management system | ``      |
+| `issuePrefix`     | prefix for links to bug tracking system                                         | ``      |
+
+### No idea
+
+| env variable name         | description                                                                                         | default |
+| :------------------------ | :-------------------------------------------------------------------------------------------------- | :------ |
+| `allureAddAnalyticLabels` | add framework and language labels (allure uses it for analytics only, have no idea why you need it) | false   |
+
+These options could be passed in multiple ways, you can check [docs](https://docs.cypress.io/guides/guides/environment-variables#Setting).  
+But also you can use `allure.properties` file (however `allure=true` is still required to be passed as cypress env variable):
 
 ```bash
-allure.results.directory=custom_dir
-allure.link.issue.pattern=https://example.com/task_
-allure.link.tms.pattern=https://example.com/test_case_
+allure.results.directory=allure-results
+allure.link.issue.pattern=https://example.com/project/test/issue/
+allure.link.tms.pattern=https://example.com/testcases/TEST/
+allure.reuse.after.spec=false
+allure.clear.skipped=false
 allure.cypress.log.commands=true
-allure.cypress.log.requests=true
 allure.cypress.log.gherkin=true
-allure.omit.previous.attempt.screenshot=true
-allure.analytics=false
+allure.cypress.log.requests=true
+allure.skip.automatic.screenshot=false
+allure.omit.previous.attempt.screenshot=false
 allure.video.passed=false
+allure.analytics=false
 ```
 
 ## Execution
@@ -166,25 +213,19 @@ allure.video.passed=false
 npx cypress run --env allure=true
 ```
 
--   if allure is enabled, you can check gathered data, in cypress window with Chrome Developer tools console:
+-   if allure is enabled, you can check data in runtime, just send it to Chrome Developer tools console:
 
 ```js
 Cypress.Allure.reporter.runtime.writer;
 ```
 
-## Troubleshooting
-Answers to common questions/issues:
- - I open allure report and I see just empty results with NaN counters
- > You should not open allure report directly as a static html page. It uses local resources, thus is banned by modern browsers and requires web server to be opened properly. To resolve it you can disable CORS (not recommended), use live server extension for vs code, or just use `allure serve` command (recommended). To serve generated report an s3 bucket with hosting option could be used or any other web hosting.
- - My other plugins do not work / allure-results is not generated
- > It is likely other plugins (as cucumber-preprocessor) may also listen to events (especially after:spec) in Cypress that this plugin uses. Unfortunately, only one listener is available and other are just overwritten, that's why you can pass env variable `allureReuseAfterSpec: true`  to not create new listeners from this plugin, but reuse existing.
+## How to open report
 
-## Debugging
+Assuming allure is already installed:
 
--   for in-browser information (cypress events, mocha events, allure events, data collecting)
-    execute `localStorage.debug = 'allure-plugin*'` in DevTools console
--   for writer task information (writing results to disk, handling attachments, plugin events)
-    add `DEBUG=allure-plugin*` before cypress run\open command
+-   serve report based on current "allure-results" folder: `allure serve`
+-   generate new report based on current "allure-results" folder: `allure generate`
+-   open generated report from "allure-report" folder: `allure open`
 
 ## Examples
 
@@ -196,15 +237,23 @@ There are also existing solutions that may help you prepare your report infrastr
 -   [Allure Server](https://github.com/kochetkov-ma/allure-server) - self-hosted portal with your reports
 -   [allure-reports-portal](https://github.com/pumano/allure-reports-portal) - another portal which allows to gather reports for multiple projects in single ui
 -   [allure-static-booster](https://gitlab.com/seitar/allure-static-booster/-/tree/master/) - solution for generating self-hosted Allure report on GitLab pages including the tables with results, pipeline links and navigation between the different Allure reports.
--   [Github Action](https://github.com/simple-elf/allure-report-action) - report generation + better implementation for historic reports described above
+-   [Github Action](https://github.com/simple-elf/allure-report-action) - report generation + historic reports
 
-## How to open report
+## Troubleshooting
 
-Assuming allure is already installed:
+Answers to common questions/issues:
 
--   serve report based on current "allure-results" folder: `allure serve`
--   generate new report based on current "allure-results" folder: `allure generate`
--   open generated report from "allure-report" folder: `allure open`
+-   I open allure report and I see just empty results with NaN counters
+    > You should not open allure report directly as a static html page. It uses local resources, thus is banned by modern browsers and requires web server to be opened properly. To resolve it you can disable CORS (not recommended), use live server extension for vs code, or just use `allure serve` command (recommended). To serve generated report an s3 bucket with hosting option could be used or any other web hosting.
+-   My other plugins do not work / allure-results is not generated
+    > It is likely other plugins (as cucumber-preprocessor) may also listen to events (especially after:spec) in Cypress that this plugin uses. Unfortunately, only one listener is available and other are just overwritten, that's why you can pass env variable `allureReuseAfterSpec: true` to not create new listeners from this plugin, but reuse existing. You can also try out [cypress-on-fix](https://github.com/bahmutov/cypress-on-fix) plugin to register multiple listeners from your plugins, then this env var is not required.
+
+## Debugging
+
+-   for in-browser information (cypress events, mocha events, allure events, data collecting)
+    execute `localStorage.debug = 'allure-plugin*'` in DevTools console
+-   for writer task information (writing results to disk, handling attachments, plugin events)
+    add `DEBUG=allure-plugin*` before cypress run\open command
 
 ## API
 
@@ -280,33 +329,29 @@ Allure API available:
 -   logStep(name: string)
 -   logCommandSteps(state: boolean)
 
-## Gherkin and tms or issue links
+## Cypress commands as steps
 
-It is posible to pass tms link or issue link with tags `tms("ABC-111")` and `issue("ABC-222")`.
-However, that will not work well with Scenario Outlines which may have different examples being linked to different tasks or test cases in tms.
-So, plugin will also parse your scenario outlines with examples and in case header in table will be `tms` or `issue` - it will add it as link to report.
+Commands are producing allure steps automatically based on cypress events and are trying to represent how code and custom commands are executed with nested structure.  
+Moreover, steps functionality could be expanded with:
 
-```gherkin
-    Scenario Outline: Some scenario
-        Given User want to link test <number> to tms
-        When User creates examples table with tms and issue headers
-        Then Links will be added to allure
-        Examples:
-            | tms    | issue   | number |
-            | TEST-1 | JIRA-11 | 1      |
-            | TEST-2 | JIRA-22 | 2      |
+-   `cy.allure().step('name')` - will create step "name" for current test. This step will be finished when next such step is created or test is finished.
+-   `cy.allure().step('name', false)` OR `cy.allure().logStep('name')` - will create step "name" for current parent step/hook/test. Will be finished when next step is created or test finished.
+-   `cy.allure().startStep('name')` - will create step "name" for current cypress command step / current step / current parent step / current hook or test. Is automatically finished on fail event or test end, but I would recommend to explicitly mention `cy.allure().endStep()` which will finish last created step.
+
+To disable tracking of specific cypress commands to be not logged as steps in allure you can set env variable `allureAvoidLoggingCommands` which should contain an array of command names to be ignored, for example:
+
+```json
+allureAvoidLoggingCommands: ["intercept", "myCustomCommand"]
 ```
 
-## VS Code for cypress + cucumber
-
-In case you are using VS Code and [Cypress Helper](https://marketplace.visualstudio.com/items?itemName=Shelex.vscode-cy-helper) extension, it has configuration for allure cucumber tags autocompletion available:
+To disable tracking of all cypress commands for specific code block you can use `logCommandSteps` api method:
 
 ```js
-"cypressHelper.cucumberTagsAutocomplete": {
-        "enable": true,
-        "allurePlugin": true,
-        "tags": ["focus", "someOtherTag"]
-    }
+// disable tracking cypress commands:
+cy.allure().logCommandSteps(false);
+cy.login(username, password);
+// enable tracking cypress commands back again:
+cy.allure().logCommandSteps();
 ```
 
 ## Screenshots and Videos
@@ -386,32 +431,38 @@ Cypress.Allure.reporter
     });
 ```
 
-## Cypress commands as steps
+## Gherkin and links
 
-Commands are producing allure steps automatically based on cypress events and are trying to represent how code and custom commands are executed with nested structure.  
-Moreover, steps functionality could be expanded with:
+It is posible to pass tms link or issue link with tags `tms("ABC-111")` and `issue("ABC-222")`.
+However, that will not work well with Scenario Outlines which may have different examples being linked to different tasks or test cases in tms.
+So, plugin will also parse your scenario outlines with examples and in case header in table will be `tms` or `issue` - it will add it as link to report.
 
--   `cy.allure().step('name')` - will create step "name" for current test. This step will be finished when next such step is created or test is finished.
--   `cy.allure().step('name', false)` OR `cy.allure().logStep('name')` - will create step "name" for current parent step/hook/test. Will be finished when next step is created or test finished.
--   `cy.allure().startStep('name')` - will create step "name" for current cypress command step / current step / current parent step / current hook or test. Is automatically finished on fail event or test end, but I would recommend to explicitly mention `cy.allure().endStep()` which will finish last created step.  
-
-To disable tracking of specific cypress commands to be not logged as steps in allure you can set env variable `allureAvoidLoggingCommands` which should contain an array of command names to be ignored, for example:
-```json
-allureAvoidLoggingCommands: ["intercept", "myCustomCommand"]
+```gherkin
+    Scenario Outline: Some scenario
+        Given User want to link test <number> to tms
+        When User creates examples table with tms and issue headers
+        Then Links will be added to allure
+        Examples:
+            | tms    | issue   | number |
+            | TEST-1 | JIRA-11 | 1      |
+            | TEST-2 | JIRA-22 | 2      |
 ```
 
-To disable tracking of all cypress commands for specific code block you can use `logCommandSteps` api method:
+## VS Code Helper plugin for cypress + cucumber
+
+In case you are using VS Code and [Cypress Helper](https://marketplace.visualstudio.com/items?itemName=Shelex.vscode-cy-helper) extension, it has configuration for allure cucumber tags autocompletion in feature files:
+
 ```js
-// disable tracking cypress commands:
-cy.allure().logCommandSteps(false);
-cy.login(username, password);
-// enable tracking cypress commands back again:
-cy.allure().logCommandSteps();
+"cypressHelper.cucumberTagsAutocomplete": {
+        "enable": true,
+        "allurePlugin": true,
+        "tags": ["focus", "someOtherTag"]
+    }
 ```
 
 ## Credits
 
-A lot of respect to [Sergey Korol](serhii.s.korol@gmail.com) who made [Allure-mocha](https://github.com/allure-framework/allure-js/tree/master/packages/allure-mocha) reporter. Base integration with Cypress internal mocha runner is based on that solution.
+Thanks to [Serhii Korol](serhii.s.korol@gmail.com) who made [Allure-mocha](https://github.com/allure-framework/allure-js/tree/master/packages/allure-mocha) reporter. Integration with Cypress internal mocha runner was based on that solution.
 
 ## License
 
