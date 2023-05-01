@@ -6,7 +6,7 @@ const readAllureResults = (folder) => {
     try {
         logger.writer('parsing existing allure results');
         if (!fs.existsSync(folder)) {
-            return;
+            return [];
         }
 
         const files = fs.readdirSync(folder);
@@ -37,11 +37,13 @@ const readAllureResults = (folder) => {
 
         return fileMap;
     } catch (e) {
-        return e;
+        // eslint-disable-next-line no-console
+        console.error(e);
+        return [];
     }
 };
 
-const sanitizeSuites = (folder, files, isGlobal) => {
+const sanitizeSuites = (folder, files = [], isGlobal = false) => {
     const suites = files.filter((file) => file.children);
 
     for (const suite of suites) {
@@ -66,9 +68,9 @@ const sanitizeSuites = (folder, files, isGlobal) => {
                     file.steps.length
             );
 
-            const earliestDuplicate = duplicates
-                .sort((a, b) => a.start - b.start)
-                .shift();
+            duplicates.sort((a, b) => a.start - b.start);
+
+            const earliestDuplicate = duplicates.shift();
 
             if (!earliestDuplicate) {
                 logger.writer('no duplicate executions found: %s', child.uuid);
