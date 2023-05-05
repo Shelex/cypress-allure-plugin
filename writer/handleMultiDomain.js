@@ -11,34 +11,40 @@ const readAllureResults = (folder) => {
 
         const files = fs.readdirSync(folder);
 
-        const fileMap = files.map((filePath) => {
-            const getType = (file) => {
-                const types = {
-                    suite: (f) =>
-                        f.includes('-container') && f.endsWith('.json'),
-                    test: (f) => f.includes('-result') && f.endsWith('.json')
+        const fileMap = files
+            .map((filePath) => {
+                const getType = (file) => {
+                    const types = {
+                        suite: (f) =>
+                            f.includes('-container') && f.endsWith('.json'),
+                        test: (f) =>
+                            f.includes('-result') && f.endsWith('.json')
+                    };
+                    return Object.keys(types).find((type) => types[type](file));
                 };
-                return Object.keys(types).find((type) => types[type](file));
-            };
 
-            const resultType = getType(filePath);
+                const resultType = getType(filePath);
 
-            const fileContent =
-                resultType === 'suite' || resultType === 'test'
-                    ? JSON.parse(
-                          fs.readFileSync(path.join(folder, filePath), {
-                              encoding: 'utf-8'
-                          })
-                      )
-                    : filePath;
+                const fullPath = path.join(folder, filePath);
 
-            return fileContent;
-        });
+                const fileContent =
+                    resultType === 'suite' || resultType === 'test'
+                        ? fs.existsSync(fullPath) &&
+                          JSON.parse(
+                              fs.readFileSync(fullPath, {
+                                  encoding: 'utf-8'
+                              })
+                          )
+                        : filePath;
+
+                return fileContent;
+            })
+            .filter((x) => x);
 
         return fileMap;
     } catch (e) {
         // eslint-disable-next-line no-console
-        console.error(e);
+        logger.writer(`error parsing existing allure results: ${e}`);
         return [];
     }
 };
