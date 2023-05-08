@@ -146,8 +146,7 @@ describe('Cucumber specific', () => {
         expect(test.links).to.have.deep.members(expectedLinks('cucumber'));
     });
 
-    // TODO: https://github.com/Shelex/cypress-allure-plugin/issues/186
-    it.skip('should contain cucumber steps', () => {
+    it('should contain cucumber steps', () => {
         const { cucumber } = result;
         const [test] = cucumber.tests;
 

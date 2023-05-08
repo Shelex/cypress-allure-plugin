@@ -1,6 +1,7 @@
 const inspect = require('object-inspect');
 const logger = require('../debug');
 const stubbedAllure = require('../stubbedAllure');
+const { commandIsGherkinStep } = require('./CucumberHandler');
 const callbacks = ['then', 'spread', 'each', 'within'];
 const { Stage, Status } = require('@shelex/allure-js-commons-browser');
 const Chain = require('./CypressChain');
@@ -18,26 +19,27 @@ module.exports = class CypressHandler {
     }
 
     findAllureExecutableFor(command) {
-        if (command.parent) {
-            const parent = this.chain.getParent(command.parent);
-
-            if (!parent) {
-                return this.reporter.currentExecutable;
-            }
-
-            // such commands contain argument
-            // which is basically a function that will be executed
-            if (callbacks.includes(parent.name)) {
-                return this.findAllureExecutableFor(parent);
-            }
-
-            // in case latest step in newer then parent - attach to user defined step
-            return this.reporter.currentStep &&
-                this.reporter.currentStep.info.start > parent.step.info.start
-                ? this.reporter.currentStep
-                : parent.step;
+        if (!command.parent) {
+            return this.reporter.currentExecutable;
         }
-        return this.reporter.currentExecutable;
+
+        const parent = this.chain.getParent(command.parent);
+
+        if (!parent) {
+            return this.reporter.currentExecutable;
+        }
+
+        // such commands contain argument
+        // which is basically a function that will be executed
+        if (callbacks.includes(parent.name)) {
+            return this.findAllureExecutableFor(parent);
+        }
+
+        // in case latest step in newer then parent - attach to user defined step
+        return this.reporter.currentStep &&
+            this.reporter.currentStep.info.start > parent.step.info.start
+            ? this.reporter.currentStep
+            : parent.step;
     }
 
     enqueued(command) {
@@ -231,7 +233,7 @@ module.exports = class CypressHandler {
                                 this.findAllureExecutableFor(command);
 
                             if (
-                                !this.reporter.config.shouldLogGherkinSteps() &&
+                                !this.reporter.config.shouldLogGherkinSteps() ||
                                 commandIsGherkinStep(chainable)
                             ) {
                                 return;
@@ -242,7 +244,10 @@ module.exports = class CypressHandler {
 
                             command.step = step;
 
-                            if (log.name === 'step') {
+                            if (
+                                log.name === 'step' ||
+                                commandIsGherkinStep(command)
+                            ) {
                                 logger.cy(
                                     `found gherkin step, finishing all current steps`
                                 );
@@ -379,6 +384,10 @@ module.exports = class CypressHandler {
                 ? false
                 : commandStatus || log.state !== Status.FAILED;
 
+        if (!step) {
+            return passed;
+        }
+
         step.info.stage = Stage.FINISHED;
 
         step.info.status = passed ? Status.PASSED : Status.FAILED;
@@ -396,7 +405,8 @@ module.exports = class CypressHandler {
                     (log.consoleProps.Stubbed === 'Yes' ? 'STUBBED ' : '') +
                     log.consoleProps.Method
                 } ${log.consoleProps.URL}`,
-            step: () => `${log.displayName}${log.message.replace(/\*/g, '')}`,
+            step: () =>
+                `${log.displayName || ''}${log.message.replace(/\*/g, '')}`,
             stub: () =>
                 `${log.name} [ function: ${log.functionName} ] ${
                     log.alias ? `as ${log.alias}` : ''
@@ -417,7 +427,14 @@ module.exports = class CypressHandler {
             executable = this.reporter.currentTest;
         }
 
-        const newStep = executable.startStep(message());
+        const logName = message();
+
+        // skip empty callbacks (usually come from cucumber plugin)
+        if (logName === 'function(){} then') {
+            return;
+        }
+
+        const newStep = executable.startStep(logName);
 
         // parse docString for gherkin steps
         if (
@@ -536,14 +553,6 @@ module.exports = class CypressHandler {
         }
     }
 };
-
-const commandIsGherkinStep = (command) =>
-    command.args &&
-    command.args.length === 1 &&
-    command.args[0] &&
-    typeof command.args[0] === 'function' &&
-    command.args[0].toString &&
-    command.args[0].toString().includes('state.onStartStep');
 
 const getCircularReplacer = () => {
     const seen = new WeakSet();

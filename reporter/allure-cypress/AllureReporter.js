@@ -8,7 +8,7 @@ const AllureInterface = require('./AllureInterface');
 const { languageLabel } = require('../languageLabel');
 const logger = require('../debug');
 const CypressHandler = require('./CypressHandler');
-const CucumberHandler = require('./CucumberHandler');
+const { CucumberHandler } = require('./CucumberHandler');
 const defineSuites = require('../defineSuites');
 
 module.exports = class AllureReporter {

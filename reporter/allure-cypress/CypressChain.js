@@ -16,7 +16,7 @@ module.exports = class Chain {
             step: null,
             commandLog: null
         };
-        this.chain.push(command);
+        this.chain.unshift(command);
 
         // in case command in enqueued while there is active chainer - treat it as parent
         // so this command should be added as a child to track if we should finish parent command step
@@ -27,10 +27,14 @@ module.exports = class Chain {
     }
 
     getParent(chainerId) {
-        return this.chain.find(
+        const parents = this.chain.filter(
             (command) =>
                 command.id === chainerId && !command.finished && command.step
         );
+
+        const withStep = parents.find((command) => command.step.info.name);
+
+        return withStep || parents.shift();
     }
 
     addChild(commandId, parentId) {
@@ -40,17 +44,19 @@ module.exports = class Chain {
     }
 
     getCommand(command, withStep = false) {
-        return this.chain.find(
+        const commands = this.chain.filter(
             (chainable) =>
                 chainable.id === command.chainerId &&
                 chainable.name === command.name &&
                 Boolean(chainable.step) === withStep &&
                 !chainable.finished
         );
+
+        return commands.pop();
     }
 
     getCommandsWithSteps() {
-        return this.chain.filter((c) => !c.finished && c.step).reverse();
+        return this.chain.filter((c) => !c.finished && c.step);
     }
 
     getLatestWithStep() {

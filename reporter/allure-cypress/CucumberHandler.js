@@ -1,7 +1,7 @@
 const logger = require('../debug');
 const { tagToLabel, tagToLink, exampleNumber } = require('../gherkinToLabel');
 
-module.exports = class CucumberHandler {
+class CucumberHandler {
     constructor(reporter) {
         this.reporter = reporter;
         this.examplesStorage = [];
@@ -279,7 +279,7 @@ module.exports = class CucumberHandler {
             }
         );
     }
-};
+}
 
 const getScenarios = (feature) => {
     const { children } = feature;
@@ -318,4 +318,21 @@ const findScenarioIndexes = (feature, scenarioId) => {
                   child: index
               };
     }, {});
+};
+
+const commandIsGherkinStep = (command) =>
+    command &&
+    command.args &&
+    command.args.length &&
+    command.args.length === 1 &&
+    command.args[0] &&
+    typeof command.args[0] === 'function' &&
+    command.args[0].toString &&
+    ['state.onStartStep', 'runStepWithLogGroup'].some((gherkinFn) =>
+        command.args[0].toString().includes(gherkinFn)
+    );
+
+module.exports = {
+    CucumberHandler,
+    commandIsGherkinStep
 };

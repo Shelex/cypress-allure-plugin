@@ -23,6 +23,7 @@ const AllureReporter = require('./allure-cypress/AllureReporter');
 const stubbedAllure = require('./stubbedAllure');
 const logger = require('./debug');
 const { shouldUseAfterSpec } = require('../writer/useAfterSpec');
+const { commandIsGherkinStep } = require('./allure-cypress/CucumberHandler');
 
 const { env } = Cypress;
 
@@ -208,6 +209,35 @@ class CypressAllureReporter {
                     this.reporter.currentExecutable.info.status = 'failed';
                 }
             }
+
+            if (log.groupStart && Cypress.spec.fileExtension !== '.feature') {
+                return;
+            }
+
+            // handle new implementation of log grouped gherkin steps
+
+            logger.allure('caught added log group for gherkin step: %O', log);
+
+            const command = this.reporter.cy.chain.currentChainer;
+
+            if (
+                !command ||
+                !this.reporter.config.shouldLogGherkinSteps() ||
+                !commandIsGherkinStep(command)
+            ) {
+                return;
+            }
+
+            logger.cy(`found gherkin step, creating allure entity`);
+            const step = this.reporter.cy.startStep(command, {
+                ...log,
+                displayName: log.name,
+                name: 'step'
+            });
+
+            this.reporter.cy.chain.currentChainer.step = step;
+            this.reporter.steps.push(step);
+            this.reporter.parentStep = step;
         });
     }
 
