@@ -450,7 +450,7 @@ So, plugin will also parse your scenario outlines with examples and in case head
 
 ## VS Code Helper plugin for cypress + cucumber
 
-In case you are using VS Code and [Cypress Helper](https://marketplace.visualstudio.com/items?itemName=Shelex.vscode-cy-helper) extension, it has configuration for allure cucumber tags autocompletion in feature files:
+In case you are using VS Code and [Cypress Helper (latest)](https://marketplace.visualstudio.com/items?itemName=shevtsov.vscode-cy-helper) extension, it has configuration for allure cucumber tags autocompletion in feature files:
 
 ```js
 "cypressHelper.cucumberTagsAutocomplete": {
