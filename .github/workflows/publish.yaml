@@ -13,7 +13,7 @@ jobs:
             - name: Download Cypress
               uses: bahmutov/npm-install@v1
               with:
-                  install-command: npm i --force
+                  install-command: npm i
               env:
                   CYPRESS_INSTALL_BINARY: 0
 
@@ -27,12 +27,13 @@ jobs:
 
             - name: Restore / Cache the binary
               id: cache-cypress
-              uses: actions/cache@v1
+              uses: actions/cache@v3
               with:
                   path: ~/.cache/Cypress
-                  key: >-
-                      cypress-cache-v2-${{ runner.os }}-${{ hashFiles('**/package.json')
-                      }}
+                  key: cypress-cache-v2-${{ runner.os }}-${{ hashFiles('**/package-lock.json') }}
+                  restore-keys: |
+                       cypress-cache-v2-${{ runner.os }}-
+                       cypress-cache-v2-
 
             - name: Install Cypress
               run: |
