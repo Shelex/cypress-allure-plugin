@@ -14,11 +14,7 @@ const shouldUseAfterSpec = (config) => {
         return true;
     }
 
-    if (cypressVersion.above('6.2.0') && config.experimentalRunEvents) {
-        return true;
-    }
-
-    return false;
+    return cypressVersion.above('6.2.0') && config.experimentalRunEvents;
 };
 
 module.exports = { shouldUseAfterSpec };

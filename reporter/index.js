@@ -78,20 +78,18 @@ const invokeResultsWriter = (allure, isGlobal) => {
             'writeAllureResults',
             {
                 results: allure.reporter.runtime.config,
-                files: allure.reporter.files,
+                files: allure.reporter.files || [],
                 mapping: allure.reporter.mochaIdToAllure,
                 clearSkipped: config.clearSkipped(),
                 isGlobal
             },
             { log: false }
-        )
-            // eslint-disable-next-line no-console
-            .catch((e) =>
-                logger.allure(
-                    `failed to execute task to write allure results: %O`,
-                    e
-                )
-            );
+        ).catch((e) =>
+            logger.allure(
+                `failed to execute task to write allure results: %O`,
+                e
+            )
+        );
         logger.allure(`writing allure results`);
     } catch (e) {
         // happens when cy.task could not be executed due to fired outside of it

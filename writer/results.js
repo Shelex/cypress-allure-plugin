@@ -13,6 +13,10 @@ const writeAttachmentFiles = ({ files, resultsDir, tests }) => {
         return;
     }
 
+    if (!tests || !tests.length) {
+        return;
+    }
+
     files.forEach((file) => {
         if (!fs.existsSync(file.path)) {
             return;
@@ -42,6 +46,10 @@ const writeAttachmentFiles = ({ files, resultsDir, tests }) => {
                 t.name === `"after all" hook for "${file.testName}"`
         );
 
+        if (!testsForAttachment || !testsForAttachment.length) {
+            return;
+        }
+
         testsForAttachment.forEach((test) => {
             logger.writer(
                 'attach "%s" to test "%s"',
@@ -62,20 +70,26 @@ const writeSuites = ({ groups, resultsDir, tests, clearSkipped }) => {
         return;
     }
 
-    groups.forEach((group) => {
-        if (!group.children || !group.children.length) {
-            return;
-        }
+    if (!tests || !tests.length) {
+        return;
+    }
 
+    const groupsWithTests = groups.filter(
+        (group) => group.children && group.children.length
+    );
+
+    groupsWithTests.forEach((group) => {
         if (clearSkipped) {
             logger.writer(
                 'clearing skipped tests enabled, removing tests from suite %s',
                 group.name
             );
+
             group.children = group.children.filter((testId) => {
                 const test = tests.find((test) => test.uuid === testId);
                 return test && test.status !== 'skipped';
             });
+
             if (!group.children.length) {
                 logger.writer('skip suite as it has no tests remained');
                 return;
@@ -89,13 +103,19 @@ const writeSuites = ({ groups, resultsDir, tests, clearSkipped }) => {
 
         // remove empty set up and tear down global hooks
         group.befores = group.befores
-            ? group.befores.filter((before) => before.steps.length)
+            ? group.befores.filter(
+                  (before) => before.steps && before.steps.length
+              )
             : [];
         group.afters = group.afters
-            ? group.afters.filter((after) => after.steps.length)
+            ? group.afters.filter((after) => after.steps && after.steps.length)
             : [];
 
-        fs.writeFileSync(groupResultPath, JSON.stringify(group));
+        try {
+            fs.writeFileSync(groupResultPath, JSON.stringify(group));
+        } catch (e) {
+            logger.writer(`failed to write suite file: ${e.message}`);
+        }
     });
 };
 

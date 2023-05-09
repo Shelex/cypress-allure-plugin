@@ -61,7 +61,8 @@ const attachScreenshotsAndVideo = (allureMapping, results, config) => {
             }
 
             const content =
-                fs.existsSync(testFilePath) && fs.readFileSync(testFilePath);
+                fs.existsSync(testFilePath) &&
+                fs.readFileSync(testFilePath, { encoding: 'utf-8' });
 
             if (!content) {
                 logger.writer('could not find file "%s"', testFilePath);
