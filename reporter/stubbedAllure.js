@@ -43,5 +43,6 @@ const stubbedAllure = {
     testParameter: () => {},
     testName: () => {},
     defineSuiteLabels: () => {},
+    defineHistoryId: () => {},
     logCommandSteps: () => {}
 };

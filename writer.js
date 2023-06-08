@@ -59,7 +59,8 @@ function allureWriter(on, config) {
             files,
             mapping,
             clearSkipped,
-            isGlobal
+            isGlobal,
+            defineHistoryId
         }) => {
             const { resultsDir: relativeResultsDir, writer } = results;
 
@@ -76,7 +77,8 @@ function allureWriter(on, config) {
                 clearSkipped,
                 writer,
                 allureMapping,
-                isGlobal
+                isGlobal,
+                defineHistoryId
             });
 
             return null;

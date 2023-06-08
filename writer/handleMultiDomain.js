@@ -71,6 +71,7 @@ const sanitizeSuites = (folder, files = [], isGlobal = false) => {
                 (file) =>
                     file.historyId === child.historyId &&
                     file.uuid !== child.uuid &&
+                    file.steps &&
                     file.steps.length
             );
 

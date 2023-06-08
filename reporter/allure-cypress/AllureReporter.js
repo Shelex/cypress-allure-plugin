@@ -27,6 +27,7 @@ module.exports = class AllureReporter {
         this.gherkin = new CucumberHandler(this);
         this.config = options;
         this.defineSuiteLabelsFn = (titles) => titles;
+        this.defineHistoryId = (testTitle) => testTitle;
     }
 
     /**
@@ -221,7 +222,7 @@ module.exports = class AllureReporter {
         }
 
         this.currentTest.info.historyId = crypto
-            .MD5(test.title)
+            .MD5(this.defineHistoryId(test.title))
             .toString(crypto.enc.Hex);
         this.currentTest.info.stage = Stage.RUNNING;
         this.addPackageLabel();

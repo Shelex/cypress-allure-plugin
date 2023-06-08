@@ -1,7 +1,7 @@
 const logger = require('../reporter/debug');
 
 const clearEmptyHookSteps = (test) => {
-    if (!test.steps.length) {
+    if (!test || !test.steps || !test.steps.length) {
         return test;
     }
 

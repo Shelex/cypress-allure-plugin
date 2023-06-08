@@ -124,6 +124,13 @@ Allure.prototype.defineSuiteLabels = function (defineSuiteLabelsFn) {
     this.reporter.defineSuiteLabelsFn = defineSuiteLabelsFn;
 };
 
+Allure.prototype.defineHistoryId = function (defineHistoryId) {
+    if (!defineHistoryId) {
+        return;
+    }
+    this.reporter.defineHistoryId = defineHistoryId;
+};
+
 Allure.prototype.label = function (name, value) {
     if (this.reporter.currentTest && !this.reporter.currentHook) {
         const labelIndex = (name) =>

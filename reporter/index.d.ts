@@ -258,6 +258,11 @@ declare global {
                     fileInfo: SuiteLabelFunctionFileInfo
                 ) => string[]
             ): void;
+
+            /**
+             * Specify string which will be used to calculate historyId for test
+             */
+            defineHistoryId(fn: (testTitle: string) => string): void;
         }
     }
 }

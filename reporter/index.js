@@ -81,7 +81,8 @@ const invokeResultsWriter = (allure, isGlobal) => {
                 files: allure.reporter.files || [],
                 mapping: allure.reporter.mochaIdToAllure,
                 clearSkipped: config.clearSkipped(),
-                isGlobal
+                isGlobal,
+                defineHistoryId: allure.reporter.defineHistoryId
             },
             { log: false }
         ).catch((e) =>
