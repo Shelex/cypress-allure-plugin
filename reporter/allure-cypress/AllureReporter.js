@@ -222,7 +222,7 @@ module.exports = class AllureReporter {
         }
 
         this.currentTest.info.historyId = crypto
-            .MD5(this.defineHistoryId(test.title))
+            .MD5(this.defineHistoryId(test.title, test.fullTitle()))
             .toString(crypto.enc.Hex);
         this.currentTest.info.stage = Stage.RUNNING;
         this.addPackageLabel();

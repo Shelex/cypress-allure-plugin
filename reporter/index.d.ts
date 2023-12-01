@@ -262,7 +262,7 @@ declare global {
             /**
              * Specify string which will be used to calculate historyId for test
              */
-            defineHistoryId(fn: (testTitle: string) => string): void;
+            defineHistoryId(fn: (testTitle: string, fullTitle: string) => string): void;
         }
     }
 }

@@ -40,12 +40,12 @@
         "lint": "npx eslint ."
     },
     "dependencies": {
-        "@shelex/allure-js-commons-browser": "1.4.1",
-        "crypto-js": "4.1.1",
+        "@shelex/allure-js-commons-browser": "1.5.0",
+        "crypto-js": "4.2.0",
         "debug": "4.3.4",
-        "object-inspect": "1.12.3",
+        "object-inspect": "1.13.1",
         "path-browserify": "1.0.1",
-        "uuid": "9.0.0"
+        "uuid": "9.0.1"
     },
     "devDependencies": {
         "@badeball/cypress-cucumber-preprocessor": "17.0.0",
@@ -58,7 +58,7 @@
         "eslint-plugin-cypress": "2.12.1",
         "eslint-plugin-prettier": "4.2.1",
         "prettier": "2.8.3",
-        "semantic-release": "20.1.0"
+        "semantic-release": "22.0.8"
     },
     "cypress-cucumber-preprocessor": {
         "nonGlobalStepDefinitions": true,

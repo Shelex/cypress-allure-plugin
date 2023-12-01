@@ -386,13 +386,13 @@ There are several ways to avoid this situation:
 - specify your own function for all tests to not only take test.title, but also concatenate it with some other information in `cypress/support/index` or `cypress/support/e2e.js` file, for example:
     - use relative spec file path like "cypress/e2e/results2/test.cy.js" and test title:
         ```js
-        Cypress.Allure.reporter.getInterface().defineHistoryId((title) => {
+        Cypress.Allure.reporter.getInterface().defineHistoryId((title, fullTitle) => {
             return `${Cypress.spec.relative}${title}`;
         });
         ```
     - use browser name and test title:
         ```js
-        Cypress.Allure.reporter.getInterface().defineHistoryId((title) => {
+        Cypress.Allure.reporter.getInterface().defineHistoryId((title, fullTitle) => {
             return `${Cypress.browser.name}${title}`;
         });
         ```
