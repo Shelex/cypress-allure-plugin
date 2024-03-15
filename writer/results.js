@@ -134,14 +134,14 @@ const writeTests = ({
         if (clearSkipped && test.status === 'skipped') {
             logger.writer('skipping test "%s"', test.name);
 
-            const mochaID = Object.keys(allureMapping).find(
-                (id) => {
-                    if (Array.isArray(allureMapping[id])) {
-                        return allureMapping[id].find(e => e.allureId === test.uuid);
-                    }
-                    return allureMapping[id].allureId === test.uuid;
+            const mochaID = Object.keys(allureMapping).find((id) => {
+                if (Array.isArray(allureMapping[id])) {
+                    return allureMapping[id].find(
+                        (e) => e.allureId === test.uuid
+                    );
                 }
-            );
+                return allureMapping[id].allureId === test.uuid;
+            });
             if (mochaID) {
                 delete allureMapping[mochaID];
             }
