@@ -135,7 +135,12 @@ const writeTests = ({
             logger.writer('skipping test "%s"', test.name);
 
             const mochaID = Object.keys(allureMapping).find(
-                (id) => allureMapping[id].allureId === test.uuid
+                (id) => {
+                    if (Array.isArray(allureMapping[id])) {
+                        return allureMapping[id].find(e => e.allureId === test.uuid);
+                    }
+                    return allureMapping[id].allureId === test.uuid;
+                }
             );
             if (mochaID) {
                 delete allureMapping[mochaID];
