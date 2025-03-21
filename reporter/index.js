@@ -1,4 +1,11 @@
 require('./commands');
+const {
+    clearAllureHookStepsFromTests,
+    setTestIdToScreenshot,
+    reorderAllureHooks,
+    ALLURE_AFTER_HOOK,
+    ALLURE_AFTER_EACH_HOOK
+} = require('./patching.js');
 
 const {
     EVENT_TEST_BEGIN,
@@ -33,13 +40,11 @@ const shouldEnableGherkinLogging = () => {
 
     const isLogCypressDefined = typeof logCypress !== 'undefined';
     const isLogGherkinDefined = typeof logGherkin !== 'undefined';
-
-    return isLogGherkinDefined
-        ? logGherkin
-        : // in case logGherkin is not defined use logCypress value or true by default
-        isLogCypressDefined
-        ? logCypress
-        : true;
+    if (isLogGherkinDefined) {
+        return logGherkin;
+    }
+    // in case logGherkin is not defined use logCypress value or true by default
+    return isLogCypressDefined ? logCypress : true;
 };
 
 const config = {
@@ -65,33 +70,35 @@ const config = {
             return input.startsWith('[') ? JSON.parse(input) : input.split(',');
         }
         return [];
-    }
+    },
+    logAllureHooksEnabled: () => env('allureLogHooks') === true
 };
 
 const invokeResultsWriter = (allure, isGlobal) => {
-    if (!config || !config.allureEnabled()) {
+    if (!config?.allureEnabled()) {
         return;
     }
     try {
-        cy.now(
-            'task',
-            'writeAllureResults',
-            {
-                results: allure.reporter.runtime.config,
-                files: allure.reporter.files || [],
-                mapping: allure.reporter.mochaIdToAllure,
-                clearSkipped: config.clearSkipped(),
-                isGlobal,
-                defineHistoryId: allure.reporter.defineHistoryId
-            },
-            { log: false }
-        ).catch((e) =>
-            logger.allure(
-                `failed to execute task to write allure results: %O`,
-                e
-            )
+        clearAllureHookStepsFromTests(
+            allure.reporter.runtime.config?.writer?.tests,
+            config.logAllureHooksEnabled()
         );
-        logger.allure(`writing allure results`);
+        return cy
+            .task(
+                'writeAllureResults',
+                {
+                    results: allure.reporter.runtime.config,
+                    files: allure.reporter.files || [],
+                    mapping: allure.reporter.mochaIdToAllure,
+                    clearSkipped: config.clearSkipped(),
+                    isGlobal,
+                    defineHistoryId: allure.reporter.defineHistoryId
+                },
+                { log: config.logAllureHooksEnabled() }
+            )
+            .then((result) => {
+                logger.allure(`writing allure results`);
+            });
     } catch (e) {
         // happens when cy.task could not be executed due to fired outside of it
         logger.allure(`failed to write allure results: %O`, e);
@@ -127,11 +134,11 @@ class CypressAllureReporter {
             this.reporter.gherkin.checkTags();
             this.reporter.endTest(test);
         };
-
         Cypress.mocha
             .getRunner()
             .on(EVENT_SUITE_BEGIN, (suite) => {
                 logger.mocha(`EVENT_SUITE_BEGIN: %s %O`, suite.title, suite);
+                reorderAllureHooks(suite);
                 this.reporter.startSuite(suite);
             })
             .on(EVENT_SUITE_END, (suite) => {
@@ -143,7 +150,6 @@ class CypressAllureReporter {
                  */
                 const isGlobal = suite.title === '';
                 this.reporter.endSuite(isGlobal);
-                isGlobal && invokeResultsWriter(this, isGlobal);
             })
             .on(EVENT_TEST_BEGIN, (test) => {
                 onTestBegin(test);
@@ -201,10 +207,7 @@ class CypressAllureReporter {
             if (log.state === 'failed') {
                 logger.cy('found failed log:added %O', log);
 
-                if (
-                    this.reporter.currentExecutable &&
-                    this.reporter.currentExecutable.info
-                ) {
+                if (this.reporter.currentExecutable?.info) {
                     this.reporter.currentExecutable.info.status = 'failed';
                 }
             }
@@ -230,7 +233,7 @@ class CypressAllureReporter {
             logger.cy(`found gherkin step, creating allure entity`);
             const step = this.reporter.cy.startStep(command, {
                 ...log,
-                displayName: log.name,
+                displayName: log?.displayName || log.name,
                 name: 'step'
             });
 
@@ -274,10 +277,6 @@ class CypressAllureReporter {
     }
 }
 
-Cypress.on('test:after:run', () => {
-    invokeResultsWriter(Cypress.Allure, false);
-});
-
 // when different hosts used in same test
 // Cypress opens new host URL and loads index.js
 // so if we already have Allure data we should not replace it with new instance
@@ -291,6 +290,11 @@ if (!Cypress.Allure) {
 Cypress.Screenshot.defaults({
     onAfterScreenshot(_, details) {
         logger.cy(`onAfterScreenshot: %O`, details);
+        setTestIdToScreenshot(
+            config.allureEnabled(),
+            Cypress.Allure?.reporter?.mochaIdToAllure,
+            details
+        );
         if (
             config.allureEnabled() &&
             !shouldUseAfterSpec(Cypress.config()) &&
@@ -368,6 +372,24 @@ const attachVideo = (reporter, test, status) => {
         );
     }
 };
+
+if (config.allureEnabled()) {
+    afterEach(ALLURE_AFTER_EACH_HOOK, function () {
+        logger.allure('########### after each ################');
+        cy.then(() => invokeResultsWriter(Cypress.Allure, false));
+    });
+
+    after(ALLURE_AFTER_HOOK, function () {
+        logger.allure('########### after all ################');
+        cy.then(() => {
+            Cypress.Allure.reporter.prepareAllureReport(
+                cy.state('runnable'),
+                config.logAllureHooksEnabled()
+            );
+            invokeResultsWriter(Cypress.Allure, true);
+        });
+    });
+}
 
 // need empty after hook to prohibit cypress stop the runner when there are skipped tests in the end
 after(() => {});

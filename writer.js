@@ -10,6 +10,10 @@ const { writeResultFiles } = require('./writer/results');
 function allureWriter(on, config) {
     allurePropertiesToEnvVars(config.env);
 
+    if (!config.env.allure) {
+        logger.writer('allure not activated');
+        return;
+    }
     if (!config.env.allureResultsPath) {
         config.env.allureResultsPath = 'allure-results';
     }

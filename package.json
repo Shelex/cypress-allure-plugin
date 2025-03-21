@@ -42,23 +42,24 @@
     "dependencies": {
         "@shelex/allure-js-commons-browser": "1.5.0",
         "crypto-js": "4.2.0",
-        "debug": "4.3.4",
-        "object-inspect": "1.13.1",
+        "debug": "4.4.0",
+        "object-inspect": "1.13.4",
         "path-browserify": "1.0.1",
-        "uuid": "9.0.1"
+        "uuid": "11.1.0"
     },
     "devDependencies": {
-        "@badeball/cypress-cucumber-preprocessor": "17.0.0",
-        "@cypress/webpack-preprocessor": "5.17.1",
-        "@types/mocha": "7.0.2",
-        "cypress": "12.11.0",
-        "eslint": "7.32.0",
-        "eslint-config-prettier": "8.6.0",
-        "eslint-plugin-chai-friendly": "0.7.2",
-        "eslint-plugin-cypress": "2.12.1",
-        "eslint-plugin-prettier": "4.2.1",
-        "prettier": "2.8.3",
-        "semantic-release": "22.0.8"
+        "@badeball/cypress-cucumber-preprocessor": "22.0.1",
+        "@cypress/webpack-preprocessor": "6.0.2",
+        "@types/mocha": "10.0.10",
+        "cypress": "14.2.0",
+        "eslint": "9.22.0",
+        "eslint-config-prettier": "10.1.1",
+        "eslint-plugin-chai-friendly": "1.0.1",
+        "eslint-plugin-cypress": "4.2.0",
+        "eslint-plugin-prettier": "5.2.3",
+        "prettier": "3.5.3",
+        "semantic-release": "24.2.3",
+        "webpack": "5.98.0"
     },
     "cypress-cucumber-preprocessor": {
         "nonGlobalStepDefinitions": true,
