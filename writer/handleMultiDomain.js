@@ -43,9 +43,22 @@ const readAllureResults = (folder) => {
 
         return fileMap;
     } catch (e) {
-        // eslint-disable-next-line no-console
         logger.writer(`error parsing existing allure results: ${e}`);
         return [];
+    }
+};
+
+const removeOrphanTest = (tests, suites, folder) => {
+    for (const test of tests) {
+        const isAttached = suites.find((suite) =>
+            suite.children.includes(test.uuid)
+        );
+        if (!isAttached) {
+            const fileName = `${test.uuid}-result.json`;
+            const filePath = path.join(folder, fileName);
+            logger.writer('found orphan test, removing %s', fileName);
+            fs.existsSync(filePath) && fs.unlinkSync(filePath);
+        }
     }
 };
 
@@ -62,7 +75,7 @@ const sanitizeSuites = (folder, files = [], isGlobal = false) => {
                 continue;
             }
 
-            if (child.steps && child.steps.length) {
+            if (child?.steps?.length) {
                 logger.writer('child %s %s has steps', child.uuid, child.name);
                 continue;
             }
@@ -71,8 +84,7 @@ const sanitizeSuites = (folder, files = [], isGlobal = false) => {
                 (file) =>
                     file.historyId === child.historyId &&
                     file.uuid !== child.uuid &&
-                    file.steps &&
-                    file.steps.length
+                    file?.steps?.length
             );
 
             duplicates.sort((a, b) => a.start - b.start);
@@ -111,17 +123,7 @@ const sanitizeSuites = (folder, files = [], isGlobal = false) => {
 
     const tests = files.filter((file) => !file.children && file.historyId);
 
-    for (const test of tests) {
-        const isAttached = suites.find((suite) =>
-            suite.children.includes(test.uuid)
-        );
-        if (!isAttached) {
-            const fileName = `${test.uuid}-result.json`;
-            const filePath = path.join(folder, fileName);
-            logger.writer('found orphan test, removing %s', fileName);
-            fs.existsSync(filePath) && fs.unlinkSync(filePath);
-        }
-    }
+    removeOrphanTest(tests, suites, folder);
 };
 
 module.exports = {

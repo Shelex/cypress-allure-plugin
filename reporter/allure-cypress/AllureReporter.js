@@ -82,8 +82,8 @@ module.exports = class AllureReporter {
     get testNameForAttachment() {
         const cyTest = cy.state().test;
         return (
-            (cyTest && cyTest.title) ||
-            (this.currentTest && this.currentTest.info.name) ||
+            cyTest?.title ||
+            this.currentTest?.info.name ||
             this.previousTestName
         );
     }
@@ -97,7 +97,9 @@ module.exports = class AllureReporter {
      * will be populated with correct folder structure
      */
     addPackageLabel() {
-        const packagePath = Cypress.spec.relative.replace(/\//g, '.');
+        const packagePath = Cypress.spec.relative
+            .replace(/\//g, '.')
+            .replace(/\\/g, '.');
         this.currentTest.addLabel(LabelName.PACKAGE, packagePath);
     }
 
@@ -137,7 +139,20 @@ module.exports = class AllureReporter {
         this.pushSuite(allureSuite);
     }
 
-    endSuite(isGlobal = false) {
+    prepareAllureReport(hook, allureLogHooks = false) {
+        logger.allure(`prepareAllureReport from hook %s`, hook.title);
+        if (hook && hook.type === 'hook') {
+            this.endHook(hook, false, true);
+            if (!allureLogHooks) {
+                // remove "after all" hook steps so hook will not be kept in the report
+                this.currentHook.info['steps'] = [];
+            }
+        }
+        this.endSuite(true, true);
+        logger.allure(`end prepareAllureReport from hook %s`, hook.title);
+    }
+
+    endSuite(isGlobal = false, isAllureReport = false) {
         if (this.currentSuite && isGlobal) {
             this.cy.handleRemainingCommands(Status.PASSED);
             logger.allure(`finished cypress commands`);
@@ -148,9 +163,11 @@ module.exports = class AllureReporter {
                 this.currentTest.testResult.stage !== Stage.FINISHED &&
                 this.endTest();
             this.currentSuite.endGroup();
-            this.popSuite();
-            logger.allure(`finished suite`);
-            this.currentTest = null;
+            if (!isAllureReport) {
+                this.popSuite();
+                logger.allure(`finished suite`);
+                this.currentTest = null;
+            }
         }
 
         // restrict label storage to single suite scope
@@ -214,11 +231,11 @@ module.exports = class AllureReporter {
             );
             // "hooktype" hook: hookname for "testname"
             // grab just "testname" to consider for calculating historyid hash
-            const match = test.title.match(/\"(.*?)\"/g).pop();
+            const match = test.title.match(/"(.*?)"/g).pop();
 
             // set title if match does contain test title
             test.title =
-                match === test.hookName ? test.title : match.replace(/\"/g, '');
+                match === test.hookName ? test.title : match.replace(/"/g, '');
         }
 
         this.currentTest.info.historyId = crypto
@@ -227,11 +244,7 @@ module.exports = class AllureReporter {
         this.currentTest.info.stage = Stage.RUNNING;
         this.addPackageLabel();
 
-        if (
-            config &&
-            config.clearFilesForPreviousAttempt() &&
-            test._currentRetry > 0
-        ) {
+        if (config?.clearFilesForPreviousAttempt() && test._currentRetry > 0) {
             logger.allure(`clearing screenshots from previous retries`);
             // remove screenshots from previous attempt
             this.files = this.files.filter(
@@ -239,7 +252,7 @@ module.exports = class AllureReporter {
             );
         }
 
-        if (config && config.addAnalyticLabels()) {
+        if (config?.addAnalyticLabels()) {
             logger.allure(`adding analytic labels`);
             this.currentTest.addLabel(LabelName.FRAMEWORK, 'Cypress');
             const language = languageLabel(test);
@@ -374,12 +387,9 @@ module.exports = class AllureReporter {
     }
 
     finishRemainingSteps(status = Status.PASSED) {
-        const alreadyHasFailedStep =
-            this.currentTest &&
-            this.currentTest.info &&
-            this.currentTest.info.steps.some(
-                (step) => step.status === Status.FAILED
-            );
+        const alreadyHasFailedStep = this.currentTest?.info?.steps.some(
+            (step) => step.status === Status.FAILED
+        );
 
         this.steps.forEach((step) => {
             step.info.stage = Stage.FINISHED;
@@ -428,7 +438,7 @@ module.exports = class AllureReporter {
                 return;
             }
             const customHookName = hook.title.replace(
-                /\"(before|after) each\" hook:? */g,
+                /"(before|after) each" hook:? */g,
                 ''
             );
 
@@ -439,7 +449,7 @@ module.exports = class AllureReporter {
         }
     }
 
-    endHook(hook, failed = false) {
+    endHook(hook, failed = false, isAllureReport = false) {
         logger.allure(`finishing hook %s`, hook.title);
         if (!this.currentSuite || !this.currentHook || isEmpty(hook)) {
             logger.allure(`no suite or no hook or hook is empty function`);
@@ -464,9 +474,9 @@ module.exports = class AllureReporter {
 
         // in case hook is a step we should complete it
         if (this.originalNameOf(hook).includes('each')) {
-            this.currentHook && this.currentHook.endStep();
+            this.currentHook?.endStep();
         }
-        !failed && (this.currentHook = null);
+        !isAllureReport && !failed && (this.currentHook = null);
         this.finishRemainingSteps(currentHookInfo.status);
     }
 
@@ -517,8 +527,7 @@ module.exports = class AllureReporter {
         }
         // update test, which may had a pending event previously
         if (
-            test &&
-            test.state &&
+            test?.state &&
             [Status.FAILED, Status.PASSED, Status.SKIPPED].includes(test.state)
         ) {
             this.updateTest(

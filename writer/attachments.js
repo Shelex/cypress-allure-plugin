@@ -18,17 +18,19 @@ const attachScreenshotsAndVideo = (allureMapping, results, config) => {
         `${uuid.v4()}-attachment${path.extname(results.video)}`;
 
     const shouldAddVideoOnPass = config.env.allureAddVideoOnPass === true;
+    const testIdIndex = Object.keys(allureMapping);
 
-    const needVideo = results.tests.filter((test) => {
+    const needVideo = results.tests.filter((test, index) => {
         let shouldAttachVideo = false;
-
+        test.testId = test?.testId || testIdIndex[index];
         const testIds = allureMapping[test.testId];
         if (!testIds) {
             return false;
         }
 
         testIds.forEach((ids) => {
-            const { allureId, attempt } = ids;
+            let { allureId, attempt, screenshots: screenshotsList } = ids;
+            screenshotsList = screenshotsList || [];
             const currentTest = test.attempts[attempt];
 
             logger.writer('going to check attachments for "%s"', allureId);
@@ -76,7 +78,7 @@ const attachScreenshotsAndVideo = (allureMapping, results, config) => {
                     return [];
                 }
 
-                return results.screenshots.filter(
+                return screenshotsList.filter(
                     (screenshot) =>
                         screenshot.testId === test.testId &&
                         screenshot.testAttemptIndex === attempt
@@ -132,15 +134,16 @@ const attachScreenshotsAndVideo = (allureMapping, results, config) => {
                 const existingVideoIndex = allureTest.attachments.findIndex(
                     (attach) => attach.type === videoContentType
                 );
-
-                existingVideoIndex === -1
-                    ? allureTest.attachments.push({
-                          name: 'video recording',
-                          type: videoContentType,
-                          source: videoPath
-                      })
-                    : (allureTest.attachments[existingVideoIndex].source =
-                          videoPath);
+                if (existingVideoIndex === -1) {
+                    allureTest.attachments.push({
+                        name: 'video recording',
+                        type: videoContentType,
+                        source: videoPath
+                    });
+                } else {
+                    allureTest.attachments[existingVideoIndex].source =
+                        videoPath;
+                }
             }
 
             fs.writeFileSync(testFilePath, JSON.stringify(allureTest));

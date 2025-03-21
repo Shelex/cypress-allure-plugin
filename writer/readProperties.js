@@ -47,7 +47,8 @@ const allurePropertiesToEnvVars = (envVars) => {
         ['allure.video.passed', 'allureAddVideoOnPass'],
         ['allure.link.issue.pattern', 'issuePrefix'],
         ['allure.link.tms.pattern', 'tmsPrefix'],
-        ['allure.analytics', 'allureAddAnalyticLabels']
+        ['allure.analytics', 'allureAddAnalyticLabels'],
+        ['allure.log.hooks', 'allureLogHooks']
     ]);
 
     propertyToCypressEnv.forEach((envVariable, name) => {
