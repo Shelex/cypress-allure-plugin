@@ -82,8 +82,8 @@ module.exports = class AllureReporter {
     get testNameForAttachment() {
         const cyTest = cy.state().test;
         return (
-            cyTest?.title ||
-            this.currentTest?.info.name ||
+            (cyTest && cyTest.title) ||
+            (this.currentTest && this.currentTest.info.name) ||
             this.previousTestName
         );
     }
@@ -244,7 +244,11 @@ module.exports = class AllureReporter {
         this.currentTest.info.stage = Stage.RUNNING;
         this.addPackageLabel();
 
-        if (config?.clearFilesForPreviousAttempt() && test._currentRetry > 0) {
+        if (
+            config &&
+            config.clearFilesForPreviousAttempt() &&
+            test._currentRetry > 0
+        ) {
             logger.allure(`clearing screenshots from previous retries`);
             // remove screenshots from previous attempt
             this.files = this.files.filter(
@@ -252,7 +256,7 @@ module.exports = class AllureReporter {
             );
         }
 
-        if (config?.addAnalyticLabels()) {
+        if (config && config.addAnalyticLabels()) {
             logger.allure(`adding analytic labels`);
             this.currentTest.addLabel(LabelName.FRAMEWORK, 'Cypress');
             const language = languageLabel(test);
@@ -387,9 +391,12 @@ module.exports = class AllureReporter {
     }
 
     finishRemainingSteps(status = Status.PASSED) {
-        const alreadyHasFailedStep = this.currentTest?.info?.steps.some(
-            (step) => step.status === Status.FAILED
-        );
+        const alreadyHasFailedStep =
+            this.currentTest &&
+            this.currentTest.info &&
+            this.currentTest.info.steps.some(
+                (step) => step.status === Status.FAILED
+            );
 
         this.steps.forEach((step) => {
             step.info.stage = Stage.FINISHED;
@@ -474,7 +481,7 @@ module.exports = class AllureReporter {
 
         // in case hook is a step we should complete it
         if (this.originalNameOf(hook).includes('each')) {
-            this.currentHook?.endStep();
+            this.currentHook && this.currentHook.endStep();
         }
         !isAllureReport && !failed && (this.currentHook = null);
         this.finishRemainingSteps(currentHookInfo.status);
@@ -527,7 +534,8 @@ module.exports = class AllureReporter {
         }
         // update test, which may had a pending event previously
         if (
-            test?.state &&
+            test &&
+            test.state &&
             [Status.FAILED, Status.PASSED, Status.SKIPPED].includes(test.state)
         ) {
             this.updateTest(

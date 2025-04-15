@@ -22,7 +22,7 @@ const attachScreenshotsAndVideo = (allureMapping, results, config) => {
 
     const needVideo = results.tests.filter((test, index) => {
         let shouldAttachVideo = false;
-        test.testId = test?.testId || testIdIndex[index];
+        test.testId = (test && test.testId) || testIdIndex[index];
         const testIds = allureMapping[test.testId];
         if (!testIds) {
             return false;

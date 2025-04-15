@@ -75,7 +75,7 @@ const sanitizeSuites = (folder, files = [], isGlobal = false) => {
                 continue;
             }
 
-            if (child?.steps?.length) {
+            if (child && child.steps && child.steps.length) {
                 logger.writer('child %s %s has steps', child.uuid, child.name);
                 continue;
             }
@@ -84,7 +84,8 @@ const sanitizeSuites = (folder, files = [], isGlobal = false) => {
                 (file) =>
                     file.historyId === child.historyId &&
                     file.uuid !== child.uuid &&
-                    file?.steps?.length
+                    file.steps &&
+                    file.steps.length
             );
 
             duplicates.sort((a, b) => a.start - b.start);

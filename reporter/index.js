@@ -75,12 +75,17 @@ const config = {
 };
 
 const invokeResultsWriter = (allure, isGlobal) => {
-    if (!config?.allureEnabled()) {
+    if (!config || !config.allureEnabled()) {
         return;
     }
     try {
         clearAllureHookStepsFromTests(
-            allure.reporter.runtime.config?.writer?.tests,
+            allure &&
+                allure.reporter &&
+                allure.reporter.runtime &&
+                allure.reporter.runtime.config &&
+                allure.reporter.runtime.config.writer &&
+                allure.reporter.runtime.config.writer.tests,
             config.logAllureHooksEnabled()
         );
         return cy
@@ -207,7 +212,10 @@ class CypressAllureReporter {
             if (log.state === 'failed') {
                 logger.cy('found failed log:added %O', log);
 
-                if (this.reporter.currentExecutable?.info) {
+                if (
+                    this.reporter.currentExecutable &&
+                    this.reporter.currentExecutable.info
+                ) {
                     this.reporter.currentExecutable.info.status = 'failed';
                 }
             }
@@ -233,7 +241,7 @@ class CypressAllureReporter {
             logger.cy(`found gherkin step, creating allure entity`);
             const step = this.reporter.cy.startStep(command, {
                 ...log,
-                displayName: log?.displayName || log.name,
+                displayName: (log && log.displayName) || log.name,
                 name: 'step'
             });
 
@@ -292,7 +300,9 @@ Cypress.Screenshot.defaults({
         logger.cy(`onAfterScreenshot: %O`, details);
         setTestIdToScreenshot(
             config.allureEnabled(),
-            Cypress.Allure?.reporter?.mochaIdToAllure,
+            Cypress.Allure &&
+                Cypress.Allure.reporter &&
+                Cypress.Allure.reporter.mochaIdToAllure,
             details
         );
         if (
