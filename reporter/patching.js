@@ -42,7 +42,7 @@ const reorderAllureHooksGeneric = (
 };
 
 const clearAllureHookSteps = (test, allureLogHooks = false) => {
-    if (!test?.steps?.length) {
+    if (!(test && test.steps && test.steps.length)) {
         return test;
     }
 
@@ -98,13 +98,13 @@ const isLastRootHook = () => {
     }
     const { hookName } = currentRunnable;
     let rootSuite = currentRunnable.parent;
-    while (rootSuite?.parent && !rootSuite.root) {
+    while (rootSuite && rootSuite.parent && !rootSuite.root) {
         rootSuite = rootSuite.parent;
     }
     if (!rootSuite) {
         return false;
     }
-    const hooks = rootSuite?.hooks || [];
+    const hooks = (rootSuite && rootSuite.hooks) || [];
     const lastHook = hooks.findLast((h) => h.hookName === hookName);
 
     return lastHook && lastHook.hookId === currentRunnable.hookId;
@@ -114,7 +114,7 @@ const setTestIdToScreenshot = (allureEnabled, mochaIdToAllure, details) => {
     if (allureEnabled) {
         let currentTest = cy.state('test');
         if (details && currentTest && mochaIdToAllure) {
-            const testIds = mochaIdToAllure[currentTest?.id];
+            const testIds = mochaIdToAllure[currentTest && currentTest.id];
             if (testIds) {
                 details['testId'] = currentTest.id;
                 let testId = testIds.at(-1);
