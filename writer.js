@@ -19,6 +19,7 @@ function allureWriter(on, config) {
     }
 
     let allureMapping = null;
+    let allurePendingResults = {};
 
     if (shouldUseAfterSpec(config)) {
         logger.writer(
@@ -59,21 +60,22 @@ function allureWriter(on, config) {
 
     on('task', {
         writeAllureResults: ({
-            results,
+            pendingResults,
             files,
-            mapping,
             clearSkipped,
             isGlobal,
             defineHistoryId
         }) => {
-            const { resultsDir: relativeResultsDir, writer } = results;
+            const { resultsDir: relativeResultsDir, writer } =
+                pendingResults.allureResults;
 
             const resultsDir = config.projectRoot
                 ? path.join(config.projectRoot, relativeResultsDir)
                 : relativeResultsDir;
 
             config.env.allureResultsPath = resultsDir;
-            allureMapping = mapping;
+            allurePendingResults = pendingResults;
+            ({ allureMapping } = pendingResults);
 
             writeResultFiles({
                 resultsDir,
@@ -84,8 +86,22 @@ function allureWriter(on, config) {
                 isGlobal,
                 defineHistoryId
             });
+            if (isGlobal) {
+                allurePendingResults = {};
+            }
 
             return null;
+        }
+    });
+    on('task', {
+        getPendingAllureResults: () => {
+            return allurePendingResults || {};
+        }
+    });
+    on('task', {
+        savePendingAllureResults: (pendingResults) => {
+            allurePendingResults = pendingResults || {};
+            return allurePendingResults;
         }
     });
 }

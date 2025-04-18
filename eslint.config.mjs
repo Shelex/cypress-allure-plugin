@@ -32,7 +32,7 @@ export default defineConfig([
                 Cypress: true
             },
 
-            ecmaVersion: 2018,
+            ecmaVersion: 2022,
             sourceType: 'module'
         },
 

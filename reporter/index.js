@@ -1,10 +1,12 @@
 require('./commands');
 const {
-    clearAllureHookStepsFromTests,
     setTestIdToScreenshot,
     reorderAllureHooks,
-    ALLURE_AFTER_HOOK,
-    ALLURE_AFTER_EACH_HOOK
+    buildPendingResults,
+    loadPendingResults,
+    clearAllureHookStepsFromTests,
+    clearAllureHookStepsFromHook,
+    ALLURE_HOOK_NAME
 } = require('./patching.js');
 
 const {
@@ -80,21 +82,20 @@ const invokeResultsWriter = (allure, isGlobal) => {
     }
     try {
         clearAllureHookStepsFromTests(
-            allure &&
-                allure.reporter &&
-                allure.reporter.runtime &&
-                allure.reporter.runtime.config &&
-                allure.reporter.runtime.config.writer &&
-                allure.reporter.runtime.config.writer.tests,
+            allure.reporter.runtime.config.writer.tests,
             config.logAllureHooksEnabled()
         );
+
         return cy
             .task(
                 'writeAllureResults',
                 {
-                    results: allure.reporter.runtime.config,
+                    pendingResults: buildPendingResults({
+                        currentSpec:
+                            Cypress.spec.relative || Cypress.spec.absolute,
+                        allure
+                    }),
                     files: allure.reporter.files || [],
-                    mapping: allure.reporter.mochaIdToAllure,
                     clearSkipped: config.clearSkipped(),
                     isGlobal,
                     defineHistoryId: allure.reporter.defineHistoryId
@@ -108,6 +109,17 @@ const invokeResultsWriter = (allure, isGlobal) => {
         // happens when cy.task could not be executed due to fired outside of it
         logger.allure(`failed to write allure results: %O`, e);
     }
+};
+
+const skipAlreadyRunTest = (test) => {
+    if (test && test._ALREADY_RAN) {
+        if (!(test.id in Cypress.Allure.reporter.mochaIdToAllure)) {
+            test['_ALLURE_RUN'] = true;
+            return false;
+        }
+        return !test._ALLURE_RUN;
+    }
+    return false;
 };
 
 class CypressAllureReporter {
@@ -157,13 +169,22 @@ class CypressAllureReporter {
                 this.reporter.endSuite(isGlobal);
             })
             .on(EVENT_TEST_BEGIN, (test) => {
+                if (skipAlreadyRunTest(test)) {
+                    return;
+                }
                 onTestBegin(test);
             })
             .on(EVENT_TEST_FAIL, (test, err) => {
+                if (skipAlreadyRunTest(test)) {
+                    return;
+                }
                 onTestFail(test, err);
             })
             .on(EVENT_TEST_PASS, (test) => {
                 logger.mocha(`EVENT_TEST_PASS: %s %O`, test.title, test);
+                if (skipAlreadyRunTest(test)) {
+                    return;
+                }
                 this.reporter.passTestCase(test);
             })
             .on(EVENT_TEST_RETRY, (test) => {
@@ -173,9 +194,15 @@ class CypressAllureReporter {
             })
             .on(EVENT_TEST_PENDING, (test) => {
                 logger.mocha(`EVENT_TEST_PENDING: %s %O`, test.title, test);
+                if (skipAlreadyRunTest(test)) {
+                    return;
+                }
                 this.reporter.pendingTestCase(test);
             })
             .on(EVENT_TEST_END, (test) => {
+                if (skipAlreadyRunTest(test)) {
+                    return;
+                }
                 onTestEnd(test);
             })
             .on(EVENT_HOOK_BEGIN, (hook) => {
@@ -184,6 +211,11 @@ class CypressAllureReporter {
             })
             .on(EVENT_HOOK_END, (hook) => {
                 logger.mocha(`EVENT_HOOK_END: %s %O`, hook.title, hook);
+                clearAllureHookStepsFromHook({
+                    hook,
+                    reporter: this.reporter,
+                    allureLogHooks: config.logAllureHooksEnabled()
+                });
                 this.reporter.endHook(hook);
             });
 
@@ -298,13 +330,11 @@ if (!Cypress.Allure) {
 Cypress.Screenshot.defaults({
     onAfterScreenshot(_, details) {
         logger.cy(`onAfterScreenshot: %O`, details);
-        setTestIdToScreenshot(
-            config.allureEnabled(),
-            Cypress.Allure &&
-                Cypress.Allure.reporter &&
-                Cypress.Allure.reporter.mochaIdToAllure,
+        setTestIdToScreenshot({
+            allureEnabled: config.allureEnabled(),
+            allure: Cypress.Allure,
             details
-        );
+        });
         if (
             config.allureEnabled() &&
             !shouldUseAfterSpec(Cypress.config()) &&
@@ -384,12 +414,19 @@ const attachVideo = (reporter, test, status) => {
 };
 
 if (config.allureEnabled()) {
-    afterEach(ALLURE_AFTER_EACH_HOOK, function () {
+    before(ALLURE_HOOK_NAME['before'], () => {
+        logger.allure('########### before all ################');
+        cy.task('getPendingAllureResults', undefined, {
+            log: config.logAllureHooksEnabled()
+        }).then(loadPendingResults);
+    });
+
+    afterEach(ALLURE_HOOK_NAME['afterEach'], () => {
         logger.allure('########### after each ################');
         cy.then(() => invokeResultsWriter(Cypress.Allure, false));
     });
 
-    after(ALLURE_AFTER_HOOK, function () {
+    after(ALLURE_HOOK_NAME['after'], () => {
         logger.allure('########### after all ################');
         cy.then(() => {
             Cypress.Allure.reporter.prepareAllureReport(
