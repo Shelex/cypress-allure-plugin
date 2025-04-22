@@ -93,11 +93,13 @@ function allureWriter(on, config) {
             return null;
         }
     });
+
     on('task', {
         getPendingAllureResults: () => {
             return allurePendingResults || {};
         }
     });
+
     on('task', {
         savePendingAllureResults: (pendingResults) => {
             allurePendingResults = pendingResults || {};
