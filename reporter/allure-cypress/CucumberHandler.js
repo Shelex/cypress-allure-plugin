@@ -121,14 +121,14 @@ class CucumberHandler {
             if (indexes.rule !== undefined && indexes.rule !== -1) {
                 globalThis.testState.gherkinDocument.feature.children[
                     indexes.rule
-                ].rule.children[indexes.child].scenario.tags = newTags;
+                    ].rule.children[indexes.child].scenario.tags = newTags;
                 return;
             }
 
             // set tags for scenario
             globalThis.testState.gherkinDocument.feature.children[
                 indexes.child
-            ].scenario.tags = newTags;
+                ].scenario.tags = newTags;
             return;
         }
 
@@ -155,7 +155,7 @@ class CucumberHandler {
         logger.allure(`populating gherkin links from examples table`);
 
         !this.examplesStorage.length &&
-            this.examplesStorage.push(...scenario.examples);
+        this.examplesStorage.push(...scenario.examples);
 
         const example =
             this.examplesStorage.length && this.examplesStorage.pop();
@@ -214,43 +214,48 @@ class CucumberHandler {
          */
 
         [this.feature, this.currentRule, this.currentScenario].forEach(
-            function (kind) {
+            (kind) => {
                 if (!kind || !kind.tags || !kind.tags.length) {
                     return;
                 }
 
                 kind.tags
-                    .filter(function ({ name }) {
+                    .filter(({ name }) => {
                         const match = tagToLabel.exec(name);
                         if (match) {
                             const [, command, value] = match;
-                            // feature and suite should be overwritten to avoid duplicates
-                            if (['feature', 'suite'].includes(command)) {
-                                const index = currentTest.info.labels.findIndex(
-                                    (label) => label.name === command
-                                );
-                                currentTest.info.labels[index] = {
+
+                            if (command === 'testID') {
+                                const ids = value.split('|');
+                                const index = this.outlineExampleIndex ?? 0;
+                                const id = ids[index] || ids[0];
+                                this.reporter.currentTest.addLabel('AS_ID', id);
+                            } else if (['feature', 'suite'].includes(command)) {
+                                const labelIndex =
+                                    this.reporter.currentTest.info.labels.findIndex(
+                                        (label) => label.name === command
+                                    );
+                                this.reporter.currentTest.info.labels[
+                                    labelIndex
+                                    ] = {
                                     name: command,
-                                    value: value
+                                    value
                                 };
                             } else {
-                                // handle renaming label for testID, or just use label name
-                                currentTest.addLabel(
-                                    command === 'testID' ? 'AS_ID' : command,
+                                this.reporter.currentTest.addLabel(
+                                    command,
                                     value
                                 );
                             }
                         }
                         return !match;
                     })
-                    // check for links
-                    .filter(function ({ name }) {
+                    .filter(({ name }) => {
                         const match = tagToLink.exec(name);
                         if (match) {
                             const [, command, name, matchUrl] = match;
 
                             const url = matchUrl || name;
-
                             const prefixBy = {
                                 issue: Cypress.env('issuePrefix'),
                                 tms: Cypress.env('tmsPrefix'),
@@ -262,7 +267,8 @@ class CucumberHandler {
                                 urlPrefix && urlPrefix.includes('*')
                                     ? urlPrefix
                                     : `${urlPrefix}*`;
-                            currentTest.addLink(
+
+                            this.reporter.currentTest.addLink(
                                 urlPrefix && pattern
                                     ? pattern.replace(/\*/g, url)
                                     : url,
@@ -272,9 +278,11 @@ class CucumberHandler {
                         }
                         return !match;
                     })
-                    // add other tags
-                    .forEach(function ({ name }) {
-                        currentTest.addLabel('tag', name.replace('@', ''));
+                    .forEach(({ name }) => {
+                        this.reporter.currentTest.addLabel(
+                            'tag',
+                            name.replace('@', '')
+                        );
                     });
             }
         );
@@ -310,13 +318,13 @@ const findScenarioIndexes = (feature, scenarioId) => {
 
         return isRule
             ? {
-                  rule: index,
-                  child: matchIndex
-              }
+                rule: index,
+                child: matchIndex
+            }
             : {
-                  rule: -1,
-                  child: index
-              };
+                rule: -1,
+                child: index
+            };
     }, {});
 };
 
