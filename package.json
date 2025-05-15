@@ -1,17 +1,17 @@
 {
-    "name": "@GalyRain/cypress-allure-plugin",
-    "version": "1.0.0",
+    "name": "@shelex/cypress-allure-plugin",
+    "version": "0.0.0-development",
     "description": "allure reporting plugin for cypress",
     "main": "reporter/index.js",
     "types": "reporter/index.d.ts",
     "license": "Apache-2.0",
     "author": {
-        "name": "Galy Rain",
-        "email": "GalyRaimMail@gmail.com"
+        "name": "Oleksandr Shevtsov",
+        "email": "ovr.shevtsov@gmail.com"
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/GalyRain/cypress-allure-plugin.git"
+        "url": "https://github.com/Shelex/cypress-allure-plugin.git"
     },
     "files": [
         "reporter",
@@ -19,7 +19,10 @@
         "writer.js",
         "writer.d.ts"
     ],
-    "bugs": "https://github.com/GalyRain/cypress-allure-plugin/issues",
+    "bugs": "https://github.com/Shelex/cypress-allure-plugin/issues",
+    "publishConfig": {
+        "registry": "https://registry.npmjs.org/"
+    },
     "keywords": [
         "cypress",
         "allure",

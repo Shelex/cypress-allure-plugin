@@ -83,15 +83,15 @@ class CucumberHandler {
     get outlineExampleIndex() {
         if (this.isNewFormat) {
             const [, exampleId] = this.state.pickle.astNodeIds;
-            if (
-                !this.currentScenario.examples ||
-                !this.currentScenario.examples.length
-            ) {
-                return -1;
+            const examples = this.currentScenario.examples || [];
+
+            for (const example of examples) {
+                const index = example.tableBody.findIndex((item) => item.id === exampleId);
+                if (index !== -1) {
+                    return index;
+                }
             }
-            return this.currentScenario.examples[0].tableBody.findIndex(
-                (item) => item.id === exampleId
-            );
+            return -1;
         }
         const num = parseInt(
             exampleNumber.exec(this.currentScenario.name).pop()
@@ -113,7 +113,7 @@ class CucumberHandler {
             }
 
             const newTags = [
-                ...currentTags.filter((t) => !t.type && !t.type !== 'Tag'),
+                ...currentTags.filter((t) => !(t && t.type === 'Tag')),
                 tag
             ];
 
@@ -214,48 +214,47 @@ class CucumberHandler {
          */
 
         [this.feature, this.currentRule, this.currentScenario].forEach(
-            (kind) => {
+            function (kind) {
                 if (!kind || !kind.tags || !kind.tags.length) {
                     return;
                 }
 
                 kind.tags
-                    .filter(({ name }) => {
+                    .filter(function ({ name }) {
                         const match = tagToLabel.exec(name);
                         if (match) {
                             const [, command, value] = match;
 
+                            // testID handling with outline index support
                             if (command === 'testID') {
                                 const ids = value.split('|');
                                 const index = this.outlineExampleIndex ?? 0;
                                 const id = ids[index] || ids[0];
-                                this.reporter.currentTest.addLabel('AS_ID', id);
+                                currentTest.addLabel('AS_ID', id);
                             } else if (['feature', 'suite'].includes(command)) {
-                                const labelIndex =
-                                    this.reporter.currentTest.info.labels.findIndex(
-                                        (label) => label.name === command
-                                    );
-                                this.reporter.currentTest.info.labels[
-                                    labelIndex
-                                    ] = {
+                                // feature and suite should be overwritten to avoid duplicates
+                                const labelIndex = currentTest.info.labels.findIndex(
+                                    (label) => label.name === command
+                                );
+                                currentTest.info.labels[labelIndex] = {
                                     name: command,
-                                    value
+                                    value: value
                                 };
                             } else {
-                                this.reporter.currentTest.addLabel(
-                                    command,
-                                    value
-                                );
+                                // use label name
+                                currentTest.addLabel(command, value);
                             }
                         }
                         return !match;
-                    })
-                    .filter(({ name }) => {
+                    }.bind(this)) // <- bind контекста для this.outlineExampleIndex
+                    // check for links
+                    .filter(function ({ name }) {
                         const match = tagToLink.exec(name);
                         if (match) {
                             const [, command, name, matchUrl] = match;
 
                             const url = matchUrl || name;
+
                             const prefixBy = {
                                 issue: Cypress.env('issuePrefix'),
                                 tms: Cypress.env('tmsPrefix'),
@@ -267,8 +266,7 @@ class CucumberHandler {
                                 urlPrefix && urlPrefix.includes('*')
                                     ? urlPrefix
                                     : `${urlPrefix}*`;
-
-                            this.reporter.currentTest.addLink(
+                            currentTest.addLink(
                                 urlPrefix && pattern
                                     ? pattern.replace(/\*/g, url)
                                     : url,
@@ -278,13 +276,11 @@ class CucumberHandler {
                         }
                         return !match;
                     })
-                    .forEach(({ name }) => {
-                        this.reporter.currentTest.addLabel(
-                            'tag',
-                            name.replace('@', '')
-                        );
+                    // add other tags
+                    .forEach(function ({ name }) {
+                        currentTest.addLabel('tag', name.replace('@', ''));
                     });
-            }
+            }.bind(this)
         );
     }
 }
