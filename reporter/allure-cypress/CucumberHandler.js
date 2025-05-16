@@ -83,15 +83,15 @@ class CucumberHandler {
     get outlineExampleIndex() {
         if (this.isNewFormat) {
             const [, exampleId] = this.state.pickle.astNodeIds;
-            if (
-                !this.currentScenario.examples ||
-                !this.currentScenario.examples.length
-            ) {
-                return -1;
+            const examples = this.currentScenario.examples || [];
+
+            for (const example of examples) {
+                const index = example.tableBody.findIndex((item) => item.id === exampleId);
+                if (index !== -1) {
+                    return index;
+                }
             }
-            return this.currentScenario.examples[0].tableBody.findIndex(
-                (item) => item.id === exampleId
-            );
+            return -1;
         }
         const num = parseInt(
             exampleNumber.exec(this.currentScenario.name).pop()
@@ -113,7 +113,7 @@ class CucumberHandler {
             }
 
             const newTags = [
-                ...currentTags.filter((t) => !t.type && !t.type !== 'Tag'),
+                ...currentTags.filter((t) => !(t && t.type === 'Tag')),
                 tag
             ];
 
@@ -121,14 +121,14 @@ class CucumberHandler {
             if (indexes.rule !== undefined && indexes.rule !== -1) {
                 globalThis.testState.gherkinDocument.feature.children[
                     indexes.rule
-                ].rule.children[indexes.child].scenario.tags = newTags;
+                    ].rule.children[indexes.child].scenario.tags = newTags;
                 return;
             }
 
             // set tags for scenario
             globalThis.testState.gherkinDocument.feature.children[
                 indexes.child
-            ].scenario.tags = newTags;
+                ].scenario.tags = newTags;
             return;
         }
 
@@ -155,7 +155,7 @@ class CucumberHandler {
         logger.allure(`populating gherkin links from examples table`);
 
         !this.examplesStorage.length &&
-            this.examplesStorage.push(...scenario.examples);
+        this.examplesStorage.push(...scenario.examples);
 
         const example =
             this.examplesStorage.length && this.examplesStorage.pop();
@@ -224,25 +224,29 @@ class CucumberHandler {
                         const match = tagToLabel.exec(name);
                         if (match) {
                             const [, command, value] = match;
-                            // feature and suite should be overwritten to avoid duplicates
-                            if (['feature', 'suite'].includes(command)) {
-                                const index = currentTest.info.labels.findIndex(
+
+                            // testID handling with outline index support
+                            if (command === 'testID') {
+                                const ids = value.split('|');
+                                const index = this.outlineExampleIndex ?? 0;
+                                const id = ids[index] || ids[0];
+                                currentTest.addLabel('AS_ID', id);
+                            } else if (['feature', 'suite'].includes(command)) {
+                                // feature and suite should be overwritten to avoid duplicates
+                                const labelIndex = currentTest.info.labels.findIndex(
                                     (label) => label.name === command
                                 );
-                                currentTest.info.labels[index] = {
+                                currentTest.info.labels[labelIndex] = {
                                     name: command,
                                     value: value
                                 };
                             } else {
-                                // handle renaming label for testID, or just use label name
-                                currentTest.addLabel(
-                                    command === 'testID' ? 'AS_ID' : command,
-                                    value
-                                );
+                                // use label name
+                                currentTest.addLabel(command, value);
                             }
                         }
                         return !match;
-                    })
+                    }.bind(this)) // bind context to access this.outlineExampleIndex inside callback
                     // check for links
                     .filter(function ({ name }) {
                         const match = tagToLink.exec(name);
@@ -276,7 +280,7 @@ class CucumberHandler {
                     .forEach(function ({ name }) {
                         currentTest.addLabel('tag', name.replace('@', ''));
                     });
-            }
+            }.bind(this)
         );
     }
 }
@@ -310,13 +314,13 @@ const findScenarioIndexes = (feature, scenarioId) => {
 
         return isRule
             ? {
-                  rule: index,
-                  child: matchIndex
-              }
+                rule: index,
+                child: matchIndex
+            }
             : {
-                  rule: -1,
-                  child: index
-              };
+                rule: -1,
+                child: index
+            };
     }, {});
 };
 
