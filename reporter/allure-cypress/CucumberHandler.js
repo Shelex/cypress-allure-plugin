@@ -246,7 +246,7 @@ class CucumberHandler {
                             }
                         }
                         return !match;
-                    }.bind(this)) // <- bind контекста для this.outlineExampleIndex
+                    }.bind(this)) // bind context to access this.outlineExampleIndex inside callback
                     // check for links
                     .filter(function ({ name }) {
                         const match = tagToLink.exec(name);
