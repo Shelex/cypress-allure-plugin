@@ -8,8 +8,8 @@ When('I run any test', () => {
     cy.log('child command for when');
 });
 
-When('I run any test whit {string}', (value) => {
-    cy.log('child command for when ' + value);
+When('I run any test with {string}', (value) => {
+    cy.log(`child command for when ${value}`);
 });
 
 Then('I should see allure api working properly', () => {

@@ -24,7 +24,7 @@ Feature: AllureAPI
     @testID("111|222")
     Scenario Outline: Cucumber tags should work
         Given I have allure tags set for Feature
-        When I run any test whit "<Value>"
+        When I run any test with "<Value>"
         Then I should see allure api working properly
         And Tags from test should overwrite tags from feature
 
