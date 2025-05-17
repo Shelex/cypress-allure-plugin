@@ -83,15 +83,17 @@ class CucumberHandler {
     get outlineExampleIndex() {
         if (this.isNewFormat) {
             const [, exampleId] = this.state.pickle.astNodeIds;
-            if (
-                !this.currentScenario.examples ||
-                !this.currentScenario.examples.length
-            ) {
-                return -1;
+            const examples = this.currentScenario.examples || [];
+
+            for (const example of examples) {
+                const index = example.tableBody.findIndex(
+                    (item) => item.id === exampleId
+                );
+                if (index !== -1) {
+                    return index;
+                }
             }
-            return this.currentScenario.examples[0].tableBody.findIndex(
-                (item) => item.id === exampleId
-            );
+            return -1;
         }
         const num = parseInt(
             exampleNumber.exec(this.currentScenario.name).pop()
@@ -113,7 +115,7 @@ class CucumberHandler {
             }
 
             const newTags = [
-                ...currentTags.filter((t) => !t.type && !t.type !== 'Tag'),
+                ...currentTags.filter((t) => !(t && t.type === 'Tag')),
                 tag
             ];
 
@@ -220,29 +222,38 @@ class CucumberHandler {
                 }
 
                 kind.tags
-                    .filter(function ({ name }) {
-                        const match = tagToLabel.exec(name);
-                        if (match) {
-                            const [, command, value] = match;
-                            // feature and suite should be overwritten to avoid duplicates
-                            if (['feature', 'suite'].includes(command)) {
-                                const index = currentTest.info.labels.findIndex(
-                                    (label) => label.name === command
-                                );
-                                currentTest.info.labels[index] = {
-                                    name: command,
-                                    value: value
-                                };
-                            } else {
-                                // handle renaming label for testID, or just use label name
-                                currentTest.addLabel(
-                                    command === 'testID' ? 'AS_ID' : command,
-                                    value
-                                );
+                    .filter(
+                        function ({ name }) {
+                            const match = tagToLabel.exec(name);
+                            if (match) {
+                                const [, command, value] = match;
+
+                                // testID handling with outline index support
+                                if (command === 'testID') {
+                                    const ids = value.split('|');
+                                    const index = this.outlineExampleIndex ?? 0;
+                                    const id = ids[index] || ids[0];
+                                    currentTest.addLabel('AS_ID', id);
+                                } else if (
+                                    ['feature', 'suite'].includes(command)
+                                ) {
+                                    // feature and suite should be overwritten to avoid duplicates
+                                    const labelIndex =
+                                        currentTest.info.labels.findIndex(
+                                            (label) => label.name === command
+                                        );
+                                    currentTest.info.labels[labelIndex] = {
+                                        name: command,
+                                        value: value
+                                    };
+                                } else {
+                                    // use label name
+                                    currentTest.addLabel(command, value);
+                                }
                             }
-                        }
-                        return !match;
-                    })
+                            return !match;
+                        }.bind(this) // bind context to access this.outlineExampleIndex inside callback
+                    )
                     // check for links
                     .filter(function ({ name }) {
                         const match = tagToLink.exec(name);
@@ -276,7 +287,7 @@ class CucumberHandler {
                     .forEach(function ({ name }) {
                         currentTest.addLabel('tag', name.replace('@', ''));
                     });
-            }
+            }.bind(this)
         );
     }
 }
