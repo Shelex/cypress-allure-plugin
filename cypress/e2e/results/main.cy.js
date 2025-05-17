@@ -138,9 +138,10 @@ const expectedLinks = (mode, type) =>
 describe('Cucumber specific', () => {
     it('should contain data passed via tags', () => {
         const { cucumber } = result;
-        const [test] = cucumber.tests;
-
-        console.log(test.labels);
+        const expectedHistoryID = 'c700cb5cd10aa2ad9a8000c773a8fd3c';
+        const [test] = cucumber.tests.filter(
+            (t) => t.historyId === expectedHistoryID
+        );
 
         expect(test.labels).to.have.length(expectedLabels('cucumber').length);
         expect(test.labels).to.have.deep.members(expectedLabels('cucumber'));
@@ -150,7 +151,10 @@ describe('Cucumber specific', () => {
 
     it('should contain cucumber steps', () => {
         const { cucumber } = result;
-        const [test] = cucumber.tests;
+        const expectedHistoryID = 'c700cb5cd10aa2ad9a8000c773a8fd3c';
+        const [test] = cucumber.tests.filter(
+            (t) => t.historyId === expectedHistoryID
+        );
 
         const expectedSteps = [
             {
