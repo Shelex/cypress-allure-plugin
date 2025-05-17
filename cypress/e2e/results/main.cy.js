@@ -11,7 +11,7 @@ describe('Allure results', () => {
         it(`should contain suite results for ${mode}`, () => {
             const { suites, tests } = result[mode];
             expect(suites).to.have.length(1);
-            expect(suites[0].children).to.have.length(mode === 'basic' ? 4 : 1);
+            expect(suites[0].children).to.have.length(mode === 'basic' ? 4 : 3);
             expect(
                 tests.every((t) =>
                     suites.find((s) => s.children.includes(t.uuid))
@@ -66,7 +66,7 @@ describe('Allure results', () => {
 
         it(`should contain test results for ${mode}`, () => {
             expect(result[mode].tests).to.have.length(
-                mode === 'cucumber' ? 1 : 4
+                mode === 'cucumber' ? 3 : 4
             );
             const { tests } = result[mode];
             tests.forEach((t) => {
@@ -139,6 +139,8 @@ describe('Cucumber specific', () => {
     it('should contain data passed via tags', () => {
         const { cucumber } = result;
         const [test] = cucumber.tests;
+
+        console.log(test.labels);
 
         expect(test.labels).to.have.length(expectedLabels('cucumber').length);
         expect(test.labels).to.have.deep.members(expectedLabels('cucumber'));
